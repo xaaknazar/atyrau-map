@@ -622,6 +622,15 @@ body {
     box-shadow: 0 0 12px rgba(79, 195, 247, 0.3);
 }
 
+.photo-pick-item.used {
+    opacity: 0.55;
+    border-color: rgba(243, 156, 18, 0.4);
+}
+
+.photo-pick-item.used .photo-pick-label {
+    color: #f39c12;
+}
+
 .photo-pick-item input[type="checkbox"] {
     position: absolute;
     top: 6px; left: 6px;

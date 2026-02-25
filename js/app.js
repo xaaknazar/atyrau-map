@@ -75,7 +75,7 @@
                 openModal(point);
             });
 
-            marker.bindTooltip(loc(point, "title"), {
+            marker.bindTooltip(loc(point, "address") || loc(point, "title"), {
                 direction: "top",
                 offset: [0, -12],
                 className: "marker-tooltip"
@@ -98,7 +98,7 @@
     function refreshTooltips() {
         markers.forEach(function (marker) {
             marker.unbindTooltip();
-            marker.bindTooltip(loc(marker._pointData, "title"), {
+            marker.bindTooltip(loc(marker._pointData, "address") || loc(marker._pointData, "title"), {
                 direction: "top",
                 offset: [0, -12],
                 className: "marker-tooltip"
@@ -149,7 +149,7 @@
 
     function openModal(point) {
         currentModalPoint = point;
-        modalTitle.textContent = loc(point, "title");
+        modalTitle.textContent = loc(point, "address") || loc(point, "title");
         modalBadge.textContent = t(CATEGORIES[point.category].badgeKey);
         modalBadge.className = point.category;
 
@@ -341,8 +341,6 @@
         addCoords.textContent = pendingLat.toFixed(4) + ", " + pendingLng.toFixed(4);
 
         // Reset form
-        document.getElementById("add-title-ru").value = "";
-        document.getElementById("add-title-kz").value = "";
         document.getElementById("add-address-ru").value = "";
         document.getElementById("add-address-kz").value = "";
         document.getElementById("add-desc-ru").value = "";
@@ -390,14 +388,32 @@
     });
 
     // ── Photo picker ────────────────────────────────────────
+    function getUsedPhotos() {
+        var used = {};
+        mapPoints.forEach(function (p) {
+            (p.photos || []).forEach(function (f) { used[f] = true; });
+        });
+        return used;
+    }
+
     function buildPhotoPicker() {
         var container = document.getElementById("photo-picker");
         container.innerHTML = "";
         selectedPhotos = [];
 
-        AVAILABLE_PHOTOS.forEach(function (photo) {
+        var usedPhotos = getUsedPhotos();
+
+        // Filter photos by selected category
+        var filtered = AVAILABLE_PHOTOS.filter(function (photo) {
+            return photo.category === selectedCategory;
+        });
+
+        filtered.forEach(function (photo) {
             var item = document.createElement("label");
             item.className = "photo-pick-item";
+            if (usedPhotos[photo.file]) {
+                item.classList.add("used");
+            }
 
             var checkbox = document.createElement("input");
             checkbox.type = "checkbox";
@@ -419,32 +435,47 @@
 
             var label = document.createElement("span");
             label.className = "photo-pick-label";
-            label.textContent = currentLang === "kz" ? photo.label_kz : photo.label_ru;
+            var labelText = currentLang === "kz" ? photo.label_kz : photo.label_ru;
+            if (usedPhotos[photo.file]) {
+                labelText += " ✓";
+            }
+            label.textContent = labelText;
 
             item.appendChild(checkbox);
             item.appendChild(thumb);
             item.appendChild(label);
             container.appendChild(item);
         });
+
+        if (filtered.length === 0) {
+            var empty = document.createElement("p");
+            empty.style.cssText = "color:#8892b0;font-size:13px;padding:8px 0;";
+            empty.textContent = currentLang === "kz"
+                ? "Бұл санат үшін фото жоқ"
+                : "Нет фото для этой категории";
+            container.appendChild(empty);
+        }
     }
 
     // ── Submit new point ────────────────────────────────────
     document.getElementById("add-submit").addEventListener("click", function () {
-        var titleRu = document.getElementById("add-title-ru").value.trim();
-        if (!titleRu) {
-            document.getElementById("add-title-ru").focus();
+        var addressRu = document.getElementById("add-address-ru").value.trim();
+        if (!addressRu) {
+            document.getElementById("add-address-ru").focus();
             return;
         }
+
+        var addressKz = document.getElementById("add-address-kz").value.trim() || addressRu;
 
         var newPoint = {
             id: getNextId(),
             lat: pendingLat,
             lng: pendingLng,
             category: selectedCategory,
-            title_ru: titleRu,
-            title_kz: document.getElementById("add-title-kz").value.trim() || titleRu,
-            address_ru: document.getElementById("add-address-ru").value.trim(),
-            address_kz: document.getElementById("add-address-kz").value.trim(),
+            title_ru: addressRu,
+            title_kz: addressKz,
+            address_ru: addressRu,
+            address_kz: addressKz,
             description_ru: document.getElementById("add-desc-ru").value.trim(),
             description_kz: document.getElementById("add-desc-kz").value.trim(),
             photos: selectedPhotos.slice()
