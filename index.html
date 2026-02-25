@@ -2,82 +2,203 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Карта безопасности — Атырау</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <title>Цифровая карта прокуратуры г. Атырау</title>
+    <link rel="icon" type="image/png" sizes="192x192" href="images/icon-192x192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="images/icon-512x512.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="images/apple-touch-icon.png">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#16213e">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Карта Атырау">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
     <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
+
+    <!-- Floating menu button for mobile (over the map) -->
+    <button id="mobile-menu-btn" aria-label="Меню">
+        <span></span><span></span><span></span>
+    </button>
+
+    <!-- Sidebar -->
     <div id="sidebar">
         <div class="sidebar-header">
-            <h1>Атырау</h1>
-            <p class="subtitle">Карта безопасности города</p>
+            <div class="header-top-row">
+                <img src="images/placeholders/logo.jpeg" alt="Логотип прокуратуры" class="sidebar-logo" />
+                <div class="lang-switch">
+                    <button class="lang-btn active" data-lang="ru">Рус</button>
+                    <button class="lang-btn" data-lang="kz">Қаз</button>
+                </div>
+            </div>
+            <h1 data-i18n="title">Цифровая карта прокуратуры города Атырау</h1>
+            <p class="subtitle" data-i18n="subtitle">Атырау қаласы прокуратурасының цифрлік картасы</p>
         </div>
 
         <div class="legend">
-            <h3>Категории</h3>
-            <label class="legend-item" data-category="blind-spots">
-                <input type="checkbox" checked data-filter="blind-spots" />
+            <h3 data-i18n="categories">Категории</h3>
+            <label class="legend-item">
+                <input type="checkbox" checked data-filter="crime" />
                 <span class="legend-dot" style="background: #e74c3c;"></span>
-                Слепые зоны (нет камер)
+                <span data-i18n="cat_crime">Преступность</span>
             </label>
-            <label class="legend-item" data-category="abandoned">
+            <label class="legend-item">
+                <input type="checkbox" checked data-filter="blind-spots" />
+                <span class="legend-dot" style="background: #3498db;"></span>
+                <span data-i18n="cat_blind">Слепые зоны (нет камер)</span>
+            </label>
+            <label class="legend-item">
                 <input type="checkbox" checked data-filter="abandoned" />
-                <span class="legend-dot" style="background: #f39c12;"></span>
-                Заброшенные здания
-            </label>
-            <label class="legend-item" data-category="unlit">
-                <input type="checkbox" checked data-filter="unlit" />
                 <span class="legend-dot" style="background: #8e44ad;"></span>
-                Неосвещённые улицы
+                <span data-i18n="cat_abandoned">Заброшенные здания</span>
+            </label>
+            <label class="legend-item">
+                <input type="checkbox" checked data-filter="unlit" />
+                <span class="legend-dot" style="background: #f39c12;"></span>
+                <span data-i18n="cat_unlit">Неосвещённые улицы</span>
             </label>
         </div>
 
         <div class="stats">
-            <h3>Статистика</h3>
+            <h3 data-i18n="statistics">Статистика</h3>
             <div class="stat-row">
-                <span class="stat-label">Слепые зоны:</span>
+                <span class="stat-label" data-i18n="stat_crime">Преступность:</span>
+                <span class="stat-value" id="count-crime">0</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label" data-i18n="stat_blind">Слепые зоны:</span>
                 <span class="stat-value" id="count-blind-spots">0</span>
             </div>
             <div class="stat-row">
-                <span class="stat-label">Заброшенные здания:</span>
+                <span class="stat-label" data-i18n="stat_abandoned">Заброшенные здания:</span>
                 <span class="stat-value" id="count-abandoned">0</span>
             </div>
             <div class="stat-row">
-                <span class="stat-label">Неосвещённые улицы:</span>
+                <span class="stat-label" data-i18n="stat_unlit">Неосвещённые улицы:</span>
                 <span class="stat-value" id="count-unlit">0</span>
             </div>
             <div class="stat-row total">
-                <span class="stat-label">Всего точек:</span>
+                <span class="stat-label" data-i18n="stat_total">Всего точек:</span>
                 <span class="stat-value" id="count-total">0</span>
             </div>
         </div>
 
+        <!-- Admin toggle -->
+        <div class="admin-section">
+            <button id="admin-toggle-btn" data-i18n="admin_login">Вход для админа</button>
+        </div>
+
         <div class="sidebar-footer">
-            <p>Нажмите на точку для подробной информации</p>
+            <p data-i18n="footer_hint">Нажмите на точку для подробной информации</p>
         </div>
     </div>
 
+    <!-- Sidebar overlay for mobile -->
+    <div id="sidebar-overlay"></div>
+
     <div id="map"></div>
 
-    <!-- Modal for point details -->
+    <!-- Admin mode indicator on map -->
+    <div id="admin-bar" class="hidden">
+        <span data-i18n="admin_bar_hint">АДМИН: нажмите на карту чтобы добавить точку</span>
+        <button id="admin-exit-btn" data-i18n="admin_exit">Выйти</button>
+    </div>
+
+    <!-- Modal for viewing point details -->
     <div id="modal-overlay" class="hidden">
         <div id="modal">
-            <button id="modal-close">&times;</button>
+            <button id="modal-close" aria-label="Закрыть">&times;</button>
             <div id="modal-content">
                 <h2 id="modal-title"></h2>
                 <span id="modal-badge"></span>
                 <div id="modal-gallery"></div>
                 <div id="modal-description"></div>
                 <div id="modal-address"></div>
+                <button id="modal-delete-btn" class="hidden" data-i18n="admin_delete_point">Удалить точку</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin login modal -->
+    <div id="login-overlay" class="hidden">
+        <div id="login-modal">
+            <button id="login-close" aria-label="Закрыть">&times;</button>
+            <h2 data-i18n="admin_login_title">Вход администратора</h2>
+            <div class="login-form">
+                <label data-i18n="admin_password_label">Пароль:</label>
+                <input type="password" id="admin-password" autocomplete="off" />
+                <button id="admin-login-submit" data-i18n="admin_login_btn">Войти</button>
+                <p id="login-error" class="hidden" data-i18n="admin_wrong_password">Неверный пароль</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin add-point form modal -->
+    <div id="add-overlay" class="hidden">
+        <div id="add-modal">
+            <button id="add-close" aria-label="Закрыть">&times;</button>
+            <h2 data-i18n="admin_add_title">Новая точка</h2>
+            <div id="add-coords"></div>
+            <div class="add-form">
+                <label data-i18n="admin_field_category">Категория:</label>
+                <div class="category-selector">
+                    <button class="cat-btn" data-cat="crime">
+                        <span class="legend-dot" style="background:#e74c3c;"></span>
+                        <span data-i18n="cat_crime">Преступность</span>
+                    </button>
+                    <button class="cat-btn active" data-cat="blind-spots">
+                        <span class="legend-dot" style="background:#3498db;"></span>
+                        <span data-i18n="cat_blind">Слепые зоны</span>
+                    </button>
+                    <button class="cat-btn" data-cat="abandoned">
+                        <span class="legend-dot" style="background:#8e44ad;"></span>
+                        <span data-i18n="cat_abandoned">Заброшенные здания</span>
+                    </button>
+                    <button class="cat-btn" data-cat="unlit">
+                        <span class="legend-dot" style="background:#f39c12;"></span>
+                        <span data-i18n="cat_unlit">Неосвещённые улицы</span>
+                    </button>
+                </div>
+
+                <label data-i18n="admin_field_title_ru">Название (рус):</label>
+                <input type="text" id="add-title-ru" />
+
+                <label data-i18n="admin_field_title_kz">Название (қаз):</label>
+                <input type="text" id="add-title-kz" />
+
+                <label data-i18n="admin_field_address_ru">Адрес (рус):</label>
+                <input type="text" id="add-address-ru" />
+
+                <label data-i18n="admin_field_address_kz">Адрес (қаз):</label>
+                <input type="text" id="add-address-kz" />
+
+                <label data-i18n="admin_field_desc_ru">Описание (рус):</label>
+                <textarea id="add-desc-ru" rows="3"></textarea>
+
+                <label data-i18n="admin_field_desc_kz">Описание (қаз):</label>
+                <textarea id="add-desc-kz" rows="3"></textarea>
+
+                <div id="photo-section">
+                    <label data-i18n="admin_field_photos">Фотографии:</label>
+                    <div id="photo-picker"></div>
+                </div>
+
+                <button id="add-submit" data-i18n="admin_add_btn">Добавить точку</button>
             </div>
         </div>
     </div>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+    <!-- Firebase SDK (Realtime Database) -->
+    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
+    <script src="js/firebase-config.js"></script>
+    <script src="js/i18n.js"></script>
+    <script src="js/photos.js"></script>
     <script src="js/data.js"></script>
     <script src="js/app.js"></script>
 </body>
