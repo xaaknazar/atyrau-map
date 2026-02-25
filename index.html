@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Карта безопасности — Атырау</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
+    <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+    <div id="sidebar">
+        <div class="sidebar-header">
+            <h1>Атырау</h1>
+            <p class="subtitle">Карта безопасности города</p>
+        </div>
+
+        <div class="legend">
+            <h3>Категории</h3>
+            <label class="legend-item" data-category="blind-spots">
+                <input type="checkbox" checked data-filter="blind-spots" />
+                <span class="legend-dot" style="background: #e74c3c;"></span>
+                Слепые зоны (нет камер)
+            </label>
+            <label class="legend-item" data-category="abandoned">
+                <input type="checkbox" checked data-filter="abandoned" />
+                <span class="legend-dot" style="background: #f39c12;"></span>
+                Заброшенные здания
+            </label>
+            <label class="legend-item" data-category="unlit">
+                <input type="checkbox" checked data-filter="unlit" />
+                <span class="legend-dot" style="background: #8e44ad;"></span>
+                Неосвещённые улицы
+            </label>
+        </div>
+
+        <div class="stats">
+            <h3>Статистика</h3>
+            <div class="stat-row">
+                <span class="stat-label">Слепые зоны:</span>
+                <span class="stat-value" id="count-blind-spots">0</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">Заброшенные здания:</span>
+                <span class="stat-value" id="count-abandoned">0</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">Неосвещённые улицы:</span>
+                <span class="stat-value" id="count-unlit">0</span>
+            </div>
+            <div class="stat-row total">
+                <span class="stat-label">Всего точек:</span>
+                <span class="stat-value" id="count-total">0</span>
+            </div>
+        </div>
+
+        <div class="sidebar-footer">
+            <p>Нажмите на точку для подробной информации</p>
+        </div>
+    </div>
+
+    <div id="map"></div>
+
+    <!-- Modal for point details -->
+    <div id="modal-overlay" class="hidden">
+        <div id="modal">
+            <button id="modal-close">&times;</button>
+            <div id="modal-content">
+                <h2 id="modal-title"></h2>
+                <span id="modal-badge"></span>
+                <div id="modal-gallery"></div>
+                <div id="modal-description"></div>
+                <div id="modal-address"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+    <script src="js/data.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
