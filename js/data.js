@@ -182,11 +182,26 @@ if (useFirebase) {
     });
 
     function _seedFirebase() {
+        // First try to migrate data from localStorage (includes admin-added points)
+        var STORAGE_KEY = "atyrau-map-points";
+        var localData = null;
+        try {
+            var saved = localStorage.getItem(STORAGE_KEY);
+            if (saved) localData = JSON.parse(saved);
+        } catch (e) { /* ignore */ }
+
+        var source = (localData && localData.length) ? localData : DEFAULT_POINTS;
         var batch = {};
-        DEFAULT_POINTS.forEach(function (p) {
+        source.forEach(function (p) {
             batch[p.id] = p;
         });
-        pointsRef.set(batch);
+        pointsRef.set(batch).then(function () {
+            // Clear localStorage after successful migration
+            if (localData && localData.length) {
+                localStorage.removeItem(STORAGE_KEY);
+                console.log("[data] localStorage → Firebase: перенесено " + source.length + " точек");
+            }
+        });
     }
 
 } else {
