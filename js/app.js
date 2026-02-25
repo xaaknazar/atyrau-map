@@ -3,19 +3,27 @@
 
     // ── Category config ─────────────────────────────────────
     var CATEGORIES = {
-        "blind-spots": { color: "#e74c3c", label: "Слепая зона" },
-        "abandoned":   { color: "#f39c12", label: "Заброшенное здание" },
-        "unlit":       { color: "#8e44ad", label: "Неосвещённая улица" }
+        "blind-spots": { color: "#e74c3c", badgeKey: "badge_blind" },
+        "abandoned":   { color: "#f39c12", badgeKey: "badge_abandoned" },
+        "unlit":       { color: "#8e44ad", badgeKey: "badge_unlit" }
     };
+
+    // ── Helper: get localized field ─────────────────────────
+    function loc(point, field) {
+        return point[field + "_" + currentLang] || point[field + "_ru"] || "";
+    }
 
     // ── Map init (Atyrau center) ────────────────────────────
     var map = L.map("map", {
         center: [47.1067, 51.9203],
         zoom: 14,
-        zoomControl: true,
+        zoomControl: false,
         maxZoom: 18,
         minZoom: 11
     });
+
+    // Place zoom control at bottom-right (better for mobile)
+    L.control.zoom({ position: "bottomright" }).addTo(map);
 
     L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
@@ -24,6 +32,8 @@
 
     // ── Layer groups per category ───────────────────────────
     var layers = {};
+    var markers = [];
+
     Object.keys(CATEGORIES).forEach(function (cat) {
         layers[cat] = L.markerClusterGroup({
             maxClusterRadius: 40,
@@ -43,26 +53,52 @@
         });
     }
 
-    mapPoints.forEach(function (point) {
-        var marker = L.marker([point.lat, point.lng], {
-            icon: createMarkerIcon(point.category)
+    function buildMarkers() {
+        // Clear existing
+        markers.forEach(function (m) {
+            if (layers[m._pointCategory]) {
+                layers[m._pointCategory].removeLayer(m);
+            }
         });
+        markers = [];
 
-        marker.on("click", function () {
-            openModal(point);
+        mapPoints.forEach(function (point) {
+            var marker = L.marker([point.lat, point.lng], {
+                icon: createMarkerIcon(point.category)
+            });
+            marker._pointData = point;
+            marker._pointCategory = point.category;
+
+            marker.on("click", function () {
+                openModal(point);
+            });
+
+            marker.bindTooltip(loc(point, "title"), {
+                direction: "top",
+                offset: [0, -12],
+                className: "marker-tooltip"
+            });
+
+            if (layers[point.category]) {
+                layers[point.category].addLayer(marker);
+            }
+            markers.push(marker);
         });
+    }
 
-        // Tooltip on hover
-        marker.bindTooltip(point.title, {
-            direction: "top",
-            offset: [0, -12],
-            className: "marker-tooltip"
+    buildMarkers();
+
+    // Rebuild tooltips on language switch
+    function refreshTooltips() {
+        markers.forEach(function (marker) {
+            marker.unbindTooltip();
+            marker.bindTooltip(loc(marker._pointData, "title"), {
+                direction: "top",
+                offset: [0, -12],
+                className: "marker-tooltip"
+            });
         });
-
-        if (layers[point.category]) {
-            layers[point.category].addLayer(marker);
-        }
-    });
+    }
 
     // ── Update stats ────────────────────────────────────────
     function updateStats() {
@@ -90,6 +126,18 @@
         });
     });
 
+    // ── Language switch ─────────────────────────────────────
+    document.querySelectorAll(".lang-btn").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+            var lang = this.getAttribute("data-lang");
+            setLanguage(lang);
+            refreshTooltips();
+        });
+    });
+
+    // Apply saved language on load
+    setLanguage(currentLang);
+
     // ── Modal ───────────────────────────────────────────────
     var overlay = document.getElementById("modal-overlay");
     var modalTitle = document.getElementById("modal-title");
@@ -99,10 +147,11 @@
     var modalAddress = document.getElementById("modal-address");
 
     function openModal(point) {
-        modalTitle.textContent = point.title;
+        modalTitle.textContent = loc(point, "title");
 
         // Badge
-        modalBadge.textContent = CATEGORIES[point.category].label;
+        var badgeKey = CATEGORIES[point.category].badgeKey;
+        modalBadge.textContent = t(badgeKey);
         modalBadge.className = point.category;
 
         // Gallery
@@ -111,7 +160,7 @@
             point.photos.forEach(function (src) {
                 var img = document.createElement("img");
                 img.src = src;
-                img.alt = point.title;
+                img.alt = loc(point, "title");
                 img.loading = "lazy";
                 img.addEventListener("click", function () {
                     openLightbox(src);
@@ -120,10 +169,13 @@
             });
         }
 
-        modalDescription.textContent = point.description;
-        modalAddress.textContent = point.address;
+        modalDescription.textContent = loc(point, "description");
+        modalAddress.textContent = loc(point, "address");
 
         overlay.classList.remove("hidden");
+
+        // Close mobile sidebar if open
+        closeMobileSidebar();
     }
 
     function closeModal() {
@@ -138,6 +190,7 @@
         if (e.key === "Escape") {
             closeLightbox();
             closeModal();
+            closeMobileSidebar();
         }
     });
 
@@ -158,5 +211,41 @@
         var lb = document.getElementById("lightbox");
         if (lb) lb.remove();
     }
+
+    // ── Mobile sidebar toggle ───────────────────────────────
+    var sidebar = document.getElementById("sidebar");
+    var sidebarOverlay = document.getElementById("sidebar-overlay");
+    var menuBtn = document.getElementById("mobile-menu-btn");
+
+    function openMobileSidebar() {
+        sidebar.classList.add("open");
+        sidebarOverlay.classList.add("active");
+        document.body.classList.add("sidebar-open");
+    }
+
+    function closeMobileSidebar() {
+        sidebar.classList.remove("open");
+        sidebarOverlay.classList.remove("active");
+        document.body.classList.remove("sidebar-open");
+    }
+
+    if (menuBtn) {
+        menuBtn.addEventListener("click", function () {
+            if (sidebar.classList.contains("open")) {
+                closeMobileSidebar();
+            } else {
+                openMobileSidebar();
+            }
+        });
+    }
+
+    if (sidebarOverlay) {
+        sidebarOverlay.addEventListener("click", closeMobileSidebar);
+    }
+
+    // Fix map size after any layout change
+    window.addEventListener("resize", function () {
+        setTimeout(function () { map.invalidateSize(); }, 100);
+    });
 
 })();
