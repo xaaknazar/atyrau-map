@@ -297,7 +297,6 @@ body {
     box-shadow: 0 2px 16px rgba(0, 0, 0, 0.5), 0 0 20px rgba(0, 0, 0, 0.3);
 }
 
-.marker-pin.crime       { background: #e74c3c; border-color: #ffcdd2; }
 .marker-pin.blind-spots { background: #3498db; border-color: #bbdefb; }
 .marker-pin.abandoned   { background: #8e44ad; border-color: #e1bee7; }
 .marker-pin.unlit       { background: #f39c12; border-color: #fff3cd; }
@@ -391,7 +390,6 @@ body {
     margin-bottom: 20px;
 }
 
-#modal-badge.crime       { background: rgba(231, 76, 60, 0.2); color: #e74c3c; }
 #modal-badge.blind-spots { background: rgba(52, 152, 219, 0.2); color: #3498db; }
 #modal-badge.abandoned   { background: rgba(142, 68, 173, 0.2); color: #8e44ad; }
 #modal-badge.unlit       { background: rgba(243, 156, 18, 0.2); color: #f39c12; }
