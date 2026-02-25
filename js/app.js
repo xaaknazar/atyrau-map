@@ -91,7 +91,10 @@
         updateStats();
     }
 
-    buildMarkers();
+    // Initial build + live updates from Firebase / localStorage
+    onDataChanged(function () {
+        buildMarkers();
+    });
 
     function refreshTooltips() {
         markers.forEach(function (marker) {
@@ -190,13 +193,7 @@
     modalDelBtn.addEventListener("click", function () {
         if (!currentModalPoint) return;
         if (!confirm(t("admin_confirm_delete"))) return;
-
-        var idx = mapPoints.findIndex(function (p) { return p.id === currentModalPoint.id; });
-        if (idx !== -1) {
-            mapPoints.splice(idx, 1);
-            savePoints();
-            buildMarkers();
-        }
+        deletePoint(currentModalPoint.id);
         closeModal();
     });
 
@@ -455,9 +452,7 @@
             photos: selectedCategory === "crime" ? [] : selectedPhotos.slice()
         };
 
-        mapPoints.push(newPoint);
-        savePoints();
-        buildMarkers();
+        savePoint(newPoint);
         closeAddModal();
     });
 
