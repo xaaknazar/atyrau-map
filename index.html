@@ -4,8 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
     <title>Цифровая карта прокуратуры г. Атырау</title>
-    <link rel="icon" type="image/jpeg" href="images/placeholders/logo.jpeg">
-    <link rel="apple-touch-icon" href="images/placeholders/logo.jpeg">
+    <link rel="icon" type="image/png" sizes="192x192" href="images/icon-192x192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="images/icon-512x512.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="images/apple-touch-icon.png">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#16213e">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Карта Атырау">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
@@ -13,20 +19,10 @@
 </head>
 <body>
 
-    <!-- Mobile top bar -->
-    <div id="mobile-topbar">
-        <button id="mobile-menu-btn" aria-label="Меню">
-            <span></span><span></span><span></span>
-        </button>
-        <div class="mobile-topbar-title">
-            <img src="images/placeholders/logo.jpeg" alt="Логотип" class="mobile-logo" />
-            <span data-i18n="mobile_title">Карта прокуратуры г. Атырау</span>
-        </div>
-        <div class="lang-switch-mobile">
-            <button class="lang-btn active" data-lang="ru">RU</button>
-            <button class="lang-btn" data-lang="kz">ҚЗ</button>
-        </div>
-    </div>
+    <!-- Floating menu button for mobile (over the map) -->
+    <button id="mobile-menu-btn" aria-label="Меню">
+        <span></span><span></span><span></span>
+    </button>
 
     <!-- Sidebar -->
     <div id="sidebar">
