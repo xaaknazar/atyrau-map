@@ -27,7 +27,30 @@ var I18N = {
         // Modal category badges
         badge_blind: "Слепая зона",
         badge_abandoned: "Заброшенное здание",
-        badge_unlit: "Неосвещённая улица"
+        badge_unlit: "Неосвещённая улица",
+
+        // Admin
+        admin_login: "Вход для админа",
+        admin_login_title: "Вход администратора",
+        admin_password_label: "Пароль:",
+        admin_login_btn: "Войти",
+        admin_wrong_password: "Неверный пароль",
+        admin_bar_hint: "АДМИН: нажмите на карту чтобы добавить точку",
+        admin_exit: "Выйти",
+        admin_add_title: "Новая точка",
+        admin_field_category: "Категория:",
+        admin_field_title_ru: "Название (рус):",
+        admin_field_title_kz: "Название (қаз):",
+        admin_field_address_ru: "Адрес (рус):",
+        admin_field_address_kz: "Адрес (қаз):",
+        admin_field_desc_ru: "Описание (рус):",
+        admin_field_desc_kz: "Описание (қаз):",
+        admin_field_photos: "Фотографии:",
+        admin_add_btn: "Добавить точку",
+        admin_delete_point: "Удалить точку",
+        admin_confirm_delete: "Вы уверены что хотите удалить эту точку?",
+        admin_reset_data: "Сбросить данные",
+        admin_confirm_reset: "Сбросить все точки к начальным данным?"
     },
     kz: {
         // Header
@@ -54,7 +77,30 @@ var I18N = {
         // Modal category badges
         badge_blind: "Соқыр аймақ",
         badge_abandoned: "Тастанды ғимарат",
-        badge_unlit: "Жарықтандырылмаған көше"
+        badge_unlit: "Жарықтандырылмаған көше",
+
+        // Admin
+        admin_login: "Әкімші кіру",
+        admin_login_title: "Әкімші кіру",
+        admin_password_label: "Құпия сөз:",
+        admin_login_btn: "Кіру",
+        admin_wrong_password: "Құпия сөз қате",
+        admin_bar_hint: "ӘКІМШІ: нүкте қосу үшін картаны басыңыз",
+        admin_exit: "Шығу",
+        admin_add_title: "Жаңа нүкте",
+        admin_field_category: "Санат:",
+        admin_field_title_ru: "Атауы (орыс):",
+        admin_field_title_kz: "Атауы (қаз):",
+        admin_field_address_ru: "Мекен-жай (орыс):",
+        admin_field_address_kz: "Мекен-жай (қаз):",
+        admin_field_desc_ru: "Сипаттама (орыс):",
+        admin_field_desc_kz: "Сипаттама (қаз):",
+        admin_field_photos: "Фотосуреттер:",
+        admin_add_btn: "Нүкте қосу",
+        admin_delete_point: "Нүктені жою",
+        admin_confirm_delete: "Бұл нүктені жойғыңыз келетініне сенімдісіз бе?",
+        admin_confirm_reset: "Барлық нүктелерді бастапқы деректерге қайтару керек пе?",
+        admin_reset_data: "Деректерді қалпына келтіру"
     }
 };
 
@@ -64,7 +110,6 @@ function setLanguage(lang) {
     currentLang = lang;
     localStorage.setItem("atyrau-map-lang", lang);
 
-    // Update all elements with data-i18n attribute
     document.querySelectorAll("[data-i18n]").forEach(function (el) {
         var key = el.getAttribute("data-i18n");
         if (I18N[lang] && I18N[lang][key]) {
@@ -72,15 +117,12 @@ function setLanguage(lang) {
         }
     });
 
-    // Update page title
     document.title = lang === "ru"
         ? "Цифровая карта прокуратуры г. Атырау"
         : "Атырау қ. прокуратурасының цифрлік картасы";
 
-    // Update html lang attribute
     document.documentElement.lang = lang === "ru" ? "ru" : "kk";
 
-    // Update active state on all lang buttons
     document.querySelectorAll(".lang-btn").forEach(function (btn) {
         btn.classList.toggle("active", btn.getAttribute("data-lang") === lang);
     });
@@ -90,7 +132,7 @@ function t(key) {
     return (I18N[currentLang] && I18N[currentLang][key]) || key;
 }
 
-// Init language from localStorage or default to "ru"
+// Init language from localStorage or default
 (function () {
     var saved = localStorage.getItem("atyrau-map-lang");
     if (saved && I18N[saved]) {
