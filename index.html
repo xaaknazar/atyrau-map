@@ -41,24 +41,33 @@
         <div class="legend">
             <h3 data-i18n="categories">Категории</h3>
             <label class="legend-item">
-                <input type="checkbox" checked data-filter="blind-spots" />
+                <input type="checkbox" checked data-filter="crime" />
                 <span class="legend-dot" style="background: #e74c3c;"></span>
+                <span data-i18n="cat_crime">Преступность</span>
+            </label>
+            <label class="legend-item">
+                <input type="checkbox" checked data-filter="blind-spots" />
+                <span class="legend-dot" style="background: #3498db;"></span>
                 <span data-i18n="cat_blind">Слепые зоны (нет камер)</span>
             </label>
             <label class="legend-item">
                 <input type="checkbox" checked data-filter="abandoned" />
-                <span class="legend-dot" style="background: #f39c12;"></span>
+                <span class="legend-dot" style="background: #8e44ad;"></span>
                 <span data-i18n="cat_abandoned">Заброшенные здания</span>
             </label>
             <label class="legend-item">
                 <input type="checkbox" checked data-filter="unlit" />
-                <span class="legend-dot" style="background: #8e44ad;"></span>
+                <span class="legend-dot" style="background: #f39c12;"></span>
                 <span data-i18n="cat_unlit">Неосвещённые улицы</span>
             </label>
         </div>
 
         <div class="stats">
             <h3 data-i18n="statistics">Статистика</h3>
+            <div class="stat-row">
+                <span class="stat-label" data-i18n="stat_crime">Преступность:</span>
+                <span class="stat-value" id="count-crime">0</span>
+            </div>
             <div class="stat-row">
                 <span class="stat-label" data-i18n="stat_blind">Слепые зоны:</span>
                 <span class="stat-value" id="count-blind-spots">0</span>
@@ -136,16 +145,20 @@
             <div class="add-form">
                 <label data-i18n="admin_field_category">Категория:</label>
                 <div class="category-selector">
-                    <button class="cat-btn active" data-cat="blind-spots">
+                    <button class="cat-btn" data-cat="crime">
                         <span class="legend-dot" style="background:#e74c3c;"></span>
+                        <span data-i18n="cat_crime">Преступность</span>
+                    </button>
+                    <button class="cat-btn active" data-cat="blind-spots">
+                        <span class="legend-dot" style="background:#3498db;"></span>
                         <span data-i18n="cat_blind">Слепые зоны</span>
                     </button>
                     <button class="cat-btn" data-cat="abandoned">
-                        <span class="legend-dot" style="background:#f39c12;"></span>
+                        <span class="legend-dot" style="background:#8e44ad;"></span>
                         <span data-i18n="cat_abandoned">Заброшенные здания</span>
                     </button>
                     <button class="cat-btn" data-cat="unlit">
-                        <span class="legend-dot" style="background:#8e44ad;"></span>
+                        <span class="legend-dot" style="background:#f39c12;"></span>
                         <span data-i18n="cat_unlit">Неосвещённые улицы</span>
                     </button>
                 </div>
@@ -168,8 +181,10 @@
                 <label data-i18n="admin_field_desc_kz">Описание (қаз):</label>
                 <textarea id="add-desc-kz" rows="3"></textarea>
 
-                <label data-i18n="admin_field_photos">Фотографии:</label>
-                <div id="photo-picker"></div>
+                <div id="photo-section">
+                    <label data-i18n="admin_field_photos">Фотографии:</label>
+                    <div id="photo-picker"></div>
+                </div>
 
                 <button id="add-submit" data-i18n="admin_add_btn">Добавить точку</button>
             </div>
