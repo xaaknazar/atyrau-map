@@ -51,7 +51,24 @@ var I18N = {
         admin_delete_point: "Удалить точку",
         admin_confirm_delete: "Вы уверены что хотите удалить эту точку?",
         admin_reset_data: "Сбросить данные",
-        admin_confirm_reset: "Сбросить все точки к начальным данным?"
+        admin_confirm_reset: "Сбросить все точки к начальным данным?",
+
+        // Share
+        share_point: "Поделиться",
+        share_copied: "Ссылка скопирована!",
+
+        // Heatmap
+        heatmap_on: "Тепловая карта: ВКЛ",
+        heatmap_off: "Тепловая карта: ВЫКЛ",
+
+        // Map tiles
+        tile_streets: "Карта",
+        tile_satellite: "Спутник",
+        tile_dark: "Тёмная",
+
+        // Drag
+        drag_saved: "Координаты обновлены",
+        admin_bar_hint_drag: "АДМИН: нажмите на карту чтобы добавить точку · перетаскивайте маркеры для корректировки"
     },
     kz: {
         // Header
@@ -102,7 +119,24 @@ var I18N = {
         admin_delete_point: "Нүктені жою",
         admin_confirm_delete: "Бұл нүктені жойғыңыз келетініне сенімдісіз бе?",
         admin_confirm_reset: "Барлық нүктелерді бастапқы деректерге қайтару керек пе?",
-        admin_reset_data: "Деректерді қалпына келтіру"
+        admin_reset_data: "Деректерді қалпына келтіру",
+
+        // Share
+        share_point: "Бөлісу",
+        share_copied: "Сілтеме көшірілді!",
+
+        // Heatmap
+        heatmap_on: "Жылу картасы: ҚОСУЛЫ",
+        heatmap_off: "Жылу картасы: ӨШІРУЛІ",
+
+        // Map tiles
+        tile_streets: "Карта",
+        tile_satellite: "Спутник",
+        tile_dark: "Қараңғы",
+
+        // Drag
+        drag_saved: "Координаттар жаңартылды",
+        admin_bar_hint_drag: "ӘКІМШІ: нүкте қосу үшін картаны басыңыз · маркерлерді түзету үшін сүйреңіз"
     }
 };
 

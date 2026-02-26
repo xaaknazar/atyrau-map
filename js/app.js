@@ -29,10 +29,41 @@
 
     L.control.zoom({ position: "bottomright" }).addTo(map);
 
-    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-        maxZoom: 19
-    }).addTo(map);
+    // ═══════════════════════════════════════════════════════
+    //  TILE LAYERS (Map style switcher)
+    // ═══════════════════════════════════════════════════════
+    var tileLayers = {
+        streets: L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+            maxZoom: 19
+        }),
+        satellite: L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", {
+            attribution: '&copy; <a href="https://www.esri.com/">Esri</a> &mdash; Earthstar Geographics',
+            maxZoom: 19
+        }),
+        dark: L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/">CARTO</a>',
+            maxZoom: 19
+        })
+    };
+
+    var currentTile = "streets";
+    tileLayers.streets.addTo(map);
+
+    document.querySelectorAll(".tile-btn").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+            var tile = this.getAttribute("data-tile");
+            if (tile === currentTile) return;
+
+            map.removeLayer(tileLayers[currentTile]);
+            tileLayers[tile].addTo(map);
+            currentTile = tile;
+
+            document.querySelectorAll(".tile-btn").forEach(function (b) {
+                b.classList.toggle("active", b.getAttribute("data-tile") === tile);
+            });
+        });
+    });
 
     // ── Layers ──────────────────────────────────────────────
     var layers = {};
@@ -56,6 +87,56 @@
         });
     }
 
+    // ═══════════════════════════════════════════════════════
+    //  HEATMAP
+    // ═══════════════════════════════════════════════════════
+    var heatLayer = null;
+    var heatmapActive = false;
+
+    function buildHeatData() {
+        return mapPoints.map(function (p) {
+            return [p.lat, p.lng, 0.6];
+        });
+    }
+
+    function toggleHeatmap() {
+        var btn = document.getElementById("heatmap-toggle");
+        if (heatmapActive) {
+            // Turn off heatmap → show markers
+            if (heatLayer) {
+                map.removeLayer(heatLayer);
+                heatLayer = null;
+            }
+            Object.keys(layers).forEach(function (cat) {
+                var cb = document.querySelector('[data-filter="' + cat + '"]');
+                if (cb && cb.checked) map.addLayer(layers[cat]);
+            });
+            heatmapActive = false;
+            btn.classList.remove("active");
+        } else {
+            // Turn on heatmap → hide markers
+            Object.keys(layers).forEach(function (cat) {
+                map.removeLayer(layers[cat]);
+            });
+            heatLayer = L.heatLayer(buildHeatData(), {
+                radius: 30,
+                blur: 20,
+                maxZoom: 17,
+                gradient: { 0.2: '#2196f3', 0.4: '#4caf50', 0.6: '#ffeb3b', 0.8: '#ff9800', 1.0: '#f44336' }
+            }).addTo(map);
+            heatmapActive = true;
+            btn.classList.add("active");
+        }
+    }
+
+    document.getElementById("heatmap-toggle").addEventListener("click", toggleHeatmap);
+
+    function refreshHeatmap() {
+        if (heatmapActive && heatLayer) {
+            heatLayer.setLatLngs(buildHeatData());
+        }
+    }
+
     // ── Build / rebuild all markers ─────────────────────────
     function buildMarkers() {
         markers.forEach(function (m) {
@@ -67,13 +148,23 @@
 
         mapPoints.forEach(function (point) {
             var marker = L.marker([point.lat, point.lng], {
-                icon: createMarkerIcon(point.category)
+                icon: createMarkerIcon(point.category),
+                draggable: isAdmin
             });
             marker._pointData = point;
             marker._pointCategory = point.category;
 
             marker.on("click", function () {
                 openModal(point);
+            });
+
+            // Drag & drop (admin only)
+            marker.on("dragend", function (e) {
+                var newPos = e.target.getLatLng();
+                point.lat = Math.round(newPos.lat * 10000) / 10000;
+                point.lng = Math.round(newPos.lng * 10000) / 10000;
+                savePoint(point);
+                showDragToast();
             });
 
             marker.bindTooltip(loc(point, "address") || loc(point, "title"), {
@@ -89,11 +180,24 @@
         });
 
         updateStats();
+        refreshHeatmap();
+    }
+
+    // ── Drag toast ───────────────────────────────────────────
+    function showDragToast() {
+        var existing = document.querySelector(".drag-toast");
+        if (existing) existing.remove();
+        var toast = document.createElement("div");
+        toast.className = "drag-toast";
+        toast.textContent = t("drag_saved");
+        document.body.appendChild(toast);
+        setTimeout(function () { toast.remove(); }, 2000);
     }
 
     // Initial build + live updates from Firebase / localStorage
     onDataChanged(function () {
         buildMarkers();
+        checkUrlPoint();
     });
 
     function refreshTooltips() {
@@ -123,6 +227,7 @@
     document.querySelectorAll("[data-filter]").forEach(function (cb) {
         cb.addEventListener("change", function () {
             var cat = this.getAttribute("data-filter");
+            if (heatmapActive) return; // don't toggle layers in heatmap mode
             if (this.checked) map.addLayer(layers[cat]);
             else map.removeLayer(layers[cat]);
         });
@@ -147,6 +252,8 @@
     var modalDesc     = document.getElementById("modal-description");
     var modalAddr     = document.getElementById("modal-address");
     var modalDelBtn   = document.getElementById("modal-delete-btn");
+    var modalShareBtn = document.getElementById("modal-share-btn");
+    var shareToast    = document.getElementById("share-toast");
     var currentModalPoint = null;
 
     function openModal(point) {
@@ -175,6 +282,9 @@
             modalDelBtn.classList.add("hidden");
         }
 
+        // Hide share toast
+        shareToast.classList.add("hidden");
+
         viewOverlay.classList.remove("hidden");
         closeMobileSidebar();
     }
@@ -188,6 +298,50 @@
     viewOverlay.addEventListener("click", function (e) {
         if (e.target === viewOverlay) closeModal();
     });
+
+    // ── Share point ──────────────────────────────────────────
+    modalShareBtn.addEventListener("click", function () {
+        if (!currentModalPoint) return;
+        var url = window.location.origin + window.location.pathname + "?point=" + currentModalPoint.id;
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(url).then(function () {
+                showShareToast();
+            });
+        } else {
+            // Fallback for older browsers
+            var input = document.createElement("input");
+            input.value = url;
+            document.body.appendChild(input);
+            input.select();
+            document.execCommand("copy");
+            document.body.removeChild(input);
+            showShareToast();
+        }
+    });
+
+    function showShareToast() {
+        shareToast.classList.remove("hidden");
+        setTimeout(function () {
+            shareToast.classList.add("hidden");
+        }, 2500);
+    }
+
+    // ── Open point from URL param ────────────────────────────
+    var urlPointChecked = false;
+
+    function checkUrlPoint() {
+        if (urlPointChecked) return;
+        var params = new URLSearchParams(window.location.search);
+        var pointId = params.get("point");
+        if (!pointId) return;
+        var id = parseInt(pointId, 10);
+        var point = mapPoints.find(function (p) { return p.id === id; });
+        if (point) {
+            urlPointChecked = true;
+            map.setView([point.lat, point.lng], 17);
+            setTimeout(function () { openModal(point); }, 500);
+        }
+    }
 
     // Delete point from modal
     modalDelBtn.addEventListener("click", function () {
@@ -309,6 +463,16 @@
         document.getElementById("admin-toggle-btn").setAttribute("data-i18n", "admin_exit");
         document.getElementById("admin-toggle-btn").textContent = t("admin_exit");
         map.getContainer().style.cursor = "crosshair";
+
+        // Update admin bar hint to include drag info
+        var hintEl = adminBar.querySelector("[data-i18n]");
+        if (hintEl) {
+            hintEl.setAttribute("data-i18n", "admin_bar_hint_drag");
+            hintEl.textContent = t("admin_bar_hint_drag");
+        }
+
+        // Rebuild markers with draggable: true
+        buildMarkers();
     }
 
     function exitAdmin() {
@@ -318,6 +482,16 @@
         document.getElementById("admin-toggle-btn").setAttribute("data-i18n", "admin_login");
         document.getElementById("admin-toggle-btn").textContent = t("admin_login");
         map.getContainer().style.cursor = "";
+
+        // Restore admin bar hint
+        var hintEl = adminBar.querySelector("[data-i18n]");
+        if (hintEl) {
+            hintEl.setAttribute("data-i18n", "admin_bar_hint");
+            hintEl.textContent = t("admin_bar_hint");
+        }
+
+        // Rebuild markers with draggable: false
+        buildMarkers();
     }
 
     document.getElementById("admin-exit-btn").addEventListener("click", exitAdmin);
@@ -486,10 +660,5 @@
         savePoint(newPoint);
         closeAddModal();
     });
-
-    // ═══════════════════════════════════════════════════════
-    //  ADMIN: RESET DATA (in sidebar)
-    // ═══════════════════════════════════════════════════════
-    // (reset button is shown only via admin; could be extended)
 
 })();

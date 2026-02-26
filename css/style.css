@@ -278,6 +278,98 @@ body {
 }
 
 /* ═══════════════════════════════════════════════════════════
+   MAP CONTROLS (Heatmap + Tile Switcher)
+   ═══════════════════════════════════════════════════════════ */
+#map-controls {
+    position: fixed;
+    top: 16px;
+    right: 16px;
+    z-index: 1050;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    align-items: flex-end;
+}
+
+.map-ctrl-btn {
+    width: 40px;
+    height: 40px;
+    background: #16213e;
+    border: 2px solid rgba(255, 255, 255, 0.12);
+    border-radius: 10px;
+    color: #a0a8c0;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.map-ctrl-btn:hover {
+    background: #0f3460;
+    color: #fff;
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.map-ctrl-btn.active {
+    background: rgba(239, 83, 80, 0.9);
+    border-color: rgba(239, 83, 80, 0.6);
+    color: #fff;
+}
+
+.tile-switcher {
+    display: flex;
+    gap: 4px;
+    background: #16213e;
+    padding: 4px;
+    border-radius: 10px;
+    border: 2px solid rgba(255, 255, 255, 0.12);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.tile-btn {
+    width: 36px;
+    height: 36px;
+    background: transparent;
+    border: none;
+    border-radius: 8px;
+    color: #8892b0;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.tile-btn:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: #c0c8e0;
+}
+
+.tile-btn.active {
+    background: rgba(79, 195, 247, 0.2);
+    color: #4fc3f7;
+}
+
+/* ── Drag toast on map ── */
+.drag-toast {
+    position: fixed;
+    bottom: 80px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(76, 175, 80, 0.95);
+    color: #fff;
+    padding: 10px 24px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    z-index: 2000;
+    animation: fadeInUp 0.3s ease;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+}
+
+/* ═══════════════════════════════════════════════════════════
    MARKERS
    ═══════════════════════════════════════════════════════════ */
 .custom-marker { border: none; background: transparent; }
@@ -428,9 +520,30 @@ body {
     border-top: 1px solid rgba(255, 255, 255, 0.06);
 }
 
-#modal-delete-btn {
+/* ── Modal actions row ── */
+.modal-actions {
+    display: flex;
+    gap: 10px;
     margin-top: 20px;
-    width: 100%;
+}
+
+#modal-share-btn {
+    flex: 1;
+    padding: 10px;
+    background: rgba(79, 195, 247, 0.15);
+    border: 1px solid rgba(79, 195, 247, 0.3);
+    color: #4fc3f7;
+    font-size: 14px;
+    font-weight: 600;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+#modal-share-btn:hover { background: rgba(79, 195, 247, 0.3); }
+
+#modal-delete-btn {
+    flex: 1;
     padding: 10px;
     background: rgba(239, 83, 80, 0.15);
     border: 1px solid rgba(239, 83, 80, 0.3);
@@ -443,6 +556,28 @@ body {
 }
 
 #modal-delete-btn:hover { background: rgba(239, 83, 80, 0.3); }
+
+/* ── Share toast ── */
+.share-toast {
+    position: absolute;
+    bottom: 16px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #4fc3f7;
+    color: #0f3460;
+    padding: 8px 20px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    animation: fadeInUp 0.3s ease;
+    z-index: 10;
+    white-space: nowrap;
+}
+
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateX(-50%) translateY(10px); }
+    to { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
 
 /* Lightbox */
 #lightbox {
@@ -782,6 +917,22 @@ body {
         gap: 8px;
         text-align: center;
         white-space: normal;
+    }
+
+    /* ── Map controls responsive ── */
+    #map-controls {
+        top: 12px;
+        right: 12px;
+    }
+
+    .map-ctrl-btn {
+        width: 36px;
+        height: 36px;
+    }
+
+    .tile-btn {
+        width: 32px;
+        height: 32px;
     }
 
     /* ── Modals responsive ── */
