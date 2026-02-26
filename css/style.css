@@ -239,6 +239,8 @@ body {
     z-index: 1;
 }
 
+.leaflet-control-attribution { display: none !important; }
+
 /* ── Admin bar on map ── */
 #admin-bar {
     position: fixed;
