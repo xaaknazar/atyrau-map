@@ -29,10 +29,7 @@
     <div id="sidebar">
         <div class="sidebar-header">
             <div class="header-top-row">
-                <div class="sidebar-logos">
-                    <img src="images/placeholders/logos.jpeg" alt="Қазақстан Прокуратурасы" class="sidebar-logo" />
-                    <img src="images/placeholders/logo.jpeg" alt="Qazaqstan Prokýratýrasy" class="sidebar-logo" />
-                </div>
+                <img src="images/placeholders/logos.jpeg" alt="Логотип прокуратуры" class="sidebar-logo" />
                 <div class="lang-switch">
                     <button class="lang-btn active" data-lang="ru">Рус</button>
                     <button class="lang-btn" data-lang="kz">Қаз</button>
@@ -44,6 +41,11 @@
 
         <div class="legend">
             <h3 data-i18n="categories">Категории</h3>
+            <label class="legend-item">
+                <input type="checkbox" checked data-filter="crime" />
+                <span class="legend-dot" style="background: #e74c3c;"></span>
+                <span data-i18n="cat_crime">Преступность</span>
+            </label>
             <label class="legend-item">
                 <input type="checkbox" checked data-filter="blind-spots" />
                 <span class="legend-dot" style="background: #3498db;"></span>
@@ -63,6 +65,10 @@
 
         <div class="stats">
             <h3 data-i18n="statistics">Статистика</h3>
+            <div class="stat-row">
+                <span class="stat-label" data-i18n="stat_crime">Преступность:</span>
+                <span class="stat-value" id="count-crime">0</span>
+            </div>
             <div class="stat-row">
                 <span class="stat-label" data-i18n="stat_blind">Слепые зоны:</span>
                 <span class="stat-value" id="count-blind-spots">0</span>
@@ -185,6 +191,10 @@
             <div class="add-form">
                 <label data-i18n="admin_field_category">Категория:</label>
                 <div class="category-selector">
+                    <button class="cat-btn" data-cat="crime">
+                        <span class="legend-dot" style="background:#e74c3c;"></span>
+                        <span data-i18n="cat_crime">Преступность</span>
+                    </button>
                     <button class="cat-btn active" data-cat="blind-spots">
                         <span class="legend-dot" style="background:#3498db;"></span>
                         <span data-i18n="cat_blind">Слепые зоны</span>
@@ -296,6 +306,7 @@
     <script src="js/firebase-config.js"></script>
     <script src="js/i18n.js"></script>
     <script src="js/photos.js"></script>
+    <script src="js/crime-points.js"></script>
     <script src="js/data.js"></script>
     <script src="js/app.js"></script>
 </body>
