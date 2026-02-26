@@ -10,12 +10,14 @@ var I18N = {
 
         // Legend
         categories: "Категории",
+        cat_crime: "Преступность",
         cat_blind: "Слепые зоны (нет камер)",
         cat_abandoned: "Заброшенные здания",
         cat_unlit: "Неосвещённые улицы",
 
         // Stats
         statistics: "Статистика",
+        stat_crime: "Преступность:",
         stat_blind: "Слепые зоны:",
         stat_abandoned: "Заброшенные здания:",
         stat_unlit: "Неосвещённые улицы:",
@@ -25,6 +27,7 @@ var I18N = {
         footer_hint: "Нажмите на точку для подробной информации",
 
         // Modal category badges
+        badge_crime: "Преступность",
         badge_blind: "Слепая зона",
         badge_abandoned: "Заброшенное здание",
         badge_unlit: "Неосвещённая улица",
@@ -58,12 +61,14 @@ var I18N = {
 
         // Legend
         categories: "Санаттар",
+        cat_crime: "Қылмыс",
         cat_blind: "Соқыр аймақтар (камера жоқ)",
         cat_abandoned: "Тастанды ғимараттар",
         cat_unlit: "Жарықтандырылмаған көшелер",
 
         // Stats
         statistics: "Статистика",
+        stat_crime: "Қылмыс:",
         stat_blind: "Соқыр аймақтар:",
         stat_abandoned: "Тастанды ғимараттар:",
         stat_unlit: "Жарықтандырылмаған көшелер:",
@@ -73,6 +78,7 @@ var I18N = {
         footer_hint: "Толық ақпарат алу үшін нүктені басыңыз",
 
         // Modal category badges
+        badge_crime: "Қылмыс",
         badge_blind: "Соқыр аймақ",
         badge_abandoned: "Тастанды ғимарат",
         badge_unlit: "Жарықтандырылмаған көше",

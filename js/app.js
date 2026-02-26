@@ -5,6 +5,7 @@
     var ADMIN_PASSWORD = "prokuratura2025";
 
     var CATEGORIES = {
+        "crime":       { color: "#e74c3c", badgeKey: "badge_crime" },
         "blind-spots": { color: "#3498db", badgeKey: "badge_blind" },
         "abandoned":   { color: "#8e44ad", badgeKey: "badge_abandoned" },
         "unlit":       { color: "#f39c12", badgeKey: "badge_unlit" }
@@ -108,9 +109,10 @@
 
     // ── Stats ───────────────────────────────────────────────
     function updateStats() {
-        var counts = { "blind-spots": 0, "abandoned": 0, "unlit": 0 };
+        var counts = { "crime": 0, "blind-spots": 0, "abandoned": 0, "unlit": 0 };
         mapPoints.forEach(function (p) { if (counts.hasOwnProperty(p.category)) counts[p.category]++; });
 
+        document.getElementById("count-crime").textContent = counts["crime"];
         document.getElementById("count-blind-spots").textContent = counts["blind-spots"];
         document.getElementById("count-abandoned").textContent = counts["abandoned"];
         document.getElementById("count-unlit").textContent = counts["unlit"];
@@ -372,7 +374,7 @@
 
     function updatePhotoSectionVisibility() {
         if (photoSection) {
-            photoSection.style.display = "";
+            photoSection.style.display = selectedCategory === "crime" ? "none" : "";
         }
     }
 
@@ -478,7 +480,7 @@
             address_kz: addressKz,
             description_ru: document.getElementById("add-desc-ru").value.trim(),
             description_kz: document.getElementById("add-desc-kz").value.trim(),
-            photos: selectedPhotos.slice()
+            photos: selectedCategory === "crime" ? [] : selectedPhotos.slice()
         };
 
         savePoint(newPoint);
