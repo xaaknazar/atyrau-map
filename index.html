@@ -15,6 +15,7 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.heat/0.2.0/leaflet-heat.css" />
     <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
@@ -41,6 +42,11 @@
         <div class="legend">
             <h3 data-i18n="categories">Категории</h3>
             <label class="legend-item">
+                <input type="checkbox" checked data-filter="crime" />
+                <span class="legend-dot" style="background: #e74c3c;"></span>
+                <span data-i18n="cat_crime">Преступность</span>
+            </label>
+            <label class="legend-item">
                 <input type="checkbox" checked data-filter="blind-spots" />
                 <span class="legend-dot" style="background: #3498db;"></span>
                 <span data-i18n="cat_blind">Слепые зоны (нет камер)</span>
@@ -60,6 +66,10 @@
         <div class="stats">
             <h3 data-i18n="statistics">Статистика</h3>
             <div class="stat-row">
+                <span class="stat-label" data-i18n="stat_crime">Преступность:</span>
+                <span class="stat-value" id="count-crime">0</span>
+            </div>
+            <div class="stat-row">
                 <span class="stat-label" data-i18n="stat_blind">Слепые зоны:</span>
                 <span class="stat-value" id="count-blind-spots">0</span>
             </div>
@@ -75,6 +85,15 @@
                 <span class="stat-label" data-i18n="stat_total">Всего точек:</span>
                 <span class="stat-value" id="count-total">0</span>
             </div>
+            <div class="stat-row pending-row">
+                <span class="stat-label" data-i18n="suggest_pending_count">Предложения:</span>
+                <span class="stat-value" id="count-pending">0</span>
+            </div>
+        </div>
+
+        <!-- Citizen feedback button -->
+        <div class="suggest-section">
+            <button id="suggest-btn" data-i18n="suggest_btn">Предложить точку</button>
         </div>
 
         <!-- Admin toggle -->
@@ -92,9 +111,41 @@
 
     <div id="map"></div>
 
+    <!-- Map controls panel -->
+    <div id="map-controls">
+        <button id="heatmap-toggle" class="map-ctrl-btn" title="Тепловая карта">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/>
+                <circle cx="12" cy="12" r="6" opacity="0.6"/>
+                <circle cx="12" cy="12" r="2" opacity="0.3"/>
+            </svg>
+        </button>
+        <div id="tile-switcher" class="tile-switcher">
+            <button class="tile-btn active" data-tile="streets" title="Карта">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="3" width="18" height="18" rx="2"/>
+                    <line x1="3" y1="12" x2="21" y2="12"/>
+                    <line x1="12" y1="3" x2="12" y2="21"/>
+                </svg>
+            </button>
+            <button class="tile-btn" data-tile="satellite" title="Спутник">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"/>
+                    <path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+                </svg>
+            </button>
+            <button class="tile-btn" data-tile="dark" title="Тёмная">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+                </svg>
+            </button>
+        </div>
+    </div>
+
     <!-- Admin mode indicator on map -->
     <div id="admin-bar" class="hidden">
         <span data-i18n="admin_bar_hint">АДМИН: нажмите на карту чтобы добавить точку</span>
+        <button id="admin-suggestions-btn" data-i18n="suggest_list_btn">Предложения (<span id="admin-pending-count">0</span>)</button>
         <button id="admin-exit-btn" data-i18n="admin_exit">Выйти</button>
     </div>
 
@@ -108,7 +159,11 @@
                 <div id="modal-gallery"></div>
                 <div id="modal-description"></div>
                 <div id="modal-address"></div>
-                <button id="modal-delete-btn" class="hidden" data-i18n="admin_delete_point">Удалить точку</button>
+                <div class="modal-actions">
+                    <button id="modal-share-btn" data-i18n="share_point">Поделиться</button>
+                    <button id="modal-delete-btn" class="hidden" data-i18n="admin_delete_point">Удалить точку</button>
+                </div>
+                <div id="share-toast" class="share-toast hidden" data-i18n="share_copied">Ссылка скопирована!</div>
             </div>
         </div>
     </div>
@@ -136,6 +191,10 @@
             <div class="add-form">
                 <label data-i18n="admin_field_category">Категория:</label>
                 <div class="category-selector">
+                    <button class="cat-btn" data-cat="crime">
+                        <span class="legend-dot" style="background:#e74c3c;"></span>
+                        <span data-i18n="cat_crime">Преступность</span>
+                    </button>
                     <button class="cat-btn active" data-cat="blind-spots">
                         <span class="legend-dot" style="background:#3498db;"></span>
                         <span data-i18n="cat_blind">Слепые зоны</span>
@@ -149,12 +208,6 @@
                         <span data-i18n="cat_unlit">Неосвещённые улицы</span>
                     </button>
                 </div>
-
-                <label data-i18n="admin_field_title_ru">Название (рус):</label>
-                <input type="text" id="add-title-ru" />
-
-                <label data-i18n="admin_field_title_kz">Название (қаз):</label>
-                <input type="text" id="add-title-kz" />
 
                 <label data-i18n="admin_field_address_ru">Адрес (рус):</label>
                 <input type="text" id="add-address-ru" />
@@ -178,14 +231,82 @@
         </div>
     </div>
 
+    <!-- Citizen suggestion form modal -->
+    <div id="suggest-overlay" class="hidden">
+        <div id="suggest-modal">
+            <button id="suggest-close" aria-label="Закрыть">&times;</button>
+            <h2 data-i18n="suggest_title">Предложить проблемную точку</h2>
+            <p id="suggest-hint" class="suggest-hint" data-i18n="suggest_hint">Нажмите на карту, чтобы указать место</p>
+            <div id="suggest-coords"></div>
+            <div class="suggest-form">
+                <label data-i18n="suggest_name">Ваше имя:</label>
+                <input type="text" id="suggest-name" />
+
+                <label data-i18n="suggest_contact">Телефон или e-mail:</label>
+                <input type="text" id="suggest-contact" />
+
+                <label data-i18n="suggest_category">Категория:</label>
+                <div class="category-selector" id="suggest-cat-selector">
+                    <button class="cat-btn active" data-cat="blind-spots">
+                        <span class="legend-dot" style="background:#3498db;"></span>
+                        <span data-i18n="cat_blind">Слепые зоны</span>
+                    </button>
+                    <button class="cat-btn" data-cat="abandoned">
+                        <span class="legend-dot" style="background:#8e44ad;"></span>
+                        <span data-i18n="cat_abandoned">Заброшенные здания</span>
+                    </button>
+                    <button class="cat-btn" data-cat="unlit">
+                        <span class="legend-dot" style="background:#f39c12;"></span>
+                        <span data-i18n="cat_unlit">Неосвещённые улицы</span>
+                    </button>
+                </div>
+
+                <label data-i18n="suggest_desc">Описание проблемы:</label>
+                <textarea id="suggest-desc" rows="3"></textarea>
+
+                <button id="suggest-submit" disabled data-i18n="suggest_submit">Отправить предложение</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin: suggestions list modal -->
+    <div id="suggestions-list-overlay" class="hidden">
+        <div id="suggestions-list-modal">
+            <button id="suggestions-list-close" aria-label="Закрыть">&times;</button>
+            <h2 data-i18n="suggest_list_title">Предложения от граждан</h2>
+            <div id="suggestions-list"></div>
+        </div>
+    </div>
+
+    <!-- Admin: view suggestion modal -->
+    <div id="suggestion-view-overlay" class="hidden">
+        <div id="suggestion-view-modal">
+            <button id="suggestion-view-close" aria-label="Закрыть">&times;</button>
+            <h2 id="suggestion-view-title"></h2>
+            <span id="suggestion-view-badge"></span>
+            <div id="suggestion-view-info"></div>
+            <div id="suggestion-view-desc"></div>
+            <div id="suggestion-approve-section" class="hidden">
+                <label data-i18n="suggest_approve_photos">Прикрепите фото перед одобрением:</label>
+                <div id="suggestion-photo-picker"></div>
+            </div>
+            <div class="modal-actions">
+                <button id="suggestion-approve-btn" data-i18n="suggest_approve">Одобрить</button>
+                <button id="suggestion-reject-btn" data-i18n="suggest_reject">Отклонить</button>
+            </div>
+        </div>
+    </div>
+
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+    <script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
     <!-- Firebase SDK (Realtime Database) -->
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
     <script src="js/firebase-config.js"></script>
     <script src="js/i18n.js"></script>
     <script src="js/photos.js"></script>
+    <script src="js/crime-points.js"></script>
     <script src="js/data.js"></script>
     <script src="js/app.js"></script>
 </body>

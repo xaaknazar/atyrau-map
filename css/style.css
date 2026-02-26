@@ -178,6 +178,40 @@ body {
     font-size: 15px;
 }
 
+/* ── Citizen suggest section in sidebar ── */
+.suggest-section {
+    padding: 16px 24px 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+#suggest-btn {
+    width: 100%;
+    padding: 10px 16px;
+    background: rgba(76, 175, 80, 0.12);
+    border: 1px solid rgba(76, 175, 80, 0.3);
+    color: #66bb6a;
+    font-size: 14px;
+    font-weight: 600;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+#suggest-btn:hover {
+    background: rgba(76, 175, 80, 0.25);
+}
+
+#suggest-btn.picking {
+    background: rgba(76, 175, 80, 0.3);
+    border-color: #66bb6a;
+    animation: pulse-suggest 1.5s infinite;
+}
+
+@keyframes pulse-suggest {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.4); }
+    50% { box-shadow: 0 0 0 8px rgba(76, 175, 80, 0); }
+}
+
 /* ── Admin section in sidebar ── */
 .admin-section {
     padding: 16px 24px;
@@ -239,6 +273,8 @@ body {
     z-index: 1;
 }
 
+.leaflet-control-attribution { display: none !important; }
+
 /* ── Admin bar on map ── */
 #admin-bar {
     position: fixed;
@@ -278,6 +314,98 @@ body {
 }
 
 /* ═══════════════════════════════════════════════════════════
+   MAP CONTROLS (Heatmap + Tile Switcher)
+   ═══════════════════════════════════════════════════════════ */
+#map-controls {
+    position: fixed;
+    top: 16px;
+    right: 16px;
+    z-index: 1050;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    align-items: flex-end;
+}
+
+.map-ctrl-btn {
+    width: 40px;
+    height: 40px;
+    background: #16213e;
+    border: 2px solid rgba(255, 255, 255, 0.12);
+    border-radius: 10px;
+    color: #a0a8c0;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.map-ctrl-btn:hover {
+    background: #0f3460;
+    color: #fff;
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.map-ctrl-btn.active {
+    background: rgba(239, 83, 80, 0.9);
+    border-color: rgba(239, 83, 80, 0.6);
+    color: #fff;
+}
+
+.tile-switcher {
+    display: flex;
+    gap: 4px;
+    background: #16213e;
+    padding: 4px;
+    border-radius: 10px;
+    border: 2px solid rgba(255, 255, 255, 0.12);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.tile-btn {
+    width: 36px;
+    height: 36px;
+    background: transparent;
+    border: none;
+    border-radius: 8px;
+    color: #8892b0;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.tile-btn:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: #c0c8e0;
+}
+
+.tile-btn.active {
+    background: rgba(79, 195, 247, 0.2);
+    color: #4fc3f7;
+}
+
+/* ── Drag toast on map ── */
+.drag-toast {
+    position: fixed;
+    bottom: 80px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(76, 175, 80, 0.95);
+    color: #fff;
+    padding: 10px 24px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    z-index: 2000;
+    animation: fadeInUp 0.3s ease;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+}
+
+/* ═══════════════════════════════════════════════════════════
    MARKERS
    ═══════════════════════════════════════════════════════════ */
 .custom-marker { border: none; background: transparent; }
@@ -297,6 +425,7 @@ body {
     box-shadow: 0 2px 16px rgba(0, 0, 0, 0.5), 0 0 20px rgba(0, 0, 0, 0.3);
 }
 
+.marker-pin.crime       { background: #e74c3c; border-color: #ffcdd2; }
 .marker-pin.blind-spots { background: #3498db; border-color: #bbdefb; }
 .marker-pin.abandoned   { background: #8e44ad; border-color: #e1bee7; }
 .marker-pin.unlit       { background: #f39c12; border-color: #fff3cd; }
@@ -390,6 +519,7 @@ body {
     margin-bottom: 20px;
 }
 
+#modal-badge.crime       { background: rgba(231, 76, 60, 0.2); color: #e74c3c; }
 #modal-badge.blind-spots { background: rgba(52, 152, 219, 0.2); color: #3498db; }
 #modal-badge.abandoned   { background: rgba(142, 68, 173, 0.2); color: #8e44ad; }
 #modal-badge.unlit       { background: rgba(243, 156, 18, 0.2); color: #f39c12; }
@@ -426,9 +556,30 @@ body {
     border-top: 1px solid rgba(255, 255, 255, 0.06);
 }
 
-#modal-delete-btn {
+/* ── Modal actions row ── */
+.modal-actions {
+    display: flex;
+    gap: 10px;
     margin-top: 20px;
-    width: 100%;
+}
+
+#modal-share-btn {
+    flex: 1;
+    padding: 10px;
+    background: rgba(79, 195, 247, 0.15);
+    border: 1px solid rgba(79, 195, 247, 0.3);
+    color: #4fc3f7;
+    font-size: 14px;
+    font-weight: 600;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+#modal-share-btn:hover { background: rgba(79, 195, 247, 0.3); }
+
+#modal-delete-btn {
+    flex: 1;
     padding: 10px;
     background: rgba(239, 83, 80, 0.15);
     border: 1px solid rgba(239, 83, 80, 0.3);
@@ -441,6 +592,28 @@ body {
 }
 
 #modal-delete-btn:hover { background: rgba(239, 83, 80, 0.3); }
+
+/* ── Share toast ── */
+.share-toast {
+    position: absolute;
+    bottom: 16px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #4fc3f7;
+    color: #0f3460;
+    padding: 8px 20px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    animation: fadeInUp 0.3s ease;
+    z-index: 10;
+    white-space: nowrap;
+}
+
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateX(-50%) translateY(10px); }
+    to { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
 
 /* Lightbox */
 #lightbox {
@@ -622,6 +795,15 @@ body {
     box-shadow: 0 0 12px rgba(79, 195, 247, 0.3);
 }
 
+.photo-pick-item.used {
+    opacity: 0.55;
+    border-color: rgba(243, 156, 18, 0.4);
+}
+
+.photo-pick-item.used .photo-pick-label {
+    color: #f39c12;
+}
+
 .photo-pick-item input[type="checkbox"] {
     position: absolute;
     top: 6px; left: 6px;
@@ -659,6 +841,477 @@ body {
 }
 
 #add-submit:hover { background: #81d4fa; }
+
+/* ═══════════════════════════════════════════════════════════
+   SUGGESTION MODAL (citizen feedback)
+   ═══════════════════════════════════════════════════════════ */
+#suggest-overlay {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+    animation: fadeIn 0.2s ease;
+    padding: 16px;
+}
+
+#suggest-modal {
+    background: #1e2a47;
+    border-radius: 16px;
+    width: 500px;
+    max-width: 100%;
+    max-height: 85vh;
+    overflow-y: auto;
+    position: relative;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    animation: slideUp 0.3s ease;
+    padding: 28px;
+}
+
+#suggest-close {
+    position: absolute;
+    top: 12px; right: 12px;
+    width: 40px; height: 40px;
+    border: none;
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+    font-size: 24px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+    z-index: 10;
+}
+
+#suggest-close:hover { background: rgba(255, 255, 255, 0.2); }
+
+#suggest-modal h2 {
+    color: #fff;
+    font-size: 20px;
+    margin-bottom: 8px;
+    padding-right: 40px;
+}
+
+.suggest-hint {
+    color: #66bb6a;
+    font-size: 13px;
+    margin-bottom: 12px;
+    font-weight: 600;
+}
+
+#suggest-coords {
+    color: #8892b0;
+    font-size: 13px;
+    margin-bottom: 16px;
+    font-family: monospace;
+}
+
+.suggest-form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.suggest-form label {
+    color: #a0a8c0;
+    font-size: 13px;
+    font-weight: 600;
+    margin-top: 4px;
+}
+
+.suggest-form input,
+.suggest-form textarea {
+    padding: 10px 14px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 8px;
+    color: #fff;
+    font-size: 14px;
+    font-family: inherit;
+    outline: none;
+    transition: border-color 0.2s;
+    resize: vertical;
+}
+
+.suggest-form input:focus,
+.suggest-form textarea:focus { border-color: #66bb6a; }
+
+#suggest-submit {
+    margin-top: 8px;
+    padding: 12px;
+    background: #66bb6a;
+    border: none;
+    color: #1a1a2e;
+    font-size: 15px;
+    font-weight: 700;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+#suggest-submit:hover { background: #81c784; }
+
+#suggest-submit:disabled {
+    background: #555;
+    color: #999;
+    cursor: not-allowed;
+}
+
+/* ── Success toast ── */
+.suggest-toast {
+    position: fixed;
+    bottom: 80px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(76, 175, 80, 0.95);
+    color: #fff;
+    padding: 12px 28px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    z-index: 2000;
+    animation: fadeInUp 0.3s ease;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+    text-align: center;
+    max-width: 90%;
+}
+
+/* ── Pending (gray) markers ── */
+.marker-pin.pending {
+    background: #9e9e9e;
+    border-color: #e0e0e0;
+    opacity: 0.8;
+}
+
+/* ── Suggestion view modal (admin) ── */
+#suggestion-view-overlay {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+    animation: fadeIn 0.2s ease;
+    padding: 16px;
+}
+
+#suggestion-view-modal {
+    background: #1e2a47;
+    border-radius: 16px;
+    width: 560px;
+    max-width: 100%;
+    max-height: 85vh;
+    overflow-y: auto;
+    position: relative;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    animation: slideUp 0.3s ease;
+    padding: 28px;
+}
+
+#suggestion-view-close {
+    position: absolute;
+    top: 12px; right: 12px;
+    width: 40px; height: 40px;
+    border: none;
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+    font-size: 24px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+    z-index: 10;
+}
+
+#suggestion-view-close:hover { background: rgba(255, 255, 255, 0.2); }
+
+#suggestion-view-title {
+    font-size: 20px;
+    color: #fff;
+    margin-bottom: 10px;
+    padding-right: 44px;
+    line-height: 1.3;
+}
+
+#suggestion-view-badge {
+    display: inline-block;
+    padding: 4px 14px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 16px;
+    background: rgba(158, 158, 158, 0.2);
+    color: #9e9e9e;
+}
+
+#suggestion-view-info {
+    font-size: 14px;
+    color: #a0a8c0;
+    margin-bottom: 12px;
+    line-height: 1.6;
+}
+
+#suggestion-view-info strong {
+    color: #c0c8e0;
+}
+
+#suggestion-view-desc {
+    font-size: 15px;
+    line-height: 1.6;
+    color: #c0c8e0;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+#suggestion-approve-section {
+    margin-bottom: 16px;
+}
+
+#suggestion-approve-section label {
+    display: block;
+    color: #a0a8c0;
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+#suggestion-photo-picker {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 8px;
+    max-height: 260px;
+    overflow-y: auto;
+    padding: 4px 0;
+}
+
+#suggestion-approve-btn {
+    flex: 1;
+    padding: 10px;
+    background: rgba(76, 175, 80, 0.15);
+    border: 1px solid rgba(76, 175, 80, 0.3);
+    color: #66bb6a;
+    font-size: 14px;
+    font-weight: 600;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+#suggestion-approve-btn:hover { background: rgba(76, 175, 80, 0.3); }
+
+#suggestion-reject-btn {
+    flex: 1;
+    padding: 10px;
+    background: rgba(239, 83, 80, 0.15);
+    border: 1px solid rgba(239, 83, 80, 0.3);
+    color: #ef5350;
+    font-size: 14px;
+    font-weight: 600;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+#suggestion-reject-btn:hover { background: rgba(239, 83, 80, 0.3); }
+
+/* ── Admin suggestions button in admin bar ── */
+#admin-suggestions-btn {
+    padding: 5px 14px;
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    background: rgba(255, 255, 255, 0.15);
+    color: #fff;
+    font-size: 12px;
+    font-weight: 600;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+#admin-suggestions-btn:hover { background: rgba(255, 255, 255, 0.3); }
+
+#admin-suggestions-btn #admin-pending-count {
+    font-weight: 700;
+}
+
+/* ── Suggestions list modal ── */
+#suggestions-list-overlay {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+    animation: fadeIn 0.2s ease;
+    padding: 16px;
+}
+
+#suggestions-list-modal {
+    background: #1e2a47;
+    border-radius: 16px;
+    width: 620px;
+    max-width: 100%;
+    max-height: 85vh;
+    overflow-y: auto;
+    position: relative;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    animation: slideUp 0.3s ease;
+    padding: 28px;
+}
+
+#suggestions-list-close {
+    position: absolute;
+    top: 12px; right: 12px;
+    width: 40px; height: 40px;
+    border: none;
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+    font-size: 24px;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+    z-index: 10;
+}
+
+#suggestions-list-close:hover { background: rgba(255, 255, 255, 0.2); }
+
+#suggestions-list-modal h2 {
+    color: #fff;
+    font-size: 20px;
+    margin-bottom: 16px;
+    padding-right: 44px;
+}
+
+.suggestion-list-item {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 10px;
+    transition: border-color 0.2s;
+}
+
+.suggestion-list-item:hover {
+    border-color: rgba(255, 255, 255, 0.18);
+}
+
+.suggestion-list-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+}
+
+.suggestion-list-header .legend-dot {
+    width: 10px;
+    height: 10px;
+}
+
+.suggestion-list-cat {
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #a0a8c0;
+}
+
+.suggestion-list-date {
+    font-size: 11px;
+    color: #6a7394;
+    margin-left: auto;
+}
+
+.suggestion-list-desc {
+    font-size: 14px;
+    color: #c0c8e0;
+    line-height: 1.5;
+    margin-bottom: 8px;
+}
+
+.suggestion-list-meta {
+    font-size: 12px;
+    color: #8892b0;
+    margin-bottom: 12px;
+    line-height: 1.5;
+}
+
+.suggestion-list-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.suggestion-list-actions button {
+    flex: 1;
+    padding: 8px 12px;
+    font-size: 13px;
+    font-weight: 600;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.sla-map-btn {
+    background: rgba(79, 195, 247, 0.12);
+    border: 1px solid rgba(79, 195, 247, 0.3);
+    color: #4fc3f7;
+}
+
+.sla-map-btn:hover { background: rgba(79, 195, 247, 0.25); }
+
+.sla-approve-btn {
+    background: rgba(76, 175, 80, 0.12);
+    border: 1px solid rgba(76, 175, 80, 0.3);
+    color: #66bb6a;
+}
+
+.sla-approve-btn:hover { background: rgba(76, 175, 80, 0.25); }
+
+.sla-reject-btn {
+    background: rgba(239, 83, 80, 0.12);
+    border: 1px solid rgba(239, 83, 80, 0.3);
+    color: #ef5350;
+}
+
+.sla-reject-btn:hover { background: rgba(239, 83, 80, 0.25); }
+
+.suggestions-empty {
+    text-align: center;
+    color: #6a7394;
+    font-size: 14px;
+    padding: 32px 0;
+}
+
+/* ── Pending suggestions counter in stats ── */
+.stat-row.pending-row {
+    color: #9e9e9e;
+}
+
+.stat-row.pending-row .stat-value {
+    color: #9e9e9e;
+    background: rgba(158, 158, 158, 0.15);
+    padding: 2px 10px;
+    border-radius: 10px;
+    font-size: 13px;
+}
 
 /* ═══════════════════════════════════════════════════════════
    RESPONSIVE — MOBILE (768px)
@@ -773,8 +1426,24 @@ body {
         white-space: normal;
     }
 
+    /* ── Map controls responsive ── */
+    #map-controls {
+        top: 12px;
+        right: 12px;
+    }
+
+    .map-ctrl-btn {
+        width: 36px;
+        height: 36px;
+    }
+
+    .tile-btn {
+        width: 32px;
+        height: 32px;
+    }
+
     /* ── Modals responsive ── */
-    #modal, #login-modal, #add-modal {
+    #modal, #login-modal, #add-modal, #suggest-modal, #suggestion-view-modal, #suggestions-list-modal {
         width: 100%;
         max-height: 80vh;
         border-radius: 14px;
@@ -835,7 +1504,7 @@ body {
     .legend-item { font-size: 13px; padding: 8px 10px; }
     .stat-row { font-size: 13px; }
 
-    #modal-content, #add-modal { padding: 16px; }
+    #modal-content, #add-modal, #suggest-modal, #suggestion-view-modal, #suggestions-list-modal { padding: 16px; }
     #modal-gallery { grid-template-columns: 1fr 1fr; }
     #modal-gallery img { height: 90px; }
     #photo-picker { grid-template-columns: 1fr 1fr; }

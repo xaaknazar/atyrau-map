@@ -10,12 +10,14 @@ var I18N = {
 
         // Legend
         categories: "Категории",
+        cat_crime: "Преступность",
         cat_blind: "Слепые зоны (нет камер)",
         cat_abandoned: "Заброшенные здания",
         cat_unlit: "Неосвещённые улицы",
 
         // Stats
         statistics: "Статистика",
+        stat_crime: "Преступность:",
         stat_blind: "Слепые зоны:",
         stat_abandoned: "Заброшенные здания:",
         stat_unlit: "Неосвещённые улицы:",
@@ -25,6 +27,7 @@ var I18N = {
         footer_hint: "Нажмите на точку для подробной информации",
 
         // Modal category badges
+        badge_crime: "Преступность",
         badge_blind: "Слепая зона",
         badge_abandoned: "Заброшенное здание",
         badge_unlit: "Неосвещённая улица",
@@ -39,8 +42,6 @@ var I18N = {
         admin_exit: "Выйти",
         admin_add_title: "Новая точка",
         admin_field_category: "Категория:",
-        admin_field_title_ru: "Название (рус):",
-        admin_field_title_kz: "Название (қаз):",
         admin_field_address_ru: "Адрес (рус):",
         admin_field_address_kz: "Адрес (қаз):",
         admin_field_desc_ru: "Описание (рус):",
@@ -50,7 +51,48 @@ var I18N = {
         admin_delete_point: "Удалить точку",
         admin_confirm_delete: "Вы уверены что хотите удалить эту точку?",
         admin_reset_data: "Сбросить данные",
-        admin_confirm_reset: "Сбросить все точки к начальным данным?"
+        admin_confirm_reset: "Сбросить все точки к начальным данным?",
+
+        // Share
+        share_point: "Поделиться",
+        share_copied: "Ссылка скопирована!",
+
+        // Heatmap
+        heatmap_on: "Тепловая карта: ВКЛ",
+        heatmap_off: "Тепловая карта: ВЫКЛ",
+
+        // Map tiles
+        tile_streets: "Карта",
+        tile_satellite: "Спутник",
+        tile_dark: "Тёмная",
+
+        // Drag
+        drag_saved: "Координаты обновлены",
+        admin_bar_hint_drag: "АДМИН: нажмите на карту чтобы добавить точку · перетаскивайте маркеры для корректировки",
+
+        // Citizen feedback
+        suggest_btn: "Предложить точку",
+        suggest_title: "Предложить проблемную точку",
+        suggest_hint: "Нажмите на карту, чтобы указать место",
+        suggest_name: "Ваше имя:",
+        suggest_contact: "Телефон или e-mail:",
+        suggest_category: "Категория:",
+        suggest_desc: "Описание проблемы:",
+        suggest_submit: "Отправить предложение",
+        suggest_success: "Спасибо! Ваше предложение отправлено на рассмотрение.",
+        suggest_pick_location: "Укажите место на карте",
+        suggest_pending: "На рассмотрении",
+        suggest_pending_count: "Предложения:",
+        suggest_from: "От:",
+        suggest_contact_label: "Контакт:",
+        suggest_approve: "Одобрить",
+        suggest_reject: "Отклонить",
+        suggest_approve_photos: "Прикрепите фото перед одобрением:",
+        suggest_no_pending: "Нет предложений на рассмотрении",
+        suggest_confirm_reject: "Отклонить это предложение?",
+        suggest_list_btn: "Предложения",
+        suggest_list_title: "Предложения от граждан",
+        suggest_show_on_map: "На карте"
     },
     kz: {
         // Header
@@ -60,12 +102,14 @@ var I18N = {
 
         // Legend
         categories: "Санаттар",
+        cat_crime: "Қылмыс",
         cat_blind: "Соқыр аймақтар (камера жоқ)",
         cat_abandoned: "Тастанды ғимараттар",
         cat_unlit: "Жарықтандырылмаған көшелер",
 
         // Stats
         statistics: "Статистика",
+        stat_crime: "Қылмыс:",
         stat_blind: "Соқыр аймақтар:",
         stat_abandoned: "Тастанды ғимараттар:",
         stat_unlit: "Жарықтандырылмаған көшелер:",
@@ -75,6 +119,7 @@ var I18N = {
         footer_hint: "Толық ақпарат алу үшін нүктені басыңыз",
 
         // Modal category badges
+        badge_crime: "Қылмыс",
         badge_blind: "Соқыр аймақ",
         badge_abandoned: "Тастанды ғимарат",
         badge_unlit: "Жарықтандырылмаған көше",
@@ -89,8 +134,6 @@ var I18N = {
         admin_exit: "Шығу",
         admin_add_title: "Жаңа нүкте",
         admin_field_category: "Санат:",
-        admin_field_title_ru: "Атауы (орыс):",
-        admin_field_title_kz: "Атауы (қаз):",
         admin_field_address_ru: "Мекен-жай (орыс):",
         admin_field_address_kz: "Мекен-жай (қаз):",
         admin_field_desc_ru: "Сипаттама (орыс):",
@@ -100,7 +143,48 @@ var I18N = {
         admin_delete_point: "Нүктені жою",
         admin_confirm_delete: "Бұл нүктені жойғыңыз келетініне сенімдісіз бе?",
         admin_confirm_reset: "Барлық нүктелерді бастапқы деректерге қайтару керек пе?",
-        admin_reset_data: "Деректерді қалпына келтіру"
+        admin_reset_data: "Деректерді қалпына келтіру",
+
+        // Share
+        share_point: "Бөлісу",
+        share_copied: "Сілтеме көшірілді!",
+
+        // Heatmap
+        heatmap_on: "Жылу картасы: ҚОСУЛЫ",
+        heatmap_off: "Жылу картасы: ӨШІРУЛІ",
+
+        // Map tiles
+        tile_streets: "Карта",
+        tile_satellite: "Спутник",
+        tile_dark: "Қараңғы",
+
+        // Drag
+        drag_saved: "Координаттар жаңартылды",
+        admin_bar_hint_drag: "ӘКІМШІ: нүкте қосу үшін картаны басыңыз · маркерлерді түзету үшін сүйреңіз",
+
+        // Citizen feedback
+        suggest_btn: "Нүкте ұсыну",
+        suggest_title: "Проблемалық нүктені ұсыну",
+        suggest_hint: "Орынды белгілеу үшін картаны басыңыз",
+        suggest_name: "Сіздің атыңыз:",
+        suggest_contact: "Телефон немесе e-mail:",
+        suggest_category: "Санат:",
+        suggest_desc: "Мәселенің сипаттамасы:",
+        suggest_submit: "Ұсынысты жіберу",
+        suggest_success: "Рахмет! Сіздің ұсынысыңыз қарауға жіберілді.",
+        suggest_pick_location: "Картадан орынды көрсетіңіз",
+        suggest_pending: "Қарауда",
+        suggest_pending_count: "Ұсыныстар:",
+        suggest_from: "Кімнен:",
+        suggest_contact_label: "Байланыс:",
+        suggest_approve: "Мақұлдау",
+        suggest_reject: "Қабылдамау",
+        suggest_approve_photos: "Мақұлдау алдында фото тіркеңіз:",
+        suggest_no_pending: "Қаралатын ұсыныстар жоқ",
+        suggest_confirm_reject: "Бұл ұсынысты қабылдамау керек пе?",
+        suggest_list_btn: "Ұсыныстар",
+        suggest_list_title: "Азаматтардан ұсыныстар",
+        suggest_show_on_map: "Картада"
     }
 };
 
