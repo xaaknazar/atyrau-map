@@ -4,7 +4,7 @@
  * Если нет — fallback на localStorage (только для локального тестирования).
  */
 
-var DEFAULT_POINTS = (typeof CRIME_POINTS !== "undefined") ? CRIME_POINTS : [];
+var DEFAULT_POINTS = [];
 
 // ══════════════════════════════════════════════════════════════
 //  Storage layer — Firebase (cloud) or localStorage (fallback)
