@@ -88,25 +88,50 @@
     }
 
     // ═══════════════════════════════════════════════════════
-    //  HEATMAP
+    //  HEATMAP (per-category colors)
     // ═══════════════════════════════════════════════════════
-    var heatLayer = null;
+    var heatLayers = {};
     var heatmapActive = false;
 
-    function buildHeatData() {
-        return mapPoints.map(function (p) {
-            return [p.lat, p.lng, 0.6];
+    // Each category gets its own gradient from transparent to its color
+    var HEAT_GRADIENTS = {
+        "crime":       { 0: "rgba(231,76,60,0)",  0.3: "rgba(231,76,60,0.3)",  0.6: "rgba(231,76,60,0.6)",  1: "#e74c3c" },
+        "blind-spots": { 0: "rgba(52,152,219,0)",  0.3: "rgba(52,152,219,0.3)",  0.6: "rgba(52,152,219,0.6)",  1: "#3498db" },
+        "abandoned":   { 0: "rgba(142,68,173,0)",  0.3: "rgba(142,68,173,0.3)",  0.6: "rgba(142,68,173,0.6)",  1: "#8e44ad" },
+        "unlit":       { 0: "rgba(243,156,18,0)",  0.3: "rgba(243,156,18,0.3)",  0.6: "rgba(243,156,18,0.6)",  1: "#f39c12" }
+    };
+
+    function buildHeatDataByCategory(cat) {
+        return mapPoints
+            .filter(function (p) { return p.category === cat; })
+            .map(function (p) { return [p.lat, p.lng, 0.7]; });
+    }
+
+    function addHeatLayers() {
+        Object.keys(CATEGORIES).forEach(function (cat) {
+            var data = buildHeatDataByCategory(cat);
+            if (data.length === 0) return;
+            heatLayers[cat] = L.heatLayer(data, {
+                radius: 30,
+                blur: 20,
+                maxZoom: 17,
+                gradient: HEAT_GRADIENTS[cat]
+            }).addTo(map);
         });
+    }
+
+    function removeHeatLayers() {
+        Object.keys(heatLayers).forEach(function (cat) {
+            map.removeLayer(heatLayers[cat]);
+        });
+        heatLayers = {};
     }
 
     function toggleHeatmap() {
         var btn = document.getElementById("heatmap-toggle");
         if (heatmapActive) {
             // Turn off heatmap → show markers
-            if (heatLayer) {
-                map.removeLayer(heatLayer);
-                heatLayer = null;
-            }
+            removeHeatLayers();
             Object.keys(layers).forEach(function (cat) {
                 var cb = document.querySelector('[data-filter="' + cat + '"]');
                 if (cb && cb.checked) map.addLayer(layers[cat]);
@@ -118,12 +143,7 @@
             Object.keys(layers).forEach(function (cat) {
                 map.removeLayer(layers[cat]);
             });
-            heatLayer = L.heatLayer(buildHeatData(), {
-                radius: 30,
-                blur: 20,
-                maxZoom: 17,
-                gradient: { 0.2: '#2196f3', 0.4: '#4caf50', 0.6: '#ffeb3b', 0.8: '#ff9800', 1.0: '#f44336' }
-            }).addTo(map);
+            addHeatLayers();
             heatmapActive = true;
             btn.classList.add("active");
         }
@@ -132,9 +152,9 @@
     document.getElementById("heatmap-toggle").addEventListener("click", toggleHeatmap);
 
     function refreshHeatmap() {
-        if (heatmapActive && heatLayer) {
-            heatLayer.setLatLngs(buildHeatData());
-        }
+        if (!heatmapActive) return;
+        removeHeatLayers();
+        addHeatLayers();
     }
 
     // ── Build / rebuild all markers ─────────────────────────
