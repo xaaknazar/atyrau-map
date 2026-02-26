@@ -4,7 +4,7 @@
  * Если нет — fallback на localStorage (только для локального тестирования).
  */
 
-var DEFAULT_POINTS = (typeof CRIME_POINTS !== "undefined") ? CRIME_POINTS : [];
+var DEFAULT_POINTS = [];
 
 // ══════════════════════════════════════════════════════════════
 //  Storage layer — Firebase (cloud) or localStorage (fallback)
@@ -49,8 +49,6 @@ if (useFirebase) {
             Object.keys(data).forEach(function (key) {
                 mapPoints.push(data[key]);
             });
-            // Merge any missing default points (e.g. new crime data)
-            _mergeMissingDefaults(data);
         } else {
             // Database empty — seed with default points
             _seedFirebase();
@@ -58,22 +56,6 @@ if (useFirebase) {
         }
         _notifyListeners();
     });
-
-    function _mergeMissingDefaults(existingData) {
-        if (!DEFAULT_POINTS.length) return;
-        var batch = {};
-        var count = 0;
-        DEFAULT_POINTS.forEach(function (p) {
-            if (!existingData[p.id]) {
-                batch[p.id] = p;
-                count++;
-            }
-        });
-        if (count > 0) {
-            pointsRef.update(batch);
-            console.log("[data] Добавлено " + count + " новых точек из DEFAULT_POINTS");
-        }
-    }
 
     function _seedFirebase() {
         // First try to migrate data from localStorage (includes admin-added points)

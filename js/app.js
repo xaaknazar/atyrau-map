@@ -5,7 +5,6 @@
     var ADMIN_PASSWORD = "prokuratura2025";
 
     var CATEGORIES = {
-        "crime":       { color: "#e74c3c", badgeKey: "badge_crime" },
         "blind-spots": { color: "#3498db", badgeKey: "badge_blind" },
         "abandoned":   { color: "#8e44ad", badgeKey: "badge_abandoned" },
         "unlit":       { color: "#f39c12", badgeKey: "badge_unlit" }
@@ -95,7 +94,6 @@
 
     // Each category gets its own gradient from transparent to its color
     var HEAT_GRADIENTS = {
-        "crime":       { 0: "rgba(231,76,60,0)",  0.3: "rgba(231,76,60,0.3)",  0.6: "rgba(231,76,60,0.6)",  1: "#e74c3c" },
         "blind-spots": { 0: "rgba(52,152,219,0)",  0.3: "rgba(52,152,219,0.3)",  0.6: "rgba(52,152,219,0.6)",  1: "#3498db" },
         "abandoned":   { 0: "rgba(142,68,173,0)",  0.3: "rgba(142,68,173,0.3)",  0.6: "rgba(142,68,173,0.6)",  1: "#8e44ad" },
         "unlit":       { 0: "rgba(243,156,18,0)",  0.3: "rgba(243,156,18,0.3)",  0.6: "rgba(243,156,18,0.6)",  1: "#f39c12" }
@@ -234,10 +232,9 @@
 
     // ── Stats ───────────────────────────────────────────────
     function updateStats() {
-        var counts = { "crime": 0, "blind-spots": 0, "abandoned": 0, "unlit": 0 };
+        var counts = { "blind-spots": 0, "abandoned": 0, "unlit": 0 };
         mapPoints.forEach(function (p) { if (counts.hasOwnProperty(p.category)) counts[p.category]++; });
 
-        document.getElementById("count-crime").textContent = counts["crime"];
         document.getElementById("count-blind-spots").textContent = counts["blind-spots"];
         document.getElementById("count-abandoned").textContent = counts["abandoned"];
         document.getElementById("count-unlit").textContent = counts["unlit"];
@@ -959,7 +956,6 @@
             btn.classList.toggle("active", btn.getAttribute("data-cat") === selectedCategory);
         });
 
-        updatePhotoSectionVisibility();
         buildPhotoPicker();
         addOverlay.classList.remove("hidden");
     }
@@ -974,21 +970,12 @@
     });
 
     // Category selector
-    var photoSection = document.getElementById("photo-section");
-
-    function updatePhotoSectionVisibility() {
-        if (photoSection) {
-            photoSection.style.display = selectedCategory === "crime" ? "none" : "";
-        }
-    }
-
     document.querySelectorAll(".cat-btn").forEach(function (btn) {
         btn.addEventListener("click", function () {
             selectedCategory = this.getAttribute("data-cat");
             document.querySelectorAll(".cat-btn").forEach(function (b) {
                 b.classList.toggle("active", b.getAttribute("data-cat") === selectedCategory);
             });
-            updatePhotoSectionVisibility();
             buildPhotoPicker();
         });
     });
@@ -1084,7 +1071,7 @@
             address_kz: addressKz,
             description_ru: document.getElementById("add-desc-ru").value.trim(),
             description_kz: document.getElementById("add-desc-kz").value.trim(),
-            photos: selectedCategory === "crime" ? [] : selectedPhotos.slice()
+            photos: selectedPhotos.slice()
         };
 
         savePoint(newPoint);
