@@ -112,9 +112,10 @@
             var data = buildHeatDataByCategory(cat);
             if (data.length === 0) return;
             heatLayers[cat] = L.heatLayer(data, {
-                radius: 30,
-                blur: 20,
-                maxZoom: 17,
+                radius: 35,
+                blur: 25,
+                max: 1.0,
+                minOpacity: 0.4,
                 gradient: HEAT_GRADIENTS[cat]
             }).addTo(map);
         });
