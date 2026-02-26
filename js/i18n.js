@@ -68,7 +68,28 @@ var I18N = {
 
         // Drag
         drag_saved: "Координаты обновлены",
-        admin_bar_hint_drag: "АДМИН: нажмите на карту чтобы добавить точку · перетаскивайте маркеры для корректировки"
+        admin_bar_hint_drag: "АДМИН: нажмите на карту чтобы добавить точку · перетаскивайте маркеры для корректировки",
+
+        // Citizen feedback
+        suggest_btn: "Предложить точку",
+        suggest_title: "Предложить проблемную точку",
+        suggest_hint: "Нажмите на карту, чтобы указать место",
+        suggest_name: "Ваше имя:",
+        suggest_contact: "Телефон или e-mail:",
+        suggest_category: "Категория:",
+        suggest_desc: "Описание проблемы:",
+        suggest_submit: "Отправить предложение",
+        suggest_success: "Спасибо! Ваше предложение отправлено на рассмотрение.",
+        suggest_pick_location: "Укажите место на карте",
+        suggest_pending: "На рассмотрении",
+        suggest_pending_count: "Предложения:",
+        suggest_from: "От:",
+        suggest_contact_label: "Контакт:",
+        suggest_approve: "Одобрить",
+        suggest_reject: "Отклонить",
+        suggest_approve_photos: "Прикрепите фото перед одобрением:",
+        suggest_no_pending: "Нет предложений на рассмотрении",
+        suggest_confirm_reject: "Отклонить это предложение?"
     },
     kz: {
         // Header
@@ -136,7 +157,28 @@ var I18N = {
 
         // Drag
         drag_saved: "Координаттар жаңартылды",
-        admin_bar_hint_drag: "ӘКІМШІ: нүкте қосу үшін картаны басыңыз · маркерлерді түзету үшін сүйреңіз"
+        admin_bar_hint_drag: "ӘКІМШІ: нүкте қосу үшін картаны басыңыз · маркерлерді түзету үшін сүйреңіз",
+
+        // Citizen feedback
+        suggest_btn: "Нүкте ұсыну",
+        suggest_title: "Проблемалық нүктені ұсыну",
+        suggest_hint: "Орынды белгілеу үшін картаны басыңыз",
+        suggest_name: "Сіздің атыңыз:",
+        suggest_contact: "Телефон немесе e-mail:",
+        suggest_category: "Санат:",
+        suggest_desc: "Мәселенің сипаттамасы:",
+        suggest_submit: "Ұсынысты жіберу",
+        suggest_success: "Рахмет! Сіздің ұсынысыңыз қарауға жіберілді.",
+        suggest_pick_location: "Картадан орынды көрсетіңіз",
+        suggest_pending: "Қарауда",
+        suggest_pending_count: "Ұсыныстар:",
+        suggest_from: "Кімнен:",
+        suggest_contact_label: "Байланыс:",
+        suggest_approve: "Мақұлдау",
+        suggest_reject: "Қабылдамау",
+        suggest_approve_photos: "Мақұлдау алдында фото тіркеңіз:",
+        suggest_no_pending: "Қаралатын ұсыныстар жоқ",
+        suggest_confirm_reject: "Бұл ұсынысты қабылдамау керек пе?"
     }
 };
 

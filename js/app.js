@@ -395,6 +395,9 @@
             closeModal();
             closeLoginModal();
             closeAddModal();
+            closeSuggestModal();
+            closeSuggestionViewModal();
+            cancelSuggestPicking();
             closeMobileSidebar();
         }
     });
@@ -518,6 +521,306 @@
     document.getElementById("admin-exit-btn").addEventListener("click", exitAdmin);
 
     // ═══════════════════════════════════════════════════════
+    //  CITIZEN FEEDBACK: SUGGEST A POINT
+    // ═══════════════════════════════════════════════════════
+    var suggestOverlay = document.getElementById("suggest-overlay");
+    var suggestCoords  = document.getElementById("suggest-coords");
+    var suggestSubmit  = document.getElementById("suggest-submit");
+    var suggestBtn     = document.getElementById("suggest-btn");
+    var isSuggestPicking = false;
+    var suggestLat = 0, suggestLng = 0;
+    var suggestCategory = "blind-spots";
+
+    // Gray marker layer for pending suggestions
+    var pendingLayer = L.markerClusterGroup({
+        maxClusterRadius: 40,
+        spiderfyOnMaxZoom: true,
+        showCoverageOnHover: false
+    });
+    map.addLayer(pendingLayer);
+    var pendingMarkers = [];
+
+    function createPendingIcon() {
+        return L.divIcon({
+            className: "custom-marker",
+            html: '<div class="marker-pin pending"></div>',
+            iconSize: [16, 16],
+            iconAnchor: [8, 8]
+        });
+    }
+
+    function buildPendingMarkers() {
+        pendingMarkers.forEach(function (m) { pendingLayer.removeLayer(m); });
+        pendingMarkers = [];
+
+        mapSuggestions.forEach(function (s) {
+            var marker = L.marker([s.lat, s.lng], {
+                icon: createPendingIcon(),
+                draggable: false
+            });
+            marker._suggestionData = s;
+
+            marker.on("click", function () {
+                if (isAdmin) {
+                    openSuggestionViewModal(s);
+                }
+            });
+
+            marker.bindTooltip(
+                (s.description || "").substring(0, 50) + (s.description && s.description.length > 50 ? "…" : ""),
+                { direction: "top", offset: [0, -12], className: "marker-tooltip" }
+            );
+
+            pendingLayer.addLayer(marker);
+            pendingMarkers.push(marker);
+        });
+
+        updatePendingCount();
+    }
+
+    function updatePendingCount() {
+        var el = document.getElementById("count-pending");
+        if (el) el.textContent = mapSuggestions.length;
+    }
+
+    onSuggestionsChanged(buildPendingMarkers);
+
+    // Suggest button click → enable map picking mode
+    suggestBtn.addEventListener("click", function () {
+        if (isSuggestPicking) {
+            cancelSuggestPicking();
+            return;
+        }
+        isSuggestPicking = true;
+        suggestBtn.classList.add("picking");
+        suggestBtn.textContent = t("suggest_pick_location");
+        map.getContainer().style.cursor = "crosshair";
+        closeMobileSidebar();
+    });
+
+    function cancelSuggestPicking() {
+        isSuggestPicking = false;
+        suggestBtn.classList.remove("picking");
+        suggestBtn.textContent = t("suggest_btn");
+        if (!isAdmin) map.getContainer().style.cursor = "";
+    }
+
+    // Category buttons in suggest form
+    document.querySelectorAll("#suggest-cat-selector .cat-btn").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+            suggestCategory = this.getAttribute("data-cat");
+            document.querySelectorAll("#suggest-cat-selector .cat-btn").forEach(function (b) {
+                b.classList.toggle("active", b.getAttribute("data-cat") === suggestCategory);
+            });
+        });
+    });
+
+    function openSuggestModal() {
+        suggestCoords.textContent = suggestLat.toFixed(4) + ", " + suggestLng.toFixed(4);
+        document.getElementById("suggest-name").value = "";
+        document.getElementById("suggest-contact").value = "";
+        document.getElementById("suggest-desc").value = "";
+        suggestCategory = "blind-spots";
+        document.querySelectorAll("#suggest-cat-selector .cat-btn").forEach(function (b) {
+            b.classList.toggle("active", b.getAttribute("data-cat") === "blind-spots");
+        });
+        suggestSubmit.disabled = false;
+        suggestOverlay.classList.remove("hidden");
+    }
+
+    function closeSuggestModal() {
+        suggestOverlay.classList.add("hidden");
+    }
+
+    document.getElementById("suggest-close").addEventListener("click", closeSuggestModal);
+    suggestOverlay.addEventListener("click", function (e) {
+        if (e.target === suggestOverlay) closeSuggestModal();
+    });
+
+    // Submit suggestion
+    suggestSubmit.addEventListener("click", function () {
+        var name = document.getElementById("suggest-name").value.trim();
+        var contact = document.getElementById("suggest-contact").value.trim();
+        var desc = document.getElementById("suggest-desc").value.trim();
+
+        if (!name) { document.getElementById("suggest-name").focus(); return; }
+        if (!contact) { document.getElementById("suggest-contact").focus(); return; }
+        if (!desc) { document.getElementById("suggest-desc").focus(); return; }
+
+        var suggestion = {
+            id: getNextSuggestionId(),
+            lat: suggestLat,
+            lng: suggestLng,
+            category: suggestCategory,
+            name: name,
+            contact: contact,
+            description: desc,
+            created: new Date().toISOString()
+        };
+
+        saveSuggestion(suggestion);
+        closeSuggestModal();
+
+        // Show success toast
+        var toast = document.createElement("div");
+        toast.className = "suggest-toast";
+        toast.textContent = t("suggest_success");
+        document.body.appendChild(toast);
+        setTimeout(function () { toast.remove(); }, 3500);
+    });
+
+    // ── Admin: View & approve suggestion ─────────────────────
+    var suggViewOverlay = document.getElementById("suggestion-view-overlay");
+    var suggViewTitle   = document.getElementById("suggestion-view-title");
+    var suggViewBadge   = document.getElementById("suggestion-view-badge");
+    var suggViewInfo    = document.getElementById("suggestion-view-info");
+    var suggViewDesc    = document.getElementById("suggestion-view-desc");
+    var suggApproveSection = document.getElementById("suggestion-approve-section");
+    var suggPhotoPicker = document.getElementById("suggestion-photo-picker");
+    var currentSuggestion = null;
+    var suggestionSelectedPhotos = [];
+
+    function openSuggestionViewModal(s) {
+        currentSuggestion = s;
+        suggestionSelectedPhotos = [];
+
+        suggViewTitle.textContent = t("suggest_pending") + " #" + s.id;
+
+        var catInfo = CATEGORIES[s.category];
+        if (catInfo) {
+            suggViewBadge.textContent = t(catInfo.badgeKey);
+            suggViewBadge.className = s.category;
+        } else {
+            suggViewBadge.textContent = s.category;
+            suggViewBadge.className = "";
+        }
+
+        suggViewInfo.innerHTML =
+            "<strong>" + t("suggest_from") + "</strong> " + escapeHtml(s.name) + "<br>" +
+            "<strong>" + t("suggest_contact_label") + "</strong> " + escapeHtml(s.contact) + "<br>" +
+            "<strong>" + s.lat.toFixed(4) + ", " + s.lng.toFixed(4) + "</strong>";
+
+        suggViewDesc.textContent = s.description || "";
+
+        // Build photo picker for approval
+        if (isAdmin) {
+            suggApproveSection.classList.remove("hidden");
+            buildSuggestionPhotoPicker(s.category);
+        } else {
+            suggApproveSection.classList.add("hidden");
+        }
+
+        suggViewOverlay.classList.remove("hidden");
+    }
+
+    function closeSuggestionViewModal() {
+        suggViewOverlay.classList.add("hidden");
+        currentSuggestion = null;
+    }
+
+    document.getElementById("suggestion-view-close").addEventListener("click", closeSuggestionViewModal);
+    suggViewOverlay.addEventListener("click", function (e) {
+        if (e.target === suggViewOverlay) closeSuggestionViewModal();
+    });
+
+    function escapeHtml(str) {
+        var div = document.createElement("div");
+        div.textContent = str;
+        return div.innerHTML;
+    }
+
+    function buildSuggestionPhotoPicker(category) {
+        suggPhotoPicker.innerHTML = "";
+        suggestionSelectedPhotos = [];
+
+        var usedPhotos = getUsedPhotos();
+        var filtered = AVAILABLE_PHOTOS.filter(function (photo) {
+            return photo.category === category;
+        });
+
+        filtered.forEach(function (photo) {
+            var item = document.createElement("label");
+            item.className = "photo-pick-item";
+            if (usedPhotos[photo.file]) item.classList.add("used");
+
+            var checkbox = document.createElement("input");
+            checkbox.type = "checkbox";
+            checkbox.value = photo.file;
+            checkbox.addEventListener("change", function () {
+                if (this.checked) {
+                    suggestionSelectedPhotos.push(photo.file);
+                    item.classList.add("selected");
+                } else {
+                    suggestionSelectedPhotos = suggestionSelectedPhotos.filter(function (f) { return f !== photo.file; });
+                    item.classList.remove("selected");
+                }
+            });
+
+            var thumb = document.createElement("img");
+            thumb.src = photo.file;
+            thumb.alt = currentLang === "kz" ? photo.label_kz : photo.label_ru;
+            thumb.loading = "lazy";
+
+            var label = document.createElement("span");
+            label.className = "photo-pick-label";
+            var labelText = currentLang === "kz" ? photo.label_kz : photo.label_ru;
+            if (usedPhotos[photo.file]) labelText += " ✓";
+            label.textContent = labelText;
+
+            item.appendChild(checkbox);
+            item.appendChild(thumb);
+            item.appendChild(label);
+            suggPhotoPicker.appendChild(item);
+        });
+
+        if (filtered.length === 0) {
+            var empty = document.createElement("p");
+            empty.style.cssText = "color:#8892b0;font-size:13px;padding:8px 0;";
+            empty.textContent = currentLang === "kz"
+                ? "Бұл санат үшін фото жоқ"
+                : "Нет фото для этой категории";
+            suggPhotoPicker.appendChild(empty);
+        }
+    }
+
+    // Approve suggestion → create real point + delete suggestion
+    document.getElementById("suggestion-approve-btn").addEventListener("click", function () {
+        if (!currentSuggestion) return;
+
+        if (suggestionSelectedPhotos.length === 0) {
+            alert(t("suggest_approve_photos"));
+            return;
+        }
+
+        var s = currentSuggestion;
+        var newPoint = {
+            id: getNextId(),
+            lat: s.lat,
+            lng: s.lng,
+            category: s.category,
+            title_ru: s.description.substring(0, 60),
+            title_kz: s.description.substring(0, 60),
+            address_ru: s.description.substring(0, 60),
+            address_kz: s.description.substring(0, 60),
+            description_ru: s.description + "\n\n" + t("suggest_from") + " " + s.name + " (" + s.contact + ")",
+            description_kz: s.description + "\n\n" + t("suggest_from") + " " + s.name + " (" + s.contact + ")",
+            photos: suggestionSelectedPhotos.slice()
+        };
+
+        savePoint(newPoint);
+        deleteSuggestion(s.id);
+        closeSuggestionViewModal();
+    });
+
+    // Reject suggestion → delete
+    document.getElementById("suggestion-reject-btn").addEventListener("click", function () {
+        if (!currentSuggestion) return;
+        if (!confirm(t("suggest_confirm_reject"))) return;
+        deleteSuggestion(currentSuggestion.id);
+        closeSuggestionViewModal();
+    });
+
+    // ═══════════════════════════════════════════════════════
     //  ADMIN: ADD POINT (click on map)
     // ═══════════════════════════════════════════════════════
     var addOverlay = document.getElementById("add-overlay");
@@ -526,8 +829,15 @@
     var selectedCategory = "blind-spots";
     var selectedPhotos = [];
 
-    // Map click → open add form
+    // Map click → citizen suggest pick OR admin add
     map.on("click", function (e) {
+        if (isSuggestPicking) {
+            suggestLat = Math.round(e.latlng.lat * 10000) / 10000;
+            suggestLng = Math.round(e.latlng.lng * 10000) / 10000;
+            cancelSuggestPicking();
+            openSuggestModal();
+            return;
+        }
         if (!isAdmin) return;
         pendingLat = Math.round(e.latlng.lat * 10000) / 10000;
         pendingLng = Math.round(e.latlng.lng * 10000) / 10000;

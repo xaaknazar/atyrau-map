@@ -140,3 +140,82 @@ function getNextId() {
     });
     return max + 1;
 }
+
+// ══════════════════════════════════════════════════════════════
+//  Suggestions (citizen feedback) — same storage pattern
+// ══════════════════════════════════════════════════════════════
+
+var mapSuggestions = [];
+var suggestionsRef = null;
+var _suggestionsListeners = [];
+
+function onSuggestionsChanged(fn) {
+    _suggestionsListeners.push(fn);
+}
+
+function _notifySuggestionsListeners() {
+    _suggestionsListeners.forEach(function (fn) { fn(); });
+}
+
+if (useFirebase) {
+    suggestionsRef = db.ref("suggestions");
+    suggestionsRef.on("value", function (snapshot) {
+        var data = snapshot.val();
+        mapSuggestions = [];
+        if (data) {
+            Object.keys(data).forEach(function (key) {
+                mapSuggestions.push(data[key]);
+            });
+        }
+        _notifySuggestionsListeners();
+    });
+} else {
+    var SUGGESTIONS_KEY = "atyrau-map-suggestions";
+
+    function _loadSuggestions() {
+        var saved = localStorage.getItem(SUGGESTIONS_KEY);
+        if (saved) {
+            try { return JSON.parse(saved); } catch (e) { /* corrupted */ }
+        }
+        return [];
+    }
+
+    mapSuggestions = _loadSuggestions();
+    setTimeout(function () { _notifySuggestionsListeners(); }, 0);
+}
+
+/** Save a new suggestion */
+function saveSuggestion(suggestion) {
+    if (useFirebase) {
+        suggestionsRef.child(String(suggestion.id)).set(suggestion);
+    } else {
+        var idx = mapSuggestions.findIndex(function (s) { return s.id === suggestion.id; });
+        if (idx !== -1) {
+            mapSuggestions[idx] = suggestion;
+        } else {
+            mapSuggestions.push(suggestion);
+        }
+        localStorage.setItem(SUGGESTIONS_KEY, JSON.stringify(mapSuggestions));
+        _notifySuggestionsListeners();
+    }
+}
+
+/** Delete a suggestion by id */
+function deleteSuggestion(id) {
+    if (useFirebase) {
+        suggestionsRef.child(String(id)).remove();
+    } else {
+        mapSuggestions = mapSuggestions.filter(function (s) { return s.id !== id; });
+        localStorage.setItem(SUGGESTIONS_KEY, JSON.stringify(mapSuggestions));
+        _notifySuggestionsListeners();
+    }
+}
+
+/** Get next suggestion id */
+function getNextSuggestionId() {
+    var max = 0;
+    mapSuggestions.forEach(function (s) {
+        if (s.id > max) max = s.id;
+    });
+    return max + 1;
+}
