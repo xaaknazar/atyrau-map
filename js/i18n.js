@@ -89,7 +89,10 @@ var I18N = {
         suggest_reject: "Отклонить",
         suggest_approve_photos: "Прикрепите фото перед одобрением:",
         suggest_no_pending: "Нет предложений на рассмотрении",
-        suggest_confirm_reject: "Отклонить это предложение?"
+        suggest_confirm_reject: "Отклонить это предложение?",
+        suggest_list_btn: "Предложения",
+        suggest_list_title: "Предложения от граждан",
+        suggest_show_on_map: "На карте"
     },
     kz: {
         // Header
@@ -178,7 +181,10 @@ var I18N = {
         suggest_reject: "Қабылдамау",
         suggest_approve_photos: "Мақұлдау алдында фото тіркеңіз:",
         suggest_no_pending: "Қаралатын ұсыныстар жоқ",
-        suggest_confirm_reject: "Бұл ұсынысты қабылдамау керек пе?"
+        suggest_confirm_reject: "Бұл ұсынысты қабылдамау керек пе?",
+        suggest_list_btn: "Ұсыныстар",
+        suggest_list_title: "Азаматтардан ұсыныстар",
+        suggest_show_on_map: "Картада"
     }
 };
 

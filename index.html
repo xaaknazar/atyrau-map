@@ -145,6 +145,7 @@
     <!-- Admin mode indicator on map -->
     <div id="admin-bar" class="hidden">
         <span data-i18n="admin_bar_hint">АДМИН: нажмите на карту чтобы добавить точку</span>
+        <button id="admin-suggestions-btn" data-i18n="suggest_list_btn">Предложения (<span id="admin-pending-count">0</span>)</button>
         <button id="admin-exit-btn" data-i18n="admin_exit">Выйти</button>
     </div>
 
@@ -268,6 +269,15 @@
         </div>
     </div>
 
+    <!-- Admin: suggestions list modal -->
+    <div id="suggestions-list-overlay" class="hidden">
+        <div id="suggestions-list-modal">
+            <button id="suggestions-list-close" aria-label="Закрыть">&times;</button>
+            <h2 data-i18n="suggest_list_title">Предложения от граждан</h2>
+            <div id="suggestions-list"></div>
+        </div>
+    </div>
+
     <!-- Admin: view suggestion modal -->
     <div id="suggestion-view-overlay" class="hidden">
         <div id="suggestion-view-modal">
@@ -296,6 +306,7 @@
     <script src="js/firebase-config.js"></script>
     <script src="js/i18n.js"></script>
     <script src="js/photos.js"></script>
+    <script src="js/crime-points.js"></script>
     <script src="js/data.js"></script>
     <script src="js/app.js"></script>
 </body>

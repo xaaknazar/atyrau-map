@@ -397,6 +397,7 @@
             closeAddModal();
             closeSuggestModal();
             closeSuggestionViewModal();
+            closeSuggestionsList();
             cancelSuggestPicking();
             closeMobileSidebar();
         }
@@ -819,6 +820,104 @@
         deleteSuggestion(currentSuggestion.id);
         closeSuggestionViewModal();
     });
+
+    // ═══════════════════════════════════════════════════════
+    //  ADMIN: SUGGESTIONS LIST
+    // ═══════════════════════════════════════════════════════
+    var suggestionsListOverlay = document.getElementById("suggestions-list-overlay");
+    var suggestionsListEl = document.getElementById("suggestions-list");
+    var adminSuggestionsBtn = document.getElementById("admin-suggestions-btn");
+    var adminPendingCount = document.getElementById("admin-pending-count");
+
+    function updateAdminPendingCount() {
+        if (adminPendingCount) adminPendingCount.textContent = mapSuggestions.length;
+    }
+
+    onSuggestionsChanged(updateAdminPendingCount);
+
+    adminSuggestionsBtn.addEventListener("click", function () {
+        openSuggestionsList();
+    });
+
+    function openSuggestionsList() {
+        buildSuggestionsList();
+        suggestionsListOverlay.classList.remove("hidden");
+    }
+
+    function closeSuggestionsList() {
+        suggestionsListOverlay.classList.add("hidden");
+    }
+
+    document.getElementById("suggestions-list-close").addEventListener("click", closeSuggestionsList);
+    suggestionsListOverlay.addEventListener("click", function (e) {
+        if (e.target === suggestionsListOverlay) closeSuggestionsList();
+    });
+
+    function buildSuggestionsList() {
+        suggestionsListEl.innerHTML = "";
+
+        if (mapSuggestions.length === 0) {
+            var empty = document.createElement("div");
+            empty.className = "suggestions-empty";
+            empty.textContent = t("suggest_no_pending");
+            suggestionsListEl.appendChild(empty);
+            return;
+        }
+
+        // Sort by date (newest first)
+        var sorted = mapSuggestions.slice().sort(function (a, b) {
+            return (b.created || "").localeCompare(a.created || "");
+        });
+
+        sorted.forEach(function (s) {
+            var item = document.createElement("div");
+            item.className = "suggestion-list-item";
+
+            var catInfo = CATEGORIES[s.category] || { color: "#9e9e9e", badgeKey: s.category };
+            var catLabel = t(catInfo.badgeKey);
+            var dateStr = s.created ? new Date(s.created).toLocaleDateString(currentLang === "kz" ? "kk-KZ" : "ru-RU") : "";
+
+            item.innerHTML =
+                '<div class="suggestion-list-header">' +
+                    '<span class="legend-dot" style="background:' + catInfo.color + ';"></span>' +
+                    '<span class="suggestion-list-cat">' + escapeHtml(catLabel) + '</span>' +
+                    '<span class="suggestion-list-date">' + dateStr + '</span>' +
+                '</div>' +
+                '<div class="suggestion-list-desc">' + escapeHtml(s.description || "") + '</div>' +
+                '<div class="suggestion-list-meta">' +
+                    '<strong>' + t("suggest_from") + '</strong> ' + escapeHtml(s.name || "") +
+                    ' &middot; <strong>' + t("suggest_contact_label") + '</strong> ' + escapeHtml(s.contact || "") +
+                '</div>' +
+                '<div class="suggestion-list-actions">' +
+                    '<button class="sla-map-btn">' + t("suggest_show_on_map") + '</button>' +
+                    '<button class="sla-approve-btn">' + t("suggest_approve") + '</button>' +
+                    '<button class="sla-reject-btn">' + t("suggest_reject") + '</button>' +
+                '</div>';
+
+            // "На карте" button → zoom to suggestion + open view modal
+            item.querySelector(".sla-map-btn").addEventListener("click", function () {
+                closeSuggestionsList();
+                map.setView([s.lat, s.lng], 17);
+                setTimeout(function () { openSuggestionViewModal(s); }, 400);
+            });
+
+            // "Одобрить" → zoom to suggestion + open view modal (with photo picker)
+            item.querySelector(".sla-approve-btn").addEventListener("click", function () {
+                closeSuggestionsList();
+                map.setView([s.lat, s.lng], 17);
+                setTimeout(function () { openSuggestionViewModal(s); }, 400);
+            });
+
+            // "Отклонить" → reject directly
+            item.querySelector(".sla-reject-btn").addEventListener("click", function () {
+                if (!confirm(t("suggest_confirm_reject"))) return;
+                deleteSuggestion(s.id);
+                buildSuggestionsList(); // rebuild list
+            });
+
+            suggestionsListEl.appendChild(item);
+        });
+    }
 
     // ═══════════════════════════════════════════════════════
     //  ADMIN: ADD POINT (click on map)
