@@ -19,12 +19,21 @@
     }
 
     // ── Map init ────────────────────────────────────────────
+    // Atyrau center + ~50 km bounding box
+    var ATYRAU_CENTER = [47.1067, 51.9203];
+    var ATYRAU_BOUNDS = L.latLngBounds(
+        [46.65, 51.30],   // юго-запад (~50 км)
+        [47.56, 52.54]    // северо-восток (~50 км)
+    );
+
     var map = L.map("map", {
-        center: [47.1067, 51.9203],
+        center: ATYRAU_CENTER,
         zoom: 14,
         zoomControl: false,
         maxZoom: 18,
-        minZoom: 11
+        minZoom: 11,
+        maxBounds: ATYRAU_BOUNDS,
+        maxBoundsViscosity: 1.0
     });
 
     L.control.zoom({ position: "bottomright" }).addTo(map);
