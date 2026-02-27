@@ -41,27 +41,35 @@ if (typeof FIREBASE_CONFIG !== "undefined" &&
 
 if (useFirebase) {
     // ── One-time migration: clear all old points ─────────────
-    var DATA_VERSION = 2;
+    var DATA_VERSION = 3;
     var metaRef = db.ref("_meta/data_version");
-    metaRef.once("value", function (snap) {
-        if (snap.val() !== DATA_VERSION) {
-            pointsRef.set(null);
-            db.ref("suggestions").set(null);
-            metaRef.set(DATA_VERSION);
-            console.log("[data] Очистка: все старые точки удалены (v" + DATA_VERSION + ")");
-        }
-    });
+    var migrationDone = false;
 
-    // ── Firebase: real-time listener ──────────────────────────
-    pointsRef.on("value", function (snapshot) {
-        var data = snapshot.val();
-        mapPoints = [];
-        if (data) {
-            Object.keys(data).forEach(function (key) {
-                mapPoints.push(data[key]);
+    metaRef.once("value").then(function (snap) {
+        if (snap.val() !== DATA_VERSION) {
+            console.log("[data] Запуск миграции v" + DATA_VERSION + " — удаление всех точек...");
+            return Promise.all([
+                pointsRef.remove(),
+                db.ref("suggestions").remove()
+            ]).then(function () {
+                return metaRef.set(DATA_VERSION);
+            }).then(function () {
+                console.log("[data] Миграция v" + DATA_VERSION + " завершена — все точки удалены");
             });
         }
-        _notifyListeners();
+    }).then(function () {
+        migrationDone = true;
+        // Start listener only AFTER migration is complete
+        pointsRef.on("value", function (snapshot) {
+            var data = snapshot.val();
+            mapPoints = [];
+            if (data) {
+                Object.keys(data).forEach(function (key) {
+                    mapPoints.push(data[key]);
+                });
+            }
+            _notifyListeners();
+        });
     });
 
 } else {
