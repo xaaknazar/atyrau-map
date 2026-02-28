@@ -26,6 +26,12 @@ var I18N = {
         // Footer
         footer_hint: "Нажмите на точку для подробной информации",
 
+        // Search
+        search_placeholder: "Поиск улицы...",
+        search_loading: "Поиск...",
+        search_no_results: "Ничего не найдено",
+        search_error: "Ошибка поиска",
+
         // Modal category badges
         badge_crime: "Преступность",
         badge_blind: "Слепая зона",
@@ -121,6 +127,12 @@ var I18N = {
         // Footer
         footer_hint: "Толық ақпарат алу үшін нүктені басыңыз",
 
+        // Search
+        search_placeholder: "Көше іздеу...",
+        search_loading: "Іздеу...",
+        search_no_results: "Ештеңе табылмады",
+        search_error: "Іздеу қатесі",
+
         // Modal category badges
         badge_crime: "Қылмыс",
         badge_blind: "Соқыр аймақ",
@@ -204,6 +216,13 @@ function setLanguage(lang) {
         var key = el.getAttribute("data-i18n");
         if (I18N[lang] && I18N[lang][key]) {
             el.textContent = I18N[lang][key];
+        }
+    });
+
+    document.querySelectorAll("[data-i18n-placeholder]").forEach(function (el) {
+        var key = el.getAttribute("data-i18n-placeholder");
+        if (I18N[lang] && I18N[lang][key]) {
+            el.placeholder = I18N[lang][key];
         }
     });
 

@@ -314,6 +314,117 @@ body {
 }
 
 /* ═══════════════════════════════════════════════════════════
+   SEARCH BAR
+   ═══════════════════════════════════════════════════════════ */
+#search-bar {
+    position: fixed;
+    top: 16px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1050;
+    width: 380px;
+    max-width: calc(100% - 100px);
+}
+
+#search-wrapper {
+    display: flex;
+    align-items: center;
+    background: #16213e;
+    border: 2px solid rgba(255, 255, 255, 0.12);
+    border-radius: 10px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+    overflow: hidden;
+    transition: border-color 0.2s;
+}
+
+#search-wrapper:focus-within {
+    border-color: #4fc3f7;
+}
+
+.search-icon {
+    margin-left: 12px;
+    color: #6a7394;
+    flex-shrink: 0;
+}
+
+#search-street {
+    flex: 1;
+    padding: 10px 12px;
+    background: transparent;
+    border: none;
+    color: #fff;
+    font-size: 14px;
+    outline: none;
+}
+
+#search-street::placeholder {
+    color: #6a7394;
+}
+
+#search-clear {
+    width: 32px;
+    height: 32px;
+    background: transparent;
+    border: none;
+    color: #8892b0;
+    font-size: 18px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.2s;
+    flex-shrink: 0;
+}
+
+#search-clear:hover { color: #fff; }
+
+#search-results {
+    margin-top: 4px;
+    background: #1e2a47;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+    max-height: 260px;
+    overflow-y: auto;
+}
+
+.search-result-item {
+    padding: 10px 14px;
+    cursor: pointer;
+    transition: background 0.15s;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    font-size: 13px;
+    color: #c0c8e0;
+    line-height: 1.4;
+}
+
+.search-result-item:last-child { border-bottom: none; }
+
+.search-result-item:hover {
+    background: rgba(79, 195, 247, 0.08);
+}
+
+.search-result-item .search-result-type {
+    font-size: 11px;
+    color: #6a7394;
+    margin-top: 2px;
+}
+
+.search-no-results {
+    padding: 14px;
+    text-align: center;
+    color: #6a7394;
+    font-size: 13px;
+}
+
+.search-loading {
+    padding: 14px;
+    text-align: center;
+    color: #8892b0;
+    font-size: 13px;
+}
+
+/* ═══════════════════════════════════════════════════════════
    MAP CONTROLS (Heatmap + Tile Switcher)
    ═══════════════════════════════════════════════════════════ */
 #map-controls {
@@ -425,6 +536,7 @@ body {
     box-shadow: 0 2px 16px rgba(0, 0, 0, 0.5), 0 0 20px rgba(0, 0, 0, 0.3);
 }
 
+.marker-pin.search-pin  { background: #4fc3f7; border-color: #e1f5fe; width: 20px; height: 20px; box-shadow: 0 0 16px rgba(79,195,247,0.6); }
 .marker-pin.crime       { background: #e74c3c; border-color: #ffcdd2; }
 .marker-pin.blind-spots { background: #3498db; border-color: #bbdefb; }
 .marker-pin.abandoned   { background: #8e44ad; border-color: #e1bee7; }
@@ -1424,6 +1536,16 @@ body {
         gap: 8px;
         text-align: center;
         white-space: normal;
+    }
+
+    /* ── Search bar responsive ── */
+    #search-bar {
+        top: 12px;
+        left: 70px;
+        transform: none;
+        width: auto;
+        right: 60px;
+        max-width: none;
     }
 
     /* ── Map controls responsive ── */

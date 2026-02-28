@@ -273,6 +273,128 @@
     setLanguage(currentLang);
 
     // ═══════════════════════════════════════════════════════
+    //  STREET SEARCH (Nominatim geocoder)
+    // ═══════════════════════════════════════════════════════
+    var searchInput   = document.getElementById("search-street");
+    var searchResults = document.getElementById("search-results");
+    var searchClear   = document.getElementById("search-clear");
+    var searchTimer   = null;
+    var searchMarker  = null;
+
+    searchInput.addEventListener("input", function () {
+        var q = searchInput.value.trim();
+        searchClear.classList.toggle("hidden", q.length === 0);
+
+        clearTimeout(searchTimer);
+        if (q.length < 2) {
+            searchResults.classList.add("hidden");
+            return;
+        }
+
+        searchTimer = setTimeout(function () { doSearch(q); }, 400);
+    });
+
+    searchClear.addEventListener("click", function () {
+        searchInput.value = "";
+        searchResults.classList.add("hidden");
+        searchClear.classList.add("hidden");
+        removeSearchMarker();
+    });
+
+    function doSearch(query) {
+        searchResults.innerHTML = '<div class="search-loading">' + t("search_loading") + '</div>';
+        searchResults.classList.remove("hidden");
+
+        var url = "https://nominatim.openstreetmap.org/search" +
+            "?q=" + encodeURIComponent(query + ", Атырау") +
+            "&format=json&addressdetails=1&limit=6" +
+            "&viewbox=51.30,47.56,52.54,46.65&bounded=1" +
+            "&accept-language=" + (currentLang === "kz" ? "kk" : "ru");
+
+        fetch(url, {
+            headers: { "Accept": "application/json" }
+        })
+        .then(function (res) { return res.json(); })
+        .then(function (data) {
+            renderSearchResults(data);
+        })
+        .catch(function () {
+            searchResults.innerHTML = '<div class="search-no-results">' + t("search_error") + '</div>';
+        });
+    }
+
+    function renderSearchResults(data) {
+        searchResults.innerHTML = "";
+
+        if (!data || data.length === 0) {
+            searchResults.innerHTML = '<div class="search-no-results">' + t("search_no_results") + '</div>';
+            searchResults.classList.remove("hidden");
+            return;
+        }
+
+        data.forEach(function (item) {
+            var div = document.createElement("div");
+            div.className = "search-result-item";
+
+            var name = item.display_name || "";
+            // Remove ", Атырау облысы, Қазақстан" etc. from the end to shorten
+            name = name.replace(/,\s*(Atyrau Region|Атырауская область|Атырау облысы|Kazakhstan|Казахстан|Қазақстан)\s*/gi, "");
+
+            div.innerHTML = name +
+                '<div class="search-result-type">' + (item.type || "").replace(/_/g, " ") + '</div>';
+
+            div.addEventListener("click", function () {
+                var lat = parseFloat(item.lat);
+                var lng = parseFloat(item.lon);
+                map.setView([lat, lng], 17);
+                placeSearchMarker(lat, lng, name);
+                searchResults.classList.add("hidden");
+                searchInput.value = name;
+            });
+
+            searchResults.appendChild(div);
+        });
+
+        searchResults.classList.remove("hidden");
+    }
+
+    function placeSearchMarker(lat, lng, label) {
+        removeSearchMarker();
+        searchMarker = L.marker([lat, lng], {
+            icon: L.divIcon({
+                className: "custom-marker",
+                html: '<div class="marker-pin search-pin"></div>',
+                iconSize: [20, 20],
+                iconAnchor: [10, 10]
+            })
+        }).addTo(map);
+        searchMarker.bindTooltip(label, {
+            direction: "top", offset: [0, -14], className: "marker-tooltip", permanent: true
+        }).openTooltip();
+    }
+
+    function removeSearchMarker() {
+        if (searchMarker) {
+            map.removeLayer(searchMarker);
+            searchMarker = null;
+        }
+    }
+
+    // Close results on click outside
+    document.addEventListener("click", function (e) {
+        if (!e.target.closest("#search-bar")) {
+            searchResults.classList.add("hidden");
+        }
+    });
+
+    // Re-open results on focus if there's text
+    searchInput.addEventListener("focus", function () {
+        if (searchInput.value.trim().length >= 2 && searchResults.children.length > 0) {
+            searchResults.classList.remove("hidden");
+        }
+    });
+
+    // ═══════════════════════════════════════════════════════
     //  VIEW MODAL (click on a point)
     // ═══════════════════════════════════════════════════════
     var viewOverlay   = document.getElementById("modal-overlay");
