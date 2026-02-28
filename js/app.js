@@ -78,11 +78,27 @@
     var layers = {};
     var markers = [];
 
+    function createClusterIcon(cat) {
+        var color = CATEGORIES[cat].color;
+        return function (cluster) {
+            var count = cluster.getChildCount();
+            var size = count < 10 ? 36 : count < 50 ? 44 : 52;
+            return L.divIcon({
+                html: '<div style="background:' + color + ';width:' + (size - 10) + 'px;height:' + (size - 10) + 'px;' +
+                    'border-radius:50%;display:flex;align-items:center;justify-content:center;' +
+                    'color:#fff;font-weight:700;font-size:12px;">' + count + '</div>',
+                className: 'cat-cluster cat-cluster-' + cat,
+                iconSize: L.point(size, size)
+            });
+        };
+    }
+
     Object.keys(CATEGORIES).forEach(function (cat) {
         layers[cat] = L.markerClusterGroup({
             maxClusterRadius: 40,
             spiderfyOnMaxZoom: true,
-            showCoverageOnHover: false
+            showCoverageOnHover: false,
+            iconCreateFunction: createClusterIcon(cat)
         });
         map.addLayer(layers[cat]);
     });
@@ -102,18 +118,18 @@
     var heatLayers = {};
     var heatmapActive = false;
 
-    // Each category gets its own gradient from transparent to its color
+    // Each category gets its own smooth gradient
     var HEAT_GRADIENTS = {
-        "crime":       { 0: "rgba(231,76,60,0)",  0.3: "rgba(231,76,60,0.3)",  0.6: "rgba(231,76,60,0.6)",  1: "#e74c3c" },
-        "blind-spots": { 0: "rgba(52,152,219,0)",  0.3: "rgba(52,152,219,0.3)",  0.6: "rgba(52,152,219,0.6)",  1: "#3498db" },
-        "abandoned":   { 0: "rgba(142,68,173,0)",  0.3: "rgba(142,68,173,0.3)",  0.6: "rgba(142,68,173,0.6)",  1: "#8e44ad" },
-        "unlit":       { 0: "rgba(243,156,18,0)",  0.3: "rgba(243,156,18,0.3)",  0.6: "rgba(243,156,18,0.6)",  1: "#f39c12" }
+        "crime":       { 0: "rgba(231,76,60,0)", 0.2: "rgba(231,76,60,0.15)", 0.4: "rgba(231,76,60,0.35)", 0.7: "rgba(255,100,80,0.6)", 1: "#e74c3c" },
+        "blind-spots": { 0: "rgba(52,152,219,0)", 0.2: "rgba(52,152,219,0.15)", 0.4: "rgba(52,152,219,0.35)", 0.7: "rgba(80,180,255,0.6)", 1: "#3498db" },
+        "abandoned":   { 0: "rgba(142,68,173,0)", 0.2: "rgba(142,68,173,0.15)", 0.4: "rgba(142,68,173,0.35)", 0.7: "rgba(170,100,210,0.6)", 1: "#8e44ad" },
+        "unlit":       { 0: "rgba(243,156,18,0)", 0.2: "rgba(243,156,18,0.15)", 0.4: "rgba(243,156,18,0.35)", 0.7: "rgba(255,180,50,0.6)", 1: "#f39c12" }
     };
 
     function buildHeatDataByCategory(cat) {
         return mapPoints
             .filter(function (p) { return p.category === cat; })
-            .map(function (p) { return [p.lat, p.lng, 0.7]; });
+            .map(function (p) { return [p.lat, p.lng, 0.6]; });
     }
 
     function addHeatLayers() {
@@ -121,10 +137,10 @@
             var data = buildHeatDataByCategory(cat);
             if (data.length === 0) return;
             heatLayers[cat] = L.heatLayer(data, {
-                radius: 35,
-                blur: 25,
+                radius: 28,
+                blur: 18,
                 max: 1.0,
-                minOpacity: 0.4,
+                minOpacity: 0.25,
                 gradient: HEAT_GRADIENTS[cat]
             }).addTo(map);
         });

@@ -546,13 +546,22 @@ body {
 .marker-pin.abandoned   { background: #8e44ad; border-color: #e1bee7; }
 .marker-pin.unlit       { background: #f39c12; border-color: #fff3cd; }
 
-/* Clusters */
-.marker-cluster-small     { background-color: rgba(79, 195, 247, 0.3) !important; }
-.marker-cluster-small div { background-color: rgba(79, 195, 247, 0.7) !important; color: #fff !important; font-weight: 600; }
-.marker-cluster-medium      { background-color: rgba(255, 183, 77, 0.3) !important; }
-.marker-cluster-medium div  { background-color: rgba(255, 183, 77, 0.7) !important; color: #fff !important; font-weight: 600; }
-.marker-cluster-large       { background-color: rgba(239, 83, 80, 0.3) !important; }
-.marker-cluster-large div   { background-color: rgba(239, 83, 80, 0.7) !important; color: #fff !important; font-weight: 600; }
+/* Category-colored clusters */
+.cat-cluster {
+    background: transparent !important;
+    border: none !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.cat-cluster div {
+    box-shadow: 0 2px 8px rgba(0,0,0,0.35);
+    border: 2px solid rgba(255,255,255,0.4);
+}
+.cat-cluster-crime div       { background: #e74c3c !important; }
+.cat-cluster-blind-spots div { background: #3498db !important; }
+.cat-cluster-abandoned div   { background: #8e44ad !important; }
+.cat-cluster-unlit div       { background: #f39c12 !important; }
 
 /* ═══════════════════════════════════════════════════════════
    SHARED MODAL STYLES
