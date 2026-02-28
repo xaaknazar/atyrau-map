@@ -92,7 +92,10 @@ var I18N = {
         suggest_confirm_reject: "Отклонить это предложение?",
         suggest_list_btn: "Предложения",
         suggest_list_title: "Предложения от граждан",
-        suggest_show_on_map: "На карте"
+        suggest_show_on_map: "На карте",
+
+        // Admin points management
+        admin_manage_points: "Список точек"
     },
     kz: {
         // Header
@@ -184,7 +187,10 @@ var I18N = {
         suggest_confirm_reject: "Бұл ұсынысты қабылдамау керек пе?",
         suggest_list_btn: "Ұсыныстар",
         suggest_list_title: "Азаматтардан ұсыныстар",
-        suggest_show_on_map: "Картада"
+        suggest_show_on_map: "Картада",
+
+        // Admin points management
+        admin_manage_points: "Нүктелер тізімі"
     }
 };
 

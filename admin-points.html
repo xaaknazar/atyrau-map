@@ -1,0 +1,853 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Управление точками — Атырау</title>
+    <link rel="icon" type="image/png" sizes="192x192" href="images/icon-192x192.png">
+    <meta name="theme-color" content="#16213e">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, sans-serif;
+            background: #1a1a2e;
+            color: #e0e0e0;
+            min-height: 100vh;
+        }
+
+        .hidden { display: none !important; }
+
+        /* ── Header ── */
+        .page-header {
+            background: linear-gradient(135deg, #0f3460, #16213e);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            padding: 20px 32px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .page-header h1 {
+            font-size: 20px;
+            color: #fff;
+            font-weight: 700;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .btn {
+            padding: 8px 18px;
+            border: none;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-back {
+            background: rgba(79, 195, 247, 0.12);
+            border: 1px solid rgba(79, 195, 247, 0.3);
+            color: #4fc3f7;
+        }
+
+        .btn-back:hover { background: rgba(79, 195, 247, 0.25); }
+
+        /* ── Login screen ── */
+        .login-screen {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: calc(100vh - 80px);
+            padding: 20px;
+        }
+
+        .login-box {
+            background: #1e2a47;
+            border-radius: 16px;
+            padding: 36px;
+            width: 380px;
+            max-width: 100%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
+
+        .login-box h2 {
+            color: #fff;
+            font-size: 20px;
+            margin-bottom: 20px;
+        }
+
+        .login-box label {
+            color: #a0a8c0;
+            font-size: 13px;
+            display: block;
+            margin-bottom: 6px;
+        }
+
+        .login-box input {
+            width: 100%;
+            padding: 10px 14px;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 8px;
+            color: #fff;
+            font-size: 15px;
+            outline: none;
+            transition: border-color 0.2s;
+            margin-bottom: 14px;
+        }
+
+        .login-box input:focus { border-color: #4fc3f7; }
+
+        .btn-login {
+            width: 100%;
+            padding: 10px;
+            background: #4fc3f7;
+            border: none;
+            color: #0f3460;
+            font-size: 14px;
+            font-weight: 700;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn-login:hover { background: #81d4fa; }
+
+        .login-error {
+            color: #ef5350;
+            font-size: 13px;
+            text-align: center;
+            margin-top: 10px;
+        }
+
+        /* ── Main content ── */
+        .main-content {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 24px 32px 60px;
+        }
+
+        /* ── Search & Filter bar ── */
+        .toolbar {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .search-input {
+            flex: 1;
+            min-width: 200px;
+            padding: 10px 16px;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 8px;
+            color: #fff;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .search-input:focus { border-color: #4fc3f7; }
+
+        .search-input::placeholder { color: #6a7394; }
+
+        .filter-btn {
+            padding: 8px 16px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            color: #c0c8e0;
+            font-size: 13px;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .filter-btn:hover { background: rgba(255, 255, 255, 0.08); }
+
+        .filter-btn.active {
+            border-color: #4fc3f7;
+            background: rgba(79, 195, 247, 0.1);
+            color: #fff;
+        }
+
+        .filter-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        /* ── Category section ── */
+        .category-section {
+            margin-bottom: 32px;
+        }
+
+        .category-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 14px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        .category-dot {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .category-header h2 {
+            font-size: 18px;
+            color: #fff;
+            font-weight: 700;
+        }
+
+        .category-count {
+            font-size: 13px;
+            color: #8892b0;
+            margin-left: 4px;
+        }
+
+        /* ── Point card ── */
+        .point-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            padding: 18px 20px;
+            margin-bottom: 10px;
+            transition: border-color 0.2s;
+        }
+
+        .point-card:hover {
+            border-color: rgba(255, 255, 255, 0.18);
+        }
+
+        .point-card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .point-id {
+            font-size: 11px;
+            color: #6a7394;
+            font-family: monospace;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 2px 8px;
+            border-radius: 4px;
+        }
+
+        .point-card-actions {
+            display: flex;
+            gap: 6px;
+        }
+
+        .btn-edit {
+            padding: 5px 12px;
+            background: rgba(79, 195, 247, 0.12);
+            border: 1px solid rgba(79, 195, 247, 0.3);
+            color: #4fc3f7;
+            font-size: 12px;
+            font-weight: 600;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn-edit:hover { background: rgba(79, 195, 247, 0.25); }
+
+        .btn-delete {
+            padding: 5px 12px;
+            background: rgba(239, 83, 80, 0.12);
+            border: 1px solid rgba(239, 83, 80, 0.3);
+            color: #ef5350;
+            font-size: 12px;
+            font-weight: 600;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn-delete:hover { background: rgba(239, 83, 80, 0.25); }
+
+        .btn-save {
+            padding: 5px 12px;
+            background: rgba(76, 175, 80, 0.15);
+            border: 1px solid rgba(76, 175, 80, 0.3);
+            color: #66bb6a;
+            font-size: 12px;
+            font-weight: 600;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn-save:hover { background: rgba(76, 175, 80, 0.3); }
+
+        .btn-cancel {
+            padding: 5px 12px;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            color: #a0a8c0;
+            font-size: 12px;
+            font-weight: 600;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn-cancel:hover { background: rgba(255, 255, 255, 0.12); }
+
+        .point-fields {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px 16px;
+        }
+
+        .point-field {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .point-field.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .field-label {
+            font-size: 11px;
+            color: #6a7394;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .field-value {
+            font-size: 14px;
+            color: #c0c8e0;
+            line-height: 1.5;
+        }
+
+        .field-value.empty {
+            color: #4a5070;
+            font-style: italic;
+        }
+
+        /* ── Edit mode ── */
+        .point-card.editing {
+            border-color: rgba(79, 195, 247, 0.3);
+            background: rgba(79, 195, 247, 0.03);
+        }
+
+        .edit-input {
+            width: 100%;
+            padding: 8px 12px;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 6px;
+            color: #fff;
+            font-size: 14px;
+            font-family: inherit;
+            outline: none;
+            transition: border-color 0.2s;
+            resize: vertical;
+        }
+
+        .edit-input:focus { border-color: #4fc3f7; }
+
+        .point-coords {
+            font-size: 12px;
+            color: #6a7394;
+            font-family: monospace;
+            margin-top: 6px;
+        }
+
+        .point-photos {
+            margin-top: 8px;
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .point-photos img {
+            width: 60px;
+            height: 45px;
+            object-fit: cover;
+            border-radius: 6px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* ── Toast ── */
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 12px 28px;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            z-index: 2000;
+            animation: fadeInUp 0.3s ease;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+        }
+
+        .toast.success {
+            background: rgba(76, 175, 80, 0.95);
+            color: #fff;
+        }
+
+        .toast.error {
+            background: rgba(239, 83, 80, 0.95);
+            color: #fff;
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateX(-50%) translateY(10px); }
+            to { opacity: 1; transform: translateX(-50%) translateY(0); }
+        }
+
+        /* ── Empty state ── */
+        .empty-state {
+            text-align: center;
+            padding: 48px 20px;
+            color: #6a7394;
+            font-size: 15px;
+        }
+
+        /* ── Loading ── */
+        .loading {
+            text-align: center;
+            padding: 60px 20px;
+            color: #8892b0;
+            font-size: 15px;
+        }
+
+        .loading::after {
+            content: '';
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(79, 195, 247, 0.3);
+            border-top-color: #4fc3f7;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-left: 10px;
+            vertical-align: middle;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* ── Responsive ── */
+        @media (max-width: 768px) {
+            .page-header {
+                padding: 16px 20px;
+                flex-wrap: wrap;
+                gap: 10px;
+            }
+
+            .page-header h1 { font-size: 17px; }
+
+            .main-content {
+                padding: 16px 16px 60px;
+            }
+
+            .toolbar {
+                flex-direction: column;
+            }
+
+            .search-input { min-width: unset; }
+
+            .point-fields {
+                grid-template-columns: 1fr;
+            }
+
+            .filter-btn { font-size: 12px; padding: 6px 12px; }
+        }
+
+        @media (max-width: 480px) {
+            .point-card { padding: 14px; }
+            .point-card-header { flex-direction: column; align-items: flex-start; gap: 8px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Login screen -->
+    <div id="login-screen" class="login-screen">
+        <div class="login-box">
+            <h2>Вход администратора</h2>
+            <label>Пароль:</label>
+            <input type="password" id="login-password" autocomplete="off" />
+            <button class="btn-login" id="login-btn">Войти</button>
+            <p id="login-error" class="login-error hidden">Неверный пароль</p>
+        </div>
+    </div>
+
+    <!-- Main app (hidden until login) -->
+    <div id="app" class="hidden">
+        <div class="page-header">
+            <h1>Управление точками</h1>
+            <div class="header-actions">
+                <a href="index.html" class="btn btn-back">← На карту</a>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <!-- Toolbar -->
+            <div class="toolbar">
+                <input type="text" class="search-input" id="search-input" placeholder="Поиск по названию, адресу, описанию..." />
+                <button class="filter-btn active" data-filter="all">Все</button>
+                <button class="filter-btn" data-filter="crime">
+                    <span class="filter-dot" style="background:#e74c3c;"></span> Преступность
+                </button>
+                <button class="filter-btn" data-filter="blind-spots">
+                    <span class="filter-dot" style="background:#3498db;"></span> Слепые зоны
+                </button>
+                <button class="filter-btn" data-filter="abandoned">
+                    <span class="filter-dot" style="background:#8e44ad;"></span> Заброшенные
+                </button>
+                <button class="filter-btn" data-filter="unlit">
+                    <span class="filter-dot" style="background:#f39c12;"></span> Неосвещённые
+                </button>
+            </div>
+
+            <!-- Points list container -->
+            <div id="points-container">
+                <div class="loading">Загрузка данных</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
+    <script src="js/firebase-config.js"></script>
+    <script src="js/i18n.js"></script>
+    <script src="js/photos.js"></script>
+    <script src="js/data.js"></script>
+
+    <script>
+    (function () {
+        "use strict";
+
+        var ADMIN_PASSWORD = "prokuratura2025";
+
+        var CATEGORY_META = {
+            "crime":       { color: "#e74c3c", label: "Преступность" },
+            "blind-spots": { color: "#3498db", label: "Слепые зоны (нет камер)" },
+            "abandoned":   { color: "#8e44ad", label: "Заброшенные здания" },
+            "unlit":       { color: "#f39c12", label: "Неосвещённые улицы" }
+        };
+
+        var CATEGORY_ORDER = ["crime", "blind-spots", "abandoned", "unlit"];
+
+        var activeFilter = "all";
+        var searchQuery = "";
+        var editingPointId = null;
+
+        // ── DOM ──
+        var loginScreen = document.getElementById("login-screen");
+        var appEl = document.getElementById("app");
+        var loginBtn = document.getElementById("login-btn");
+        var loginPassword = document.getElementById("login-password");
+        var loginError = document.getElementById("login-error");
+        var searchInput = document.getElementById("search-input");
+        var container = document.getElementById("points-container");
+
+        // ── Login ──
+        function tryLogin() {
+            var pwd = loginPassword.value.trim();
+            if (pwd === ADMIN_PASSWORD) {
+                loginScreen.classList.add("hidden");
+                appEl.classList.remove("hidden");
+                loginError.classList.add("hidden");
+                renderPoints();
+            } else {
+                loginError.classList.remove("hidden");
+            }
+        }
+
+        loginBtn.addEventListener("click", tryLogin);
+        loginPassword.addEventListener("keydown", function (e) {
+            if (e.key === "Enter") tryLogin();
+        });
+
+        // ── Filter buttons ──
+        document.querySelectorAll(".filter-btn").forEach(function (btn) {
+            btn.addEventListener("click", function () {
+                document.querySelectorAll(".filter-btn").forEach(function (b) {
+                    b.classList.remove("active");
+                });
+                btn.classList.add("active");
+                activeFilter = btn.getAttribute("data-filter");
+                renderPoints();
+            });
+        });
+
+        // ── Search ──
+        searchInput.addEventListener("input", function () {
+            searchQuery = searchInput.value.toLowerCase().trim();
+            renderPoints();
+        });
+
+        // ── Data listener ──
+        onDataChanged(function () {
+            renderPoints();
+        });
+
+        // ── Render ──
+        function getFilteredPoints() {
+            var points = mapPoints.slice();
+
+            // Filter by category
+            if (activeFilter !== "all") {
+                points = points.filter(function (p) {
+                    return p.category === activeFilter;
+                });
+            }
+
+            // Filter by search
+            if (searchQuery) {
+                points = points.filter(function (p) {
+                    var haystack = [
+                        p.title_ru, p.title_kz,
+                        p.address_ru, p.address_kz,
+                        p.description_ru, p.description_kz,
+                        String(p.id)
+                    ].join(" ").toLowerCase();
+                    return haystack.indexOf(searchQuery) !== -1;
+                });
+            }
+
+            return points;
+        }
+
+        function groupByCategory(points) {
+            var groups = {};
+            CATEGORY_ORDER.forEach(function (cat) { groups[cat] = []; });
+            points.forEach(function (p) {
+                if (groups[p.category]) {
+                    groups[p.category].push(p);
+                }
+            });
+            return groups;
+        }
+
+        function renderPoints() {
+            var points = getFilteredPoints();
+
+            if (points.length === 0) {
+                container.innerHTML = '<div class="empty-state">Нет точек для отображения</div>';
+                return;
+            }
+
+            var html = "";
+
+            if (activeFilter !== "all") {
+                // Single category — flat list
+                html += renderPointsList(points);
+            } else {
+                // Grouped by category
+                var groups = groupByCategory(points);
+                CATEGORY_ORDER.forEach(function (cat) {
+                    var catPoints = groups[cat];
+                    if (catPoints.length === 0) return;
+                    var meta = CATEGORY_META[cat];
+                    html += '<div class="category-section">';
+                    html += '<div class="category-header">';
+                    html += '<span class="category-dot" style="background:' + meta.color + ';"></span>';
+                    html += '<h2>' + meta.label + '</h2>';
+                    html += '<span class="category-count">(' + catPoints.length + ')</span>';
+                    html += '</div>';
+                    html += renderPointsList(catPoints);
+                    html += '</div>';
+                });
+            }
+
+            container.innerHTML = html;
+            bindCardEvents();
+        }
+
+        function renderPointsList(points) {
+            var html = "";
+            points.forEach(function (p) {
+                var isEditing = editingPointId === p.id;
+                var meta = CATEGORY_META[p.category] || { color: "#888", label: "?" };
+                html += '<div class="point-card' + (isEditing ? ' editing' : '') + '" data-id="' + p.id + '">';
+                html += '<div class="point-card-header">';
+                html += '<span class="point-id">ID: ' + p.id + '</span>';
+                html += '<div class="point-card-actions">';
+                if (isEditing) {
+                    html += '<button class="btn-save" data-action="save" data-id="' + p.id + '">Сохранить</button>';
+                    html += '<button class="btn-cancel" data-action="cancel" data-id="' + p.id + '">Отмена</button>';
+                } else {
+                    html += '<button class="btn-edit" data-action="edit" data-id="' + p.id + '">Редактировать</button>';
+                    html += '<button class="btn-delete" data-action="delete" data-id="' + p.id + '">Удалить</button>';
+                }
+                html += '</div></div>';
+
+                html += '<div class="point-fields">';
+
+                if (isEditing) {
+                    html += renderEditField("title_ru", "Название (рус)", p.title_ru);
+                    html += renderEditField("title_kz", "Название (қаз)", p.title_kz);
+                    html += renderEditField("address_ru", "Адрес (рус)", p.address_ru);
+                    html += renderEditField("address_kz", "Адрес (қаз)", p.address_kz);
+                    html += renderEditTextarea("description_ru", "Описание (рус)", p.description_ru);
+                    html += renderEditTextarea("description_kz", "Описание (қаз)", p.description_kz);
+                } else {
+                    html += renderViewField("Название (рус)", p.title_ru);
+                    html += renderViewField("Название (қаз)", p.title_kz);
+                    html += renderViewField("Адрес (рус)", p.address_ru);
+                    html += renderViewField("Адрес (қаз)", p.address_kz);
+                    html += renderViewField("Описание (рус)", p.description_ru, true);
+                    html += renderViewField("Описание (қаз)", p.description_kz, true);
+                }
+
+                html += '</div>';
+
+                // Coordinates
+                html += '<div class="point-coords">Координаты: ' + (p.lat || "?") + ', ' + (p.lng || "?") + '</div>';
+
+                // Photos
+                if (p.photos && p.photos.length > 0) {
+                    html += '<div class="point-photos">';
+                    p.photos.forEach(function (photo) {
+                        html += '<img src="' + escapeHtml(photo) + '" alt="" loading="lazy" />';
+                    });
+                    html += '</div>';
+                }
+
+                html += '</div>';
+            });
+            return html;
+        }
+
+        function renderViewField(label, value, fullWidth) {
+            var cls = fullWidth ? ' full-width' : '';
+            var display = value ? escapeHtml(value) : '<span class="empty">—</span>';
+            return '<div class="point-field' + cls + '">' +
+                '<span class="field-label">' + label + '</span>' +
+                '<span class="field-value">' + display + '</span>' +
+                '</div>';
+        }
+
+        function renderEditField(name, label, value) {
+            return '<div class="point-field">' +
+                '<span class="field-label">' + label + '</span>' +
+                '<input class="edit-input" data-field="' + name + '" value="' + escapeAttr(value || '') + '" />' +
+                '</div>';
+        }
+
+        function renderEditTextarea(name, label, value) {
+            return '<div class="point-field full-width">' +
+                '<span class="field-label">' + label + '</span>' +
+                '<textarea class="edit-input" data-field="' + name + '" rows="3">' + escapeHtml(value || '') + '</textarea>' +
+                '</div>';
+        }
+
+        function escapeHtml(str) {
+            if (!str) return "";
+            return String(str)
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;");
+        }
+
+        function escapeAttr(str) {
+            return escapeHtml(str);
+        }
+
+        // ── Card events ──
+        function bindCardEvents() {
+            container.querySelectorAll("[data-action]").forEach(function (btn) {
+                btn.addEventListener("click", function (e) {
+                    var action = btn.getAttribute("data-action");
+                    var id = parseInt(btn.getAttribute("data-id"), 10);
+
+                    if (action === "edit") {
+                        editingPointId = id;
+                        renderPoints();
+                    } else if (action === "cancel") {
+                        editingPointId = null;
+                        renderPoints();
+                    } else if (action === "save") {
+                        saveEdits(id);
+                    } else if (action === "delete") {
+                        confirmDelete(id);
+                    }
+                });
+            });
+        }
+
+        function saveEdits(id) {
+            var point = null;
+            for (var i = 0; i < mapPoints.length; i++) {
+                if (mapPoints[i].id === id) { point = mapPoints[i]; break; }
+            }
+            if (!point) return;
+
+            var card = container.querySelector('.point-card[data-id="' + id + '"]');
+            if (!card) return;
+
+            var updated = JSON.parse(JSON.stringify(point));
+            card.querySelectorAll(".edit-input").forEach(function (input) {
+                var field = input.getAttribute("data-field");
+                if (field) {
+                    updated[field] = input.value;
+                }
+            });
+
+            savePoint(updated);
+            editingPointId = null;
+            showToast("Точка обновлена", "success");
+        }
+
+        function confirmDelete(id) {
+            if (confirm("Вы уверены что хотите удалить точку #" + id + "?")) {
+                deletePoint(id);
+                showToast("Точка удалена", "success");
+            }
+        }
+
+        // ── Toast ──
+        function showToast(msg, type) {
+            var existing = document.querySelector(".toast");
+            if (existing) existing.remove();
+
+            var el = document.createElement("div");
+            el.className = "toast " + (type || "success");
+            el.textContent = msg;
+            document.body.appendChild(el);
+            setTimeout(function () { el.remove(); }, 2500);
+        }
+    })();
+    </script>
+
+</body>
+</html>
