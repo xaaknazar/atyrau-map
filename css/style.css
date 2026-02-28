@@ -241,6 +241,10 @@ body {
     color: #ef5350;
 }
 
+.admin-mode #search-bar {
+    top: 60px;
+}
+
 /* ── Sidebar footer ── */
 .sidebar-footer {
     padding: 16px 24px;
