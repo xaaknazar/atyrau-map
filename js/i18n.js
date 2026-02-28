@@ -27,10 +27,11 @@ var I18N = {
         footer_hint: "Нажмите на точку для подробной информации",
 
         // Search
-        search_placeholder: "Поиск улицы...",
+        search_placeholder: "Улица или координаты...",
         search_loading: "Поиск...",
         search_no_results: "Ничего не найдено",
         search_error: "Ошибка поиска",
+        search_coordinates: "Координаты",
 
         // Modal category badges
         badge_crime: "Преступность",
@@ -128,10 +129,11 @@ var I18N = {
         footer_hint: "Толық ақпарат алу үшін нүктені басыңыз",
 
         // Search
-        search_placeholder: "Көше іздеу...",
+        search_placeholder: "Көше немесе координаталар...",
         search_loading: "Іздеу...",
         search_no_results: "Ештеңе табылмады",
         search_error: "Іздеу қатесі",
+        search_coordinates: "Координаталар",
 
         // Modal category badges
         badge_crime: "Қылмыс",

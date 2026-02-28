@@ -301,7 +301,39 @@
         removeSearchMarker();
     });
 
+    function parseCoords(str) {
+        // Match patterns like "47.146437, 51.9359" or "47.146437 51.9359"
+        var m = str.match(/^\s*(-?\d+\.?\d*)\s*[,;\s]\s*(-?\d+\.?\d*)\s*$/);
+        if (!m) return null;
+        var a = parseFloat(m[1]), b = parseFloat(m[2]);
+        if (isNaN(a) || isNaN(b)) return null;
+        // Determine which is lat and which is lng based on Atyrau area
+        // Lat ~47, Lng ~52
+        if (a >= 40 && a <= 56 && b >= 40 && b <= 60) return { lat: a, lng: b };
+        if (b >= 40 && b <= 56 && a >= 40 && a <= 60) return { lat: b, lng: a };
+        return null;
+    }
+
     function doSearch(query) {
+        // Check if input looks like coordinates
+        var coords = parseCoords(query);
+        if (coords) {
+            var label = coords.lat.toFixed(6) + ", " + coords.lng.toFixed(6);
+            searchResults.innerHTML = "";
+            var div = document.createElement("div");
+            div.className = "search-result-item";
+            div.innerHTML = label + '<div class="search-result-type">' + t("search_coordinates") + '</div>';
+            div.addEventListener("click", function () {
+                map.setView([coords.lat, coords.lng], 17);
+                placeSearchMarker(coords.lat, coords.lng, label);
+                searchResults.classList.add("hidden");
+                searchInput.value = label;
+            });
+            searchResults.appendChild(div);
+            searchResults.classList.remove("hidden");
+            return;
+        }
+
         searchResults.innerHTML = '<div class="search-loading">' + t("search_loading") + '</div>';
         searchResults.classList.remove("hidden");
 
