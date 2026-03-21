@@ -2,7 +2,7 @@
     "use strict";
 
     // ── Config ──────────────────────────────────────────────
-    var ADMIN_PASSWORD = "prokuratura2025";
+    var ADMIN_PASSWORD = "YOUR_ADMIN_PASSWORD";
 
     var CATEGORIES = {
         "crime":       { color: "#e74c3c", badgeKey: "badge_crime" },
