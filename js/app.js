@@ -2,7 +2,7 @@
     "use strict";
 
     // ── Config ──────────────────────────────────────────────
-    var ADMIN_PASSWORD = "prokuratura2025";
+    var ADMIN_PASSWORD = "YOUR_ADMIN_PASSWORD";
 
     var CATEGORIES = {
         "crime":       { color: "#e74c3c", badgeKey: "badge_crime" },
@@ -19,12 +19,21 @@
     }
 
     // ── Map init ────────────────────────────────────────────
+    // Atyrau center + ~50 km bounding box
+    var ATYRAU_CENTER = [47.1067, 51.9203];
+    var ATYRAU_BOUNDS = L.latLngBounds(
+        [46.65, 51.30],   // юго-запад (~50 км)
+        [47.56, 52.54]    // северо-восток (~50 км)
+    );
+
     var map = L.map("map", {
-        center: [47.1067, 51.9203],
+        center: ATYRAU_CENTER,
         zoom: 14,
         zoomControl: false,
         maxZoom: 18,
-        minZoom: 11
+        minZoom: 11,
+        maxBounds: ATYRAU_BOUNDS,
+        maxBoundsViscosity: 1.0
     });
 
     L.control.zoom({ position: "bottomright" }).addTo(map);
@@ -69,11 +78,27 @@
     var layers = {};
     var markers = [];
 
+    function createClusterIcon(cat) {
+        var color = CATEGORIES[cat].color;
+        return function (cluster) {
+            var count = cluster.getChildCount();
+            var size = count < 10 ? 36 : count < 50 ? 44 : 52;
+            return L.divIcon({
+                html: '<div style="background:' + color + ';width:' + (size - 10) + 'px;height:' + (size - 10) + 'px;' +
+                    'border-radius:50%;display:flex;align-items:center;justify-content:center;' +
+                    'color:#fff;font-weight:700;font-size:12px;">' + count + '</div>',
+                className: 'cat-cluster cat-cluster-' + cat,
+                iconSize: L.point(size, size)
+            });
+        };
+    }
+
     Object.keys(CATEGORIES).forEach(function (cat) {
         layers[cat] = L.markerClusterGroup({
             maxClusterRadius: 40,
             spiderfyOnMaxZoom: true,
-            showCoverageOnHover: false
+            showCoverageOnHover: false,
+            iconCreateFunction: createClusterIcon(cat)
         });
         map.addLayer(layers[cat]);
     });
@@ -93,18 +118,18 @@
     var heatLayers = {};
     var heatmapActive = false;
 
-    // Each category gets its own gradient from transparent to its color
+    // Each category gets its own smooth gradient
     var HEAT_GRADIENTS = {
-        "crime":       { 0: "rgba(231,76,60,0)",  0.3: "rgba(231,76,60,0.3)",  0.6: "rgba(231,76,60,0.6)",  1: "#e74c3c" },
-        "blind-spots": { 0: "rgba(52,152,219,0)",  0.3: "rgba(52,152,219,0.3)",  0.6: "rgba(52,152,219,0.6)",  1: "#3498db" },
-        "abandoned":   { 0: "rgba(142,68,173,0)",  0.3: "rgba(142,68,173,0.3)",  0.6: "rgba(142,68,173,0.6)",  1: "#8e44ad" },
-        "unlit":       { 0: "rgba(243,156,18,0)",  0.3: "rgba(243,156,18,0.3)",  0.6: "rgba(243,156,18,0.6)",  1: "#f39c12" }
+        "crime":       { 0: "rgba(231,76,60,0)", 0.2: "rgba(231,76,60,0.15)", 0.4: "rgba(231,76,60,0.35)", 0.7: "rgba(255,100,80,0.6)", 1: "#e74c3c" },
+        "blind-spots": { 0: "rgba(52,152,219,0)", 0.2: "rgba(52,152,219,0.15)", 0.4: "rgba(52,152,219,0.35)", 0.7: "rgba(80,180,255,0.6)", 1: "#3498db" },
+        "abandoned":   { 0: "rgba(142,68,173,0)", 0.2: "rgba(142,68,173,0.15)", 0.4: "rgba(142,68,173,0.35)", 0.7: "rgba(170,100,210,0.6)", 1: "#8e44ad" },
+        "unlit":       { 0: "rgba(243,156,18,0)", 0.2: "rgba(243,156,18,0.15)", 0.4: "rgba(243,156,18,0.35)", 0.7: "rgba(255,180,50,0.6)", 1: "#f39c12" }
     };
 
     function buildHeatDataByCategory(cat) {
         return mapPoints
             .filter(function (p) { return p.category === cat; })
-            .map(function (p) { return [p.lat, p.lng, 0.7]; });
+            .map(function (p) { return [p.lat, p.lng, 0.6]; });
     }
 
     function addHeatLayers() {
@@ -112,10 +137,10 @@
             var data = buildHeatDataByCategory(cat);
             if (data.length === 0) return;
             heatLayers[cat] = L.heatLayer(data, {
-                radius: 35,
-                blur: 25,
+                radius: 28,
+                blur: 18,
                 max: 1.0,
-                minOpacity: 0.4,
+                minOpacity: 0.25,
                 gradient: HEAT_GRADIENTS[cat]
             }).addTo(map);
         });
@@ -262,6 +287,160 @@
         });
     });
     setLanguage(currentLang);
+
+    // ═══════════════════════════════════════════════════════
+    //  STREET SEARCH (Nominatim geocoder)
+    // ═══════════════════════════════════════════════════════
+    var searchInput   = document.getElementById("search-street");
+    var searchResults = document.getElementById("search-results");
+    var searchClear   = document.getElementById("search-clear");
+    var searchTimer   = null;
+    var searchMarker  = null;
+
+    searchInput.addEventListener("input", function () {
+        var q = searchInput.value.trim();
+        searchClear.classList.toggle("hidden", q.length === 0);
+
+        clearTimeout(searchTimer);
+        if (q.length < 2) {
+            searchResults.classList.add("hidden");
+            return;
+        }
+
+        searchTimer = setTimeout(function () { doSearch(q); }, 400);
+    });
+
+    searchClear.addEventListener("click", function () {
+        searchInput.value = "";
+        searchResults.classList.add("hidden");
+        searchClear.classList.add("hidden");
+        removeSearchMarker();
+    });
+
+    function parseCoords(str) {
+        // Match patterns like "47.146437, 51.9359" or "47.146437 51.9359"
+        var m = str.match(/^\s*(-?\d+\.?\d*)\s*[,;\s]\s*(-?\d+\.?\d*)\s*$/);
+        if (!m) return null;
+        var a = parseFloat(m[1]), b = parseFloat(m[2]);
+        if (isNaN(a) || isNaN(b)) return null;
+        // Determine which is lat and which is lng based on Atyrau area
+        // Lat ~47, Lng ~52
+        if (a >= 40 && a <= 56 && b >= 40 && b <= 60) return { lat: a, lng: b };
+        if (b >= 40 && b <= 56 && a >= 40 && a <= 60) return { lat: b, lng: a };
+        return null;
+    }
+
+    function doSearch(query) {
+        // Check if input looks like coordinates
+        var coords = parseCoords(query);
+        if (coords) {
+            var label = coords.lat.toFixed(6) + ", " + coords.lng.toFixed(6);
+            searchResults.innerHTML = "";
+            var div = document.createElement("div");
+            div.className = "search-result-item";
+            div.innerHTML = label + '<div class="search-result-type">' + t("search_coordinates") + '</div>';
+            div.addEventListener("click", function () {
+                map.setView([coords.lat, coords.lng], 17);
+                placeSearchMarker(coords.lat, coords.lng, label);
+                searchResults.classList.add("hidden");
+                searchInput.value = label;
+            });
+            searchResults.appendChild(div);
+            searchResults.classList.remove("hidden");
+            return;
+        }
+
+        searchResults.innerHTML = '<div class="search-loading">' + t("search_loading") + '</div>';
+        searchResults.classList.remove("hidden");
+
+        var url = "https://nominatim.openstreetmap.org/search" +
+            "?q=" + encodeURIComponent(query + ", Атырау") +
+            "&format=json&addressdetails=1&limit=6" +
+            "&viewbox=51.30,47.56,52.54,46.65&bounded=1" +
+            "&accept-language=" + (currentLang === "kz" ? "kk" : "ru");
+
+        fetch(url, {
+            headers: { "Accept": "application/json" }
+        })
+        .then(function (res) { return res.json(); })
+        .then(function (data) {
+            renderSearchResults(data);
+        })
+        .catch(function () {
+            searchResults.innerHTML = '<div class="search-no-results">' + t("search_error") + '</div>';
+        });
+    }
+
+    function renderSearchResults(data) {
+        searchResults.innerHTML = "";
+
+        if (!data || data.length === 0) {
+            searchResults.innerHTML = '<div class="search-no-results">' + t("search_no_results") + '</div>';
+            searchResults.classList.remove("hidden");
+            return;
+        }
+
+        data.forEach(function (item) {
+            var div = document.createElement("div");
+            div.className = "search-result-item";
+
+            var name = item.display_name || "";
+            // Remove ", Атырау облысы, Қазақстан" etc. from the end to shorten
+            name = name.replace(/,\s*(Atyrau Region|Атырауская область|Атырау облысы|Kazakhstan|Казахстан|Қазақстан)\s*/gi, "");
+
+            div.innerHTML = name +
+                '<div class="search-result-type">' + (item.type || "").replace(/_/g, " ") + '</div>';
+
+            div.addEventListener("click", function () {
+                var lat = parseFloat(item.lat);
+                var lng = parseFloat(item.lon);
+                map.setView([lat, lng], 17);
+                placeSearchMarker(lat, lng, name);
+                searchResults.classList.add("hidden");
+                searchInput.value = name;
+            });
+
+            searchResults.appendChild(div);
+        });
+
+        searchResults.classList.remove("hidden");
+    }
+
+    function placeSearchMarker(lat, lng, label) {
+        removeSearchMarker();
+        searchMarker = L.marker([lat, lng], {
+            icon: L.divIcon({
+                className: "custom-marker",
+                html: '<div class="marker-pin search-pin"></div>',
+                iconSize: [20, 20],
+                iconAnchor: [10, 10]
+            })
+        }).addTo(map);
+        searchMarker.bindTooltip(label, {
+            direction: "top", offset: [0, -14], className: "marker-tooltip", permanent: true
+        }).openTooltip();
+    }
+
+    function removeSearchMarker() {
+        if (searchMarker) {
+            map.removeLayer(searchMarker);
+            searchMarker = null;
+        }
+    }
+
+    // Close results on click outside
+    document.addEventListener("click", function (e) {
+        if (!e.target.closest("#search-bar")) {
+            searchResults.classList.add("hidden");
+        }
+    });
+
+    // Re-open results on focus if there's text
+    searchInput.addEventListener("focus", function () {
+        if (searchInput.value.trim().length >= 2 && searchResults.children.length > 0) {
+            searchResults.classList.remove("hidden");
+        }
+    });
 
     // ═══════════════════════════════════════════════════════
     //  VIEW MODAL (click on a point)

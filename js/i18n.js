@@ -26,6 +26,13 @@ var I18N = {
         // Footer
         footer_hint: "Нажмите на точку для подробной информации",
 
+        // Search
+        search_placeholder: "Улица или координаты...",
+        search_loading: "Поиск...",
+        search_no_results: "Ничего не найдено",
+        search_error: "Ошибка поиска",
+        search_coordinates: "Координаты",
+
         // Modal category badges
         badge_crime: "Преступность",
         badge_blind: "Слепая зона",
@@ -92,7 +99,10 @@ var I18N = {
         suggest_confirm_reject: "Отклонить это предложение?",
         suggest_list_btn: "Предложения",
         suggest_list_title: "Предложения от граждан",
-        suggest_show_on_map: "На карте"
+        suggest_show_on_map: "На карте",
+
+        // Admin points management
+        admin_manage_points: "Список точек"
     },
     kz: {
         // Header
@@ -117,6 +127,13 @@ var I18N = {
 
         // Footer
         footer_hint: "Толық ақпарат алу үшін нүктені басыңыз",
+
+        // Search
+        search_placeholder: "Көше немесе координаталар...",
+        search_loading: "Іздеу...",
+        search_no_results: "Ештеңе табылмады",
+        search_error: "Іздеу қатесі",
+        search_coordinates: "Координаталар",
 
         // Modal category badges
         badge_crime: "Қылмыс",
@@ -184,7 +201,10 @@ var I18N = {
         suggest_confirm_reject: "Бұл ұсынысты қабылдамау керек пе?",
         suggest_list_btn: "Ұсыныстар",
         suggest_list_title: "Азаматтардан ұсыныстар",
-        suggest_show_on_map: "Картада"
+        suggest_show_on_map: "Картада",
+
+        // Admin points management
+        admin_manage_points: "Нүктелер тізімі"
     }
 };
 
@@ -198,6 +218,13 @@ function setLanguage(lang) {
         var key = el.getAttribute("data-i18n");
         if (I18N[lang] && I18N[lang][key]) {
             el.textContent = I18N[lang][key];
+        }
+    });
+
+    document.querySelectorAll("[data-i18n-placeholder]").forEach(function (el) {
+        var key = el.getAttribute("data-i18n-placeholder");
+        if (I18N[lang] && I18N[lang][key]) {
+            el.placeholder = I18N[lang][key];
         }
     });
 

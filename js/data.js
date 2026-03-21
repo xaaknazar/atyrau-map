@@ -4,7 +4,7 @@
  * Если нет — fallback на localStorage (только для локального тестирования).
  */
 
-var DEFAULT_POINTS = (typeof CRIME_POINTS !== "undefined") ? CRIME_POINTS : [];
+var DEFAULT_POINTS = [];
 
 // ══════════════════════════════════════════════════════════════
 //  Storage layer — Firebase (cloud) or localStorage (fallback)
@@ -40,63 +40,37 @@ if (typeof FIREBASE_CONFIG !== "undefined" &&
 }
 
 if (useFirebase) {
-    // ── Firebase: real-time listener ──────────────────────────
-    pointsRef.on("value", function (snapshot) {
-        var data = snapshot.val();
-        if (data) {
-            // Firebase stores as object {id: point}, convert to array
-            mapPoints = [];
-            Object.keys(data).forEach(function (key) {
-                mapPoints.push(data[key]);
+    // ── One-time migration: clear all old points ─────────────
+    var DATA_VERSION = 3;
+    var metaRef = db.ref("_meta/data_version");
+    var migrationDone = false;
+
+    metaRef.once("value").then(function (snap) {
+        if (snap.val() !== DATA_VERSION) {
+            console.log("[data] Запуск миграции v" + DATA_VERSION + " — удаление всех точек...");
+            return Promise.all([
+                pointsRef.remove(),
+                db.ref("suggestions").remove()
+            ]).then(function () {
+                return metaRef.set(DATA_VERSION);
+            }).then(function () {
+                console.log("[data] Миграция v" + DATA_VERSION + " завершена — все точки удалены");
             });
-            // Merge any missing default points (e.g. new crime data)
-            _mergeMissingDefaults(data);
-        } else {
-            // Database empty — seed with default points
-            _seedFirebase();
-            return; // the set() will trigger this listener again
         }
-        _notifyListeners();
+    }).then(function () {
+        migrationDone = true;
+        // Start listener only AFTER migration is complete
+        pointsRef.on("value", function (snapshot) {
+            var data = snapshot.val();
+            mapPoints = [];
+            if (data) {
+                Object.keys(data).forEach(function (key) {
+                    mapPoints.push(data[key]);
+                });
+            }
+            _notifyListeners();
+        });
     });
-
-    function _mergeMissingDefaults(existingData) {
-        if (!DEFAULT_POINTS.length) return;
-        var batch = {};
-        var count = 0;
-        DEFAULT_POINTS.forEach(function (p) {
-            if (!existingData[p.id]) {
-                batch[p.id] = p;
-                count++;
-            }
-        });
-        if (count > 0) {
-            pointsRef.update(batch);
-            console.log("[data] Добавлено " + count + " новых точек из DEFAULT_POINTS");
-        }
-    }
-
-    function _seedFirebase() {
-        // First try to migrate data from localStorage (includes admin-added points)
-        var STORAGE_KEY = "atyrau-map-points";
-        var localData = null;
-        try {
-            var saved = localStorage.getItem(STORAGE_KEY);
-            if (saved) localData = JSON.parse(saved);
-        } catch (e) { /* ignore */ }
-
-        var source = (localData && localData.length) ? localData : DEFAULT_POINTS;
-        var batch = {};
-        source.forEach(function (p) {
-            batch[p.id] = p;
-        });
-        pointsRef.set(batch).then(function () {
-            // Clear localStorage after successful migration
-            if (localData && localData.length) {
-                localStorage.removeItem(STORAGE_KEY);
-                console.log("[data] localStorage → Firebase: перенесено " + source.length + " точек");
-            }
-        });
-    }
 
 } else {
     // ── localStorage fallback ─────────────────────────────────
@@ -104,15 +78,11 @@ if (useFirebase) {
 
     var STORAGE_KEY = "atyrau-map-points";
 
-    function _loadLocal() {
-        var saved = localStorage.getItem(STORAGE_KEY);
-        if (saved) {
-            try { return JSON.parse(saved); } catch (e) { /* corrupted */ }
-        }
-        return JSON.parse(JSON.stringify(DEFAULT_POINTS));
-    }
+    // Clear old localStorage data
+    localStorage.removeItem(STORAGE_KEY);
+    localStorage.removeItem("atyrau-map-suggestions");
 
-    mapPoints = _loadLocal();
+    mapPoints = [];
 
     // Notify after app.js has had a chance to register its listener
     setTimeout(function () { _notifyListeners(); }, 0);
