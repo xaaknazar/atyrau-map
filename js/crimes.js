@@ -34,7 +34,13 @@
 //  Конфигурация
 // ══════════════════════════════════════════════════════════════
 
-// Ссылка на опубликованную Google таблицу (CSV формат)
+// Google Apps Script web app — возвращает JSON с координатами
+var CRIMES_API_URL =
+    "https://script.google.com/macros/s/" +
+    "AKfycbz9Q5pkCGFgOZJbrxb_peozbGT9Kr8sj4VEa-0U46lh3g5Xw6DGOTis2tEfTQFBUagj" +
+    "/exec";
+
+// Резервная ссылка — CSV из таблицы (без координат, на случай если API недоступен)
 var CRIMES_SHEET_CSV_URL =
     "https://docs.google.com/spreadsheets/d/e/" +
     "2PACX-1vRdNcnBVsk8JV3lsjicAt9erR4jAmaq8Pj4AsC5eIcqGqR_q3OLkU2Eujn9eG99WEdzMUzA1OEHf7wE" +
@@ -175,8 +181,87 @@ function csvRowToCrime(cols, idx) {
 //  Загрузка данных из Google Sheets
 // ══════════════════════════════════════════════════════════════
 
-function loadCrimesFromSheet(callback) {
-    console.log("[crimes] Загрузка данных из Google Sheets...");
+/**
+ * Конвертировать JSON-объект (строку из Apps Script) в объект инцидента.
+ * Apps Script может вернуть массив объектов с ключами-заголовками
+ * или массив массивов (как CSV).
+ */
+function jsonRowToCrime(row, idx) {
+    // Если row — массив (array of arrays формат)
+    if (Array.isArray(row)) {
+        return csvRowToCrime(row, idx);
+    }
+
+    // Если row — объект с ключами
+    return {
+        id: idx + 1,
+        erdr: row["1.Номер ЕРДР"] || row["erdr"] || row["ЕРДР"] || "",
+        regDate: parseDateToISO(row["1.Дата-время регистрации"] || row["regDate"] || ""),
+        organ: row["2.Орган регистрации"] || row["organ"] || "",
+        kuiNumber: row["4.Номер КУИ"] || row["kuiNumber"] || "",
+        kuiDate: row["4.Дата-время регистрации в КУИ"] || row["kuiDate"] || "",
+        crimeDate: parseDateToISO(row["9.Дата совершения"] || row["crimeDate"] || ""),
+        crimeTime: row["9.время совершения"] || row["crimeTime"] || "",
+        description: row["9.1 Описание преступления/проступка"] || row["description"] || "",
+        article: row["10.Квалификация"] || row["article"] || "",
+        articlePart: row["10.Квалификация п.п."] || row["articlePart"] || "",
+        placeType: row["29.Место совершения"] || row["placeType"] || "",
+        isPublic: (row["29.1.Общественное место"] || row["isPublic"] || "").toString().toLowerCase().indexOf("общественное") !== -1,
+        oblast: row["31.Место совершения Область"] || row["oblast"] || "",
+        district: row["31.Место совершения Район"] || row["district"] || "",
+        city: row["31.Место совершения Населенный пункт"] || row["city"] || "",
+        street: row["31.Место совершения Улица"] || row["street"] || "",
+        house: row["31.Место совершения Дом"] || row["house"] || "",
+        building: row["31.Место совершения Корпус"] || row["building"] || "",
+        apartment: row["31.Место совершения Квартира"] || row["apartment"] || "",
+        lat: parseFloat(row["Широта"] || row["lat"]) || null,
+        lng: parseFloat(row["Долгота"] || row["lng"]) || null
+    };
+}
+
+/**
+ * Загрузить из Apps Script API (JSON с координатами).
+ */
+function _loadFromAPI(callback) {
+    console.log("[crimes] Загрузка из Apps Script API...");
+
+    fetch(CRIMES_API_URL)
+        .then(function (resp) {
+            if (!resp.ok) throw new Error("HTTP " + resp.status);
+            return resp.json();
+        })
+        .then(function (data) {
+            // data может быть: { data: [...] } или просто [...]
+            var rows = Array.isArray(data) ? data : (data.data || data.rows || []);
+
+            if (rows.length === 0) {
+                throw new Error("API вернул пустые данные");
+            }
+
+            crimeIncidents = [];
+            for (var i = 0; i < rows.length; i++) {
+                var crime = jsonRowToCrime(rows[i], i);
+                if (crime.erdr) {
+                    crimeIncidents.push(crime);
+                }
+            }
+
+            console.log("[crimes] Загружено из API: " + crimeIncidents.length);
+            _saveCrimesCache();
+            callback();
+        })
+        .catch(function (err) {
+            console.warn("[crimes] API недоступен:", err.message);
+            // Fallback на CSV
+            _loadFromCSV(callback);
+        });
+}
+
+/**
+ * Загрузить из CSV (резервный вариант).
+ */
+function _loadFromCSV(callback) {
+    console.log("[crimes] Загрузка из CSV (резервный)...");
 
     fetch(CRIMES_SHEET_CSV_URL)
         .then(function (resp) {
@@ -186,34 +271,32 @@ function loadCrimesFromSheet(callback) {
         .then(function (csv) {
             var rows = parseCSV(csv);
             if (rows.length < 2) {
-                console.warn("[crimes] Таблица пуста или не удалось распарсить");
+                console.warn("[crimes] Таблица пуста");
                 _tryLoadFromCache();
                 callback();
                 return;
             }
 
-            // Первая строка — заголовки, пропускаем
             crimeIncidents = [];
             for (var i = 1; i < rows.length; i++) {
                 var cols = rows[i];
-                // Пропускаем строки без номера ЕРДР
                 if (!cols[1] || cols[1].trim() === "") continue;
                 crimeIncidents.push(csvRowToCrime(cols, i - 1));
             }
 
-            console.log("[crimes] Загружено записей: " + crimeIncidents.length);
-
-            // Кэшируем данные на случай оффлайна
+            console.log("[crimes] Загружено из CSV: " + crimeIncidents.length);
             _saveCrimesCache();
-
             callback();
         })
         .catch(function (err) {
-            console.warn("[crimes] Ошибка загрузки таблицы:", err.message);
-            console.log("[crimes] Пробуем загрузить из кэша...");
+            console.warn("[crimes] CSV тоже недоступен:", err.message);
             _tryLoadFromCache();
             callback();
         });
+}
+
+function loadCrimesFromSheet(callback) {
+    _loadFromAPI(callback);
 }
 
 function _saveCrimesCache() {
