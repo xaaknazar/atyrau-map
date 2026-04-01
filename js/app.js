@@ -316,6 +316,7 @@
         var filtered = filterCrimesByPeriod(currentCrimePeriod);
 
         filtered.forEach(function (crime) {
+            if (!crime.lat || !crime.lng) return;
             var marker = L.marker([crime.lat, crime.lng], {
                 icon: createCrimeMarkerIcon()
             });
@@ -390,8 +391,11 @@
         if (e.target === this) this.classList.add("hidden");
     });
 
-    // Build crime markers on load
-    buildCrimeMarkers();
+    // Геокодировать адреса, затем показать маркеры
+    geocodeAllCrimes(function () {
+        _crimeGeoReady = true;
+        buildCrimeMarkers();
+    });
 
     // ── Language switch ─────────────────────────────────────
     document.querySelectorAll(".lang-btn").forEach(function (btn) {

@@ -1,25 +1,9 @@
 /**
  * Данные о зарегистрированных правонарушениях (ЕРДР).
  *
- * Каждая запись содержит:
- *   erdr        — номер ЕРДР
- *   regDate     — дата-время регистрации (ISO)
- *   organ       — орган регистрации
- *   crimeDate   — дата совершения (ISO)
- *   crimeTime   — время совершения (строка)
- *   description — описание преступления/проступка
- *   article     — квалификация (статья)
- *   articlePart — п.п. квалификации
- *   placeType   — место совершения (тип)
- *   isPublic    — общественное место (да/нет)
- *   oblast      — область
- *   district    — район
- *   city        — населённый пункт
- *   street      — улица
- *   house       — дом
- *   building    — корпус
- *   apartment   — квартира
- *   lat, lng    — координаты (геокодированные)
+ * Координаты (lat/lng) определяются автоматически через Nominatim
+ * по полям адреса (oblast, district, city, street, house).
+ * Результаты геокодирования кэшируются в localStorage.
  */
 
 var crimeIncidents = [
@@ -41,9 +25,7 @@ var crimeIncidents = [
         street: "3",
         house: "24",
         building: "",
-        apartment: "",
-        lat: 47.0875,
-        lng: 51.8650
+        apartment: ""
     },
     {
         id: 2,
@@ -63,9 +45,7 @@ var crimeIncidents = [
         street: "",
         house: "",
         building: "",
-        apartment: "",
-        lat: 47.1067,
-        lng: 51.9203
+        apartment: ""
     },
     {
         id: 3,
@@ -85,9 +65,7 @@ var crimeIncidents = [
         street: "АЗАТТЫҚ",
         house: "2",
         building: "",
-        apartment: "",
-        lat: 47.1172,
-        lng: 51.9198
+        apartment: ""
     },
     {
         id: 4,
@@ -107,9 +85,7 @@ var crimeIncidents = [
         street: "УӘЛИ ЖАЙЫҚОВ",
         house: "13/1",
         building: "",
-        apartment: "",
-        lat: 47.0419,
-        lng: 53.0677
+        apartment: ""
     },
     {
         id: 5,
@@ -129,9 +105,7 @@ var crimeIncidents = [
         street: "",
         house: "",
         building: "1",
-        apartment: "",
-        lat: 47.0460,
-        lng: 51.8770
+        apartment: ""
     },
     {
         id: 6,
@@ -151,9 +125,7 @@ var crimeIncidents = [
         street: "АВАНГАРД-3",
         house: "76",
         building: "",
-        apartment: "21",
-        lat: 47.1215,
-        lng: 51.9520
+        apartment: "21"
     },
     {
         id: 7,
@@ -173,9 +145,7 @@ var crimeIncidents = [
         street: "",
         house: "",
         building: "",
-        apartment: "",
-        lat: 47.2300,
-        lng: 53.1200
+        apartment: ""
     },
     {
         id: 8,
@@ -195,9 +165,7 @@ var crimeIncidents = [
         street: "АХТАН КЕРЕЙҰЛЫ",
         house: "1",
         building: "",
-        apartment: "",
-        lat: 47.0670,
-        lng: 53.3610
+        apartment: ""
     },
     {
         id: 9,
@@ -217,9 +185,7 @@ var crimeIncidents = [
         street: "№3",
         house: "17",
         building: "",
-        apartment: "",
-        lat: 47.0930,
-        lng: 51.8560
+        apartment: ""
     },
     {
         id: 10,
@@ -239,9 +205,7 @@ var crimeIncidents = [
         street: "Молдагулова",
         house: "102",
         building: "",
-        apartment: "",
-        lat: 47.1005,
-        lng: 51.9115
+        apartment: ""
     },
     {
         id: 11,
@@ -261,9 +225,7 @@ var crimeIncidents = [
         street: "1",
         house: "2",
         building: "",
-        apartment: "",
-        lat: 47.1145,
-        lng: 51.9280
+        apartment: ""
     },
     {
         id: 12,
@@ -283,9 +245,7 @@ var crimeIncidents = [
         street: "№3",
         house: "17",
         building: "",
-        apartment: "",
-        lat: 47.0932,
-        lng: 51.8558
+        apartment: ""
     },
     {
         id: 13,
@@ -305,9 +265,7 @@ var crimeIncidents = [
         street: "№16",
         house: "4",
         building: "",
-        apartment: "",
-        lat: 47.0880,
-        lng: 51.9310
+        apartment: ""
     },
     {
         id: 14,
@@ -327,9 +285,7 @@ var crimeIncidents = [
         street: "Шайхы Әбішев",
         house: "1",
         building: "",
-        apartment: "",
-        lat: 46.8530,
-        lng: 51.6350
+        apartment: ""
     },
     {
         id: 15,
@@ -349,9 +305,7 @@ var crimeIncidents = [
         street: "ӘБДІРЕШ ДӘУЛЕТОВ",
         house: "5",
         building: "",
-        apartment: "",
-        lat: 47.1030,
-        lng: 51.9050
+        apartment: ""
     },
     {
         id: 16,
@@ -371,19 +325,244 @@ var crimeIncidents = [
         street: "",
         house: "",
         building: "",
-        apartment: "",
-        lat: 47.1219,
-        lng: 51.8213
+        apartment: ""
     }
 ];
+
+// ══════════════════════════════════════════════════════════════
+//  Автоматическое геокодирование адресов через Nominatim
+// ══════════════════════════════════════════════════════════════
+
+var GEOCODE_CACHE_KEY = "atyrau-crime-geocode-cache";
+var _geocodeCache = {};
+var _crimeGeoReady = false;
+var _crimeGeoCallbacks = [];
+
+/** Вызывается когда все координаты определены */
+function onCrimesGeoReady(fn) {
+    if (_crimeGeoReady) { fn(); return; }
+    _crimeGeoCallbacks.push(fn);
+}
+
+function _notifyCrimeGeoReady() {
+    _crimeGeoReady = true;
+    _crimeGeoCallbacks.forEach(function (fn) { fn(); });
+}
+
+/** Загрузить кэш из localStorage */
+function _loadGeoCache() {
+    try {
+        var saved = localStorage.getItem(GEOCODE_CACHE_KEY);
+        if (saved) _geocodeCache = JSON.parse(saved);
+    } catch (e) { /* ignore */ }
+}
+
+/** Сохранить кэш в localStorage */
+function _saveGeoCache() {
+    try {
+        localStorage.setItem(GEOCODE_CACHE_KEY, JSON.stringify(_geocodeCache));
+    } catch (e) { /* ignore */ }
+}
+
+/**
+ * Построить строку запроса для Nominatim из полей адреса.
+ * Пробует от конкретного (улица + дом) к общему (город).
+ */
+function _buildGeoQuery(crime) {
+    var parts = [];
+
+    // Улица + дом (убираем символы №)
+    var street = (crime.street || "").replace(/№/g, "").trim();
+    var house = (crime.house || "").trim();
+
+    if (street && house) {
+        parts.push(street + " " + house);
+    } else if (street) {
+        parts.push(street);
+    }
+
+    // Город / населённый пункт
+    var city = (crime.city || "").trim();
+    if (city) parts.push(city);
+
+    // Район (если это не просто "Атырау")
+    var district = (crime.district || "").trim();
+    if (district && district.toLowerCase() !== city.toLowerCase() &&
+        district !== "Атырау") {
+        parts.push(district);
+    }
+
+    // Всегда добавляем Атырау область для контекста
+    parts.push("Атырау");
+
+    return parts.join(", ");
+}
+
+/**
+ * Уникальный ключ кэша для данного инцидента.
+ */
+function _geoCacheKey(crime) {
+    return [
+        (crime.city || "").toUpperCase().trim(),
+        (crime.street || "").toUpperCase().trim(),
+        (crime.house || "").trim(),
+        (crime.district || "").toUpperCase().trim()
+    ].join("|");
+}
+
+/**
+ * Геокодировать один адрес через Nominatim.
+ * Возвращает Promise<{lat, lng} | null>.
+ */
+function _geocodeAddress(query) {
+    var url = "https://nominatim.openstreetmap.org/search" +
+        "?q=" + encodeURIComponent(query) +
+        "&format=json&limit=1" +
+        "&countrycodes=kz" +
+        "&accept-language=ru";
+
+    return fetch(url, {
+        headers: { "User-Agent": "AtyrauProsecutorMap/1.0" }
+    })
+    .then(function (resp) { return resp.json(); })
+    .then(function (data) {
+        if (data && data.length > 0) {
+            return {
+                lat: parseFloat(data[0].lat),
+                lng: parseFloat(data[0].lon)
+            };
+        }
+        return null;
+    })
+    .catch(function () { return null; });
+}
+
+/**
+ * Попробовать несколько вариантов запроса: от подробного к общему.
+ * Если улица+дом не нашлись — ищем только город/район.
+ */
+function _geocodeWithFallback(crime) {
+    var queries = [];
+
+    var street = (crime.street || "").replace(/№/g, "").trim();
+    var house = (crime.house || "").trim();
+    var city = (crime.city || "").trim();
+    var district = (crime.district || "").trim();
+
+    // 1. Полный адрес: улица + дом + город
+    if (street && house && city) {
+        queries.push(street + " " + house + ", " + city + ", Атырау");
+    }
+
+    // 2. Улица + город
+    if (street && city) {
+        queries.push(street + ", " + city + ", Атырау");
+    }
+
+    // 3. Только город/населённый пункт + район
+    if (city && district && district !== "Атырау") {
+        queries.push(city + ", " + district + ", Атырау");
+    }
+
+    // 4. Только город
+    if (city) {
+        queries.push(city + ", Атырау");
+    }
+
+    // 5. Атырау (самый общий fallback)
+    queries.push("Атырау, Казахстан");
+
+    // Последовательно пробуем каждый вариант
+    function tryNext(idx) {
+        if (idx >= queries.length) return Promise.resolve(null);
+        return _geocodeAddress(queries[idx]).then(function (result) {
+            if (result) return result;
+            return tryNext(idx + 1);
+        });
+    }
+
+    return tryNext(0);
+}
+
+/**
+ * Геокодировать все инциденты.
+ * Использует кэш + делает запросы с задержкой (лимит Nominatim: 1 req/sec).
+ */
+function geocodeAllCrimes(callback) {
+    _loadGeoCache();
+
+    var needGeocode = [];
+
+    // Сначала применяем кэш
+    crimeIncidents.forEach(function (crime) {
+        var key = _geoCacheKey(crime);
+        if (_geocodeCache[key]) {
+            crime.lat = _geocodeCache[key].lat;
+            crime.lng = _geocodeCache[key].lng;
+        } else {
+            needGeocode.push(crime);
+        }
+    });
+
+    if (needGeocode.length === 0) {
+        console.log("[geocode] Все адреса в кэше (" + crimeIncidents.length + ")");
+        if (callback) callback();
+        return;
+    }
+
+    console.log("[geocode] Нужно геокодировать: " + needGeocode.length + " из " + crimeIncidents.length);
+
+    var idx = 0;
+
+    function processNext() {
+        if (idx >= needGeocode.length) {
+            _saveGeoCache();
+            console.log("[geocode] Готово");
+            if (callback) callback();
+            return;
+        }
+
+        var crime = needGeocode[idx];
+        var key = _geoCacheKey(crime);
+
+        _geocodeWithFallback(crime).then(function (result) {
+            if (result) {
+                crime.lat = result.lat;
+                crime.lng = result.lng;
+                _geocodeCache[key] = result;
+                console.log("[geocode] " + crime.erdr + " → " + result.lat.toFixed(4) + ", " + result.lng.toFixed(4));
+            } else {
+                // Fallback: центр Атырау
+                crime.lat = 47.1067;
+                crime.lng = 51.9203;
+                _geocodeCache[key] = { lat: crime.lat, lng: crime.lng };
+                console.warn("[geocode] " + crime.erdr + " — адрес не найден, поставлен центр Атырау");
+            }
+
+            idx++;
+            // Nominatim: max 1 запрос в секунду
+            setTimeout(processNext, 1100);
+        });
+    }
+
+    processNext();
+}
+
+// ══════════════════════════════════════════════════════════════
+//  Утилиты
+// ══════════════════════════════════════════════════════════════
 
 /**
  * Фильтрация инцидентов по периоду.
  * @param {string} period — "all" | "month" | "week" | "day"
- * @returns {Array} Отфильтрованный массив
+ * @returns {Array} Отфильтрованный массив (только с координатами)
  */
 function filterCrimesByPeriod(period) {
-    if (period === "all") return crimeIncidents;
+    var list = crimeIncidents.filter(function (c) {
+        return typeof c.lat === "number" && typeof c.lng === "number";
+    });
+
+    if (period === "all") return list;
 
     var now = new Date();
     var cutoff;
@@ -399,10 +578,10 @@ function filterCrimesByPeriod(period) {
             cutoff = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
             break;
         default:
-            return crimeIncidents;
+            return list;
     }
 
-    return crimeIncidents.filter(function (c) {
+    return list.filter(function (c) {
         var d = new Date(c.regDate);
         return d >= cutoff;
     });
