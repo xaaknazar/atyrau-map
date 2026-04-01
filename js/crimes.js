@@ -1,9 +1,9 @@
 /**
  * Загрузка правонарушений (ЕРДР) из Google Sheets.
  *
- * Таблица публикуется как CSV, парсится на клиенте,
- * адреса автоматически геокодируются через Nominatim,
- * результаты кэшируются в localStorage.
+ * Таблица публикуется как CSV, парсится на клиенте.
+ * Координаты (широта/долгота) заполняются ВНУТРИ таблицы
+ * через Google Apps Script — клиент только читает готовые значения.
  *
  * Колонки таблицы (по порядку):
  *  0  — №
@@ -26,6 +26,8 @@
  *  17 — 31.Место совершения Дом
  *  18 — 31.Место совершения Корпус
  *  19 — 31.Место совершения Квартира
+ *  20 — Широта (lat)
+ *  21 — Долгота (lng)
  */
 
 // ══════════════════════════════════════════════════════════════
@@ -38,9 +40,6 @@ var CRIMES_SHEET_CSV_URL =
     "2PACX-1vRdNcnBVsk8JV3lsjicAt9erR4jAmaq8Pj4AsC5eIcqGqR_q3OLkU2Eujn9eG99WEdzMUzA1OEHf7wE" +
     "/pub?gid=0&single=true&output=csv";
 
-var GEOCODE_CACHE_KEY = "atyrau-crime-geocode-cache";
-var GEOCODE_CACHE_VERSION_KEY = "atyrau-crime-geocode-version";
-var GEOCODE_CACHE_VERSION = 3;  // Увеличивать при изменении логики геокодирования
 var CRIMES_DATA_CACHE_KEY = "atyrau-crimes-data-cache";
 
 // ══════════════════════════════════════════════════════════════
@@ -48,7 +47,6 @@ var CRIMES_DATA_CACHE_KEY = "atyrau-crimes-data-cache";
 // ══════════════════════════════════════════════════════════════
 
 var crimeIncidents = [];
-var _geocodeCache = {};
 var _crimeGeoCallbacks = [];
 var _crimeDataReady = false;
 
@@ -168,8 +166,8 @@ function csvRowToCrime(cols, idx) {
         house: cols[17] || "",
         building: cols[18] || "",
         apartment: cols[19] || "",
-        lat: null,
-        lng: null
+        lat: cols[20] ? parseFloat(cols[20]) : null,
+        lng: cols[21] ? parseFloat(cols[21]) : null
     };
 }
 
@@ -234,101 +232,20 @@ function _tryLoadFromCache() {
     } catch (e) { /* ignore */ }
 }
 
-// ══════════════════════════════════════════════════════════════
-//  Автоматическое геокодирование адресов через Nominatim
-// ══════════════════════════════════════════════════════════════
-
-/** Загрузить кэш геокодирования из localStorage.
- *  Сбрасывает кэш при изменении версии логики. */
-function _loadGeoCache() {
-    try {
-        var savedVersion = localStorage.getItem(GEOCODE_CACHE_VERSION_KEY);
-        if (parseInt(savedVersion) !== GEOCODE_CACHE_VERSION) {
-            // Логика изменилась — старый кэш невалиден
-            localStorage.removeItem(GEOCODE_CACHE_KEY);
-            localStorage.setItem(GEOCODE_CACHE_VERSION_KEY, String(GEOCODE_CACHE_VERSION));
-            _geocodeCache = {};
-            console.log("[geocode] Кэш сброшен (новая версия логики v" + GEOCODE_CACHE_VERSION + ")");
-            return;
-        }
-        var saved = localStorage.getItem(GEOCODE_CACHE_KEY);
-        if (saved) _geocodeCache = JSON.parse(saved);
-    } catch (e) { /* ignore */ }
-}
-
-/** Сохранить кэш в localStorage */
-function _saveGeoCache() {
-    try {
-        localStorage.setItem(GEOCODE_CACHE_KEY, JSON.stringify(_geocodeCache));
-    } catch (e) { /* ignore */ }
-}
-
 /**
- * Уникальный ключ кэша для данного инцидента.
- */
-function _geoCacheKey(crime) {
-    return [
-        (crime.city || "").toUpperCase().trim(),
-        (crime.street || "").toUpperCase().trim(),
-        (crime.house || "").trim(),
-        (crime.district || "").toUpperCase().trim()
-    ].join("|");
-}
-
-/**
- * Геокодировать все инциденты — ТОЛЬКО через локальный справочник.
- * Мгновенно, без API запросов.
- *
- * Поиск координат по полям:
- * 1. Населённый пункт (city) — микрорайон или посёлок
- * 2. Район (district) — fallback по району области
- * 3. Не найдено → точка не ставится (пропускается)
- */
-function geocodeAllCrimes(onProgress, onDone) {
-    var resolved = 0;
-    var skipped = 0;
-
-    crimeIncidents.forEach(function (crime) {
-        var coords = null;
-
-        if (typeof lookupLocalGeo === "function") {
-            coords = lookupLocalGeo(crime);
-        }
-
-        if (coords) {
-            crime.lat = coords.lat;
-            crime.lng = coords.lng;
-            resolved++;
-        } else {
-            // Не нашли в справочнике — не ставим точку
-            crime.lat = null;
-            crime.lng = null;
-            skipped++;
-        }
-    });
-
-    console.log("[geocode] Готово мгновенно: " + resolved + " определено, " + skipped + " пропущено (нет в справочнике)");
-
-    if (onDone) onDone();
-}
-
-/**
- * Полная инициализация: загрузить из таблицы → геокодировать → уведомить.
+ * Полная инициализация: загрузить из таблицы → уведомить.
+ * Координаты уже содержатся в таблице (колонки 20-21).
  */
 function initCrimeData(onProgress, onDone) {
     loadCrimesFromSheet(function () {
-        if (crimeIncidents.length === 0) {
-            console.warn("[crimes] Нет данных для отображения");
-            if (onDone) onDone();
-            _notifyCrimesReady();
-            return;
-        }
+        var withCoords = crimeIncidents.filter(function (c) {
+            return typeof c.lat === "number" && !isNaN(c.lat);
+        }).length;
+        console.log("[crimes] С координатами: " + withCoords + " из " + crimeIncidents.length);
 
-        geocodeAllCrimes(onProgress, function () {
-            _saveCrimesCache();
-            if (onDone) onDone();
-            _notifyCrimesReady();
-        });
+        _saveCrimesCache();
+        if (onDone) onDone();
+        _notifyCrimesReady();
     });
 }
 
