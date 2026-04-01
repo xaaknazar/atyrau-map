@@ -5,7 +5,6 @@
     var ADMIN_PASSWORD = "prokuratura2025";
 
     var CATEGORIES = {
-        "crime":       { color: "#e74c3c", badgeKey: "badge_crime" },
         "blind-spots": { color: "#3498db", badgeKey: "badge_blind" },
         "abandoned":   { color: "#8e44ad", badgeKey: "badge_abandoned" },
         "unlit":       { color: "#f39c12", badgeKey: "badge_unlit" }
@@ -120,7 +119,6 @@
 
     // Each category gets its own smooth gradient
     var HEAT_GRADIENTS = {
-        "crime":       { 0: "rgba(231,76,60,0)", 0.2: "rgba(231,76,60,0.15)", 0.4: "rgba(231,76,60,0.35)", 0.7: "rgba(255,100,80,0.6)", 1: "#e74c3c" },
         "blind-spots": { 0: "rgba(52,152,219,0)", 0.2: "rgba(52,152,219,0.15)", 0.4: "rgba(52,152,219,0.35)", 0.7: "rgba(80,180,255,0.6)", 1: "#3498db" },
         "abandoned":   { 0: "rgba(142,68,173,0)", 0.2: "rgba(142,68,173,0.15)", 0.4: "rgba(142,68,173,0.35)", 0.7: "rgba(170,100,210,0.6)", 1: "#8e44ad" },
         "unlit":       { 0: "rgba(243,156,18,0)", 0.2: "rgba(243,156,18,0.15)", 0.4: "rgba(243,156,18,0.35)", 0.7: "rgba(255,180,50,0.6)", 1: "#f39c12" }
@@ -259,10 +257,9 @@
 
     // ── Stats ───────────────────────────────────────────────
     function updateStats() {
-        var counts = { "crime": 0, "blind-spots": 0, "abandoned": 0, "unlit": 0 };
+        var counts = { "blind-spots": 0, "abandoned": 0, "unlit": 0 };
         mapPoints.forEach(function (p) { if (counts.hasOwnProperty(p.category)) counts[p.category]++; });
 
-        document.getElementById("count-crime").textContent = counts["crime"];
         document.getElementById("count-blind-spots").textContent = counts["blind-spots"];
         document.getElementById("count-abandoned").textContent = counts["abandoned"];
         document.getElementById("count-unlit").textContent = counts["unlit"];
@@ -278,6 +275,123 @@
             else map.removeLayer(layers[cat]);
         });
     });
+
+    // ═══════════════════════════════════════════════════════
+    //  CRIME INCIDENTS (ЕРДР) — separate layer from static points
+    // ═══════════════════════════════════════════════════════
+    var crimeIncidentLayer = L.markerClusterGroup({
+        maxClusterRadius: 40,
+        spiderfyOnMaxZoom: true,
+        showCoverageOnHover: false,
+        iconCreateFunction: function (cluster) {
+            var count = cluster.getChildCount();
+            var size = count < 10 ? 36 : count < 50 ? 44 : 52;
+            return L.divIcon({
+                html: '<div style="background:#e74c3c;width:' + (size - 10) + 'px;height:' + (size - 10) + 'px;' +
+                    'border-radius:50%;display:flex;align-items:center;justify-content:center;' +
+                    'color:#fff;font-weight:700;font-size:12px;">' + count + '</div>',
+                className: 'cat-cluster cat-cluster-crime',
+                iconSize: L.point(size, size)
+            });
+        }
+    });
+    map.addLayer(crimeIncidentLayer);
+
+    var crimeMarkers = [];
+    var currentCrimePeriod = "all";
+
+    function createCrimeMarkerIcon() {
+        return L.divIcon({
+            className: "custom-marker",
+            html: '<div class="marker-pin crime-incident"></div>',
+            iconSize: [20, 20],
+            iconAnchor: [10, 10]
+        });
+    }
+
+    function buildCrimeMarkers() {
+        crimeIncidentLayer.clearLayers();
+        crimeMarkers = [];
+
+        var filtered = filterCrimesByPeriod(currentCrimePeriod);
+
+        filtered.forEach(function (crime) {
+            var marker = L.marker([crime.lat, crime.lng], {
+                icon: createCrimeMarkerIcon()
+            });
+
+            marker.on("click", function () {
+                openCrimeModal(crime);
+            });
+
+            var tooltipText = crime.article + " — " + buildCrimeAddress(crime);
+            if (tooltipText.length > 80) tooltipText = tooltipText.substring(0, 77) + "...";
+
+            marker.bindTooltip(tooltipText, {
+                direction: "top",
+                offset: [0, -12],
+                className: "marker-tooltip crime-tooltip"
+            });
+
+            crimeIncidentLayer.addLayer(marker);
+            crimeMarkers.push(marker);
+        });
+
+        document.getElementById("count-crime-incidents").textContent = filtered.length;
+    }
+
+    // Crime toggle
+    var crimeToggle = document.getElementById("crime-incidents-toggle");
+    if (crimeToggle) {
+        crimeToggle.addEventListener("change", function () {
+            if (this.checked) {
+                map.addLayer(crimeIncidentLayer);
+            } else {
+                map.removeLayer(crimeIncidentLayer);
+            }
+        });
+    }
+
+    // Crime period filter buttons
+    document.querySelectorAll(".crime-period-btn").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+            document.querySelectorAll(".crime-period-btn").forEach(function (b) {
+                b.classList.remove("active");
+            });
+            this.classList.add("active");
+            currentCrimePeriod = this.getAttribute("data-period");
+            buildCrimeMarkers();
+        });
+    });
+
+    // Crime modal
+    function openCrimeModal(crime) {
+        var overlay = document.getElementById("crime-modal-overlay");
+        document.getElementById("crime-modal-article").textContent = crime.article + (crime.articlePart ? " " + crime.articlePart : "");
+        document.getElementById("crime-modal-date").textContent = formatCrimeDate(crime.regDate);
+        document.getElementById("crime-modal-erdr").textContent = "ЕРДР: " + crime.erdr;
+        document.getElementById("crime-modal-organ").innerHTML =
+            '<strong>' + t("crime_organ") + ':</strong> ' + crime.organ;
+        document.getElementById("crime-modal-place").innerHTML =
+            '<strong>' + t("crime_place_type") + ':</strong> ' + crime.placeType +
+            (crime.isPublic ? ' <span class="crime-public-badge">' + t("crime_public_place") + '</span>' : '');
+        document.getElementById("crime-modal-address").innerHTML =
+            '<strong>' + t("crime_address") + ':</strong> ' + buildCrimeAddress(crime);
+        document.getElementById("crime-modal-crime-date").innerHTML =
+            '<strong>' + t("crime_date_committed") + ':</strong> ' + crime.crimeDate + ' ' + (crime.crimeTime || '');
+        document.getElementById("crime-modal-description").textContent = crime.description;
+        overlay.classList.remove("hidden");
+    }
+
+    document.getElementById("crime-modal-close").addEventListener("click", function () {
+        document.getElementById("crime-modal-overlay").classList.add("hidden");
+    });
+    document.getElementById("crime-modal-overlay").addEventListener("click", function (e) {
+        if (e.target === this) this.classList.add("hidden");
+    });
+
+    // Build crime markers on load
+    buildCrimeMarkers();
 
     // ── Language switch ─────────────────────────────────────
     document.querySelectorAll(".lang-btn").forEach(function (btn) {
@@ -1157,7 +1271,7 @@
 
     function updatePhotoSectionVisibility() {
         if (photoSection) {
-            photoSection.style.display = selectedCategory === "crime" ? "none" : "";
+            photoSection.style.display = "";
         }
     }
 
@@ -1263,7 +1377,7 @@
             address_kz: addressKz,
             description_ru: document.getElementById("add-desc-ru").value.trim(),
             description_kz: document.getElementById("add-desc-kz").value.trim(),
-            photos: selectedCategory === "crime" ? [] : selectedPhotos.slice()
+            photos: selectedPhotos.slice()
         };
 
         savePoint(newPoint);

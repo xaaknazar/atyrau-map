@@ -102,7 +102,22 @@ var I18N = {
         suggest_show_on_map: "На карте",
 
         // Admin points management
-        admin_manage_points: "Список точек"
+        admin_manage_points: "Список точек",
+
+        // Crime incidents (ЕРДР)
+        crime_incidents_title: "Зарегистрированные правонарушения",
+        crime_incidents_show: "Показать на карте",
+        crime_incidents_count: "Правонарушений:",
+        crime_filter_period: "Период:",
+        crime_period_all: "Все",
+        crime_period_month: "Месяц",
+        crime_period_week: "Неделя",
+        crime_period_day: "День",
+        crime_organ: "Орган регистрации",
+        crime_place_type: "Место совершения",
+        crime_public_place: "общественное место",
+        crime_address: "Адрес",
+        crime_date_committed: "Дата совершения"
     },
     kz: {
         // Header
@@ -204,7 +219,22 @@ var I18N = {
         suggest_show_on_map: "Картада",
 
         // Admin points management
-        admin_manage_points: "Нүктелер тізімі"
+        admin_manage_points: "Нүктелер тізімі",
+
+        // Crime incidents (ЕРДР)
+        crime_incidents_title: "Тіркелген құқық бұзушылықтар",
+        crime_incidents_show: "Картада көрсету",
+        crime_incidents_count: "Құқық бұзушылықтар:",
+        crime_filter_period: "Кезең:",
+        crime_period_all: "Барлығы",
+        crime_period_month: "Ай",
+        crime_period_week: "Апта",
+        crime_period_day: "Күн",
+        crime_organ: "Тіркеу органы",
+        crime_place_type: "Жасалу орны",
+        crime_public_place: "қоғамдық орын",
+        crime_address: "Мекен-жай",
+        crime_date_committed: "Жасалу күні"
     }
 };
 
