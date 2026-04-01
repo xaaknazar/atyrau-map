@@ -276,210 +276,40 @@ function _geoCacheKey(crime) {
 }
 
 /**
- * Геокодировать один адрес через Nominatim.
- */
-function _geocodeAddress(query) {
-    var url = "https://nominatim.openstreetmap.org/search" +
-        "?q=" + encodeURIComponent(query) +
-        "&format=json&limit=1" +
-        "&countrycodes=kz" +
-        "&accept-language=ru";
-
-    return fetch(url, {
-        headers: { "User-Agent": "AtyrauProsecutorMap/1.0" }
-    })
-    .then(function (resp) { return resp.json(); })
-    .then(function (data) {
-        if (data && data.length > 0) {
-            return {
-                lat: parseFloat(data[0].lat),
-                lng: parseFloat(data[0].lon)
-            };
-        }
-        return null;
-    })
-    .catch(function () { return null; });
-}
-
-/**
- * Попробовать несколько вариантов запроса: от подробного к общему.
- * Основной формат: "улица дом, город Атырау"
- */
-function _geocodeWithFallback(crime) {
-    var queries = [];
-
-    var street = (crime.street || "").replace(/№/g, "").replace(/\s+/g, " ").trim();
-    var house = (crime.house || "").replace(/№/g, "").trim();
-    var city = (crime.city || "").trim();
-
-    // 1. Главный запрос: улица + дом + город Атырау
-    if (street && house) {
-        queries.push(street + " " + house + ", Атырау, Казахстан");
-        queries.push(street + ", " + house + ", Атырау");
-    }
-
-    // 2. Только улица + Атырау
-    if (street) {
-        queries.push(street + ", Атырау, Казахстан");
-    }
-
-    // 3. Если город не "АТЫРАУ" (посёлки области) — город + район
-    if (city && city.toUpperCase() !== "АТЫРАУ") {
-        queries.push(city + ", Атырау облысы, Казахстан");
-    }
-
-    function tryNext(idx) {
-        if (idx >= queries.length) return Promise.resolve(null);
-        return _geocodeAddress(queries[idx]).then(function (result) {
-            if (result) return result;
-            return tryNext(idx + 1);
-        });
-    }
-
-    return tryNext(0);
-}
-
-/**
- * Геокодировать все инциденты.
+ * Геокодировать все инциденты — ТОЛЬКО через локальный справочник.
+ * Мгновенно, без API запросов.
  *
- * Порядок определения координат:
- *
- * А) Адрес С улицей (ул. Гагарин, д. 42):
- *    1. localStorage кэш
- *    2. Nominatim API (точный поиск по улице)
- *    3. Локальный справочник geodict.js (fallback по микрорайону/городу)
- *
- * Б) Адрес БЕЗ улицы (только микрорайон/посёлок):
- *    1. localStorage кэш
- *    2. Локальный справочник (точные координаты районов)
- *    3. Nominatim API (если района нет в справочнике)
- *
- * Группировка по уникальным адресам — один запрос на одинаковые адреса.
+ * Поиск координат по полям:
+ * 1. Населённый пункт (city) — микрорайон или посёлок
+ * 2. Район (district) — fallback по району области
+ * 3. Не найдено → точка не ставится (пропускается)
  */
 function geocodeAllCrimes(onProgress, onDone) {
-    _loadGeoCache();
+    var resolved = 0;
+    var skipped = 0;
 
-    var crimesByKey = {};       // key → [crime, crime, ...]
-    var uniqueAddresses = {};   // key → первый crime с этим адресом
-
-    // 1. Группируем по уникальным адресам
     crimeIncidents.forEach(function (crime) {
-        var key = _geoCacheKey(crime);
-        if (!crimesByKey[key]) crimesByKey[key] = [];
-        crimesByKey[key].push(crime);
-
-        if (!uniqueAddresses[key]) {
-            uniqueAddresses[key] = crime;
-        }
-    });
-
-    var totalUniqueKeys = Object.keys(uniqueAddresses).length;
-    var resolvedFromCache = 0;
-    var resolvedFromDict = 0;
-    var needNominatim = [];
-
-    // 2. Для каждого уникального адреса решаем: кэш, справочник или Nominatim
-    Object.keys(uniqueAddresses).forEach(function (key) {
-        var sampleCrime = uniqueAddresses[key];
         var coords = null;
-        var hasStreet = (sampleCrime.street || "").trim().length > 0;
 
-        // Кэш — всегда первый
-        if (_geocodeCache[key]) {
-            coords = _geocodeCache[key];
-            resolvedFromCache++;
+        if (typeof lookupLocalGeo === "function") {
+            coords = lookupLocalGeo(crime);
         }
-        // Если улицы НЕТ — используем справочник (для микрорайонов/посёлков)
-        else if (!hasStreet && typeof lookupLocalGeo === "function") {
-            var localResult = lookupLocalGeo(sampleCrime);
-            if (localResult) {
-                coords = localResult;
-                _geocodeCache[key] = coords;
-                resolvedFromDict++;
-            }
-        }
-        // Если есть улица — НЕ используем справочник, идём в Nominatim
-        // (справочник знает только микрорайоны, а не конкретные дома)
 
         if (coords) {
-            crimesByKey[key].forEach(function (crime) {
-                crime.lat = coords.lat;
-                crime.lng = coords.lng;
-            });
+            crime.lat = coords.lat;
+            crime.lng = coords.lng;
+            resolved++;
         } else {
-            needNominatim.push(key);
+            // Не нашли в справочнике — не ставим точку
+            crime.lat = null;
+            crime.lng = null;
+            skipped++;
         }
     });
 
-    console.log("[geocode] Уникальных адресов: " + totalUniqueKeys +
-        " | из кэша: " + resolvedFromCache +
-        " | из справочника: " + resolvedFromDict +
-        " | на Nominatim: " + needNominatim.length);
+    console.log("[geocode] Готово мгновенно: " + resolved + " определено, " + skipped + " пропущено (нет в справочнике)");
 
-    if (needNominatim.length === 0) {
-        _saveGeoCache();
-        if (onDone) onDone();
-        return;
-    }
-
-    // 3. Nominatim — для адресов с улицами + тех, кого нет в справочнике
-    var idx = 0;
-
-    function processNext() {
-        if (idx >= needNominatim.length) {
-            _saveGeoCache();
-            console.log("[geocode] Готово");
-            if (onDone) onDone();
-            return;
-        }
-
-        var key = needNominatim[idx];
-        var sampleCrime = uniqueAddresses[key];
-
-        _geocodeWithFallback(sampleCrime).then(function (result) {
-            var coords;
-            if (result) {
-                coords = result;
-                console.log("[geocode] [" + (idx + 1) + "/" + needNominatim.length + "] " +
-                    key.replace(/\|/g, ", ") + " → " +
-                    result.lat.toFixed(4) + ", " + result.lng.toFixed(4));
-            } else {
-                // Nominatim не нашёл → справочник как fallback
-                var dictFallback = null;
-                if (typeof lookupLocalGeo === "function") {
-                    dictFallback = lookupLocalGeo(sampleCrime);
-                    // Если не нашли по полному адресу — ищем хотя бы по городу
-                    if (!dictFallback) {
-                        dictFallback = lookupLocalGeo({
-                            city: sampleCrime.city,
-                            street: "",
-                            district: sampleCrime.district
-                        });
-                    }
-                }
-                coords = dictFallback || { lat: 47.1067, lng: 51.9203 };
-                console.warn("[geocode] [" + (idx + 1) + "/" + needNominatim.length + "] " +
-                    key.replace(/\|/g, ", ") + " — Nominatim не нашёл, fallback");
-            }
-
-            _geocodeCache[key] = coords;
-
-            crimesByKey[key].forEach(function (crime) {
-                crime.lat = coords.lat;
-                crime.lng = coords.lng;
-            });
-
-            idx++;
-            if (onProgress) onProgress(idx, needNominatim.length);
-
-            if (idx % 10 === 0) _saveGeoCache();
-
-            // Nominatim: max 1 запрос в секунду
-            setTimeout(processNext, 1100);
-        });
-    }
-
-    processNext();
+    if (onDone) onDone();
 }
 
 /**

@@ -521,6 +521,9 @@
             <div class="toolbar">
                 <input type="text" class="search-input" id="search-input" placeholder="Поиск по названию, адресу, описанию..." />
                 <button class="filter-btn active" data-filter="all">Все</button>
+                <button class="filter-btn" data-filter="crime">
+                    <span class="filter-dot" style="background:#e74c3c;"></span> Преступность
+                </button>
                 <button class="filter-btn" data-filter="blind-spots">
                     <span class="filter-dot" style="background:#3498db;"></span> Слепые зоны
                 </button>
@@ -554,12 +557,13 @@
         var ADMIN_PASSWORD = "prokuratura2025";
 
         var CATEGORY_META = {
+            "crime":       { color: "#e74c3c", label: "Преступность" },
             "blind-spots": { color: "#3498db", label: "Слепые зоны (нет камер)" },
             "abandoned":   { color: "#8e44ad", label: "Заброшенные здания" },
             "unlit":       { color: "#f39c12", label: "Неосвещённые улицы" }
         };
 
-        var CATEGORY_ORDER = ["blind-spots", "abandoned", "unlit"];
+        var CATEGORY_ORDER = ["crime", "blind-spots", "abandoned", "unlit"];
 
         var activeFilter = "all";
         var searchQuery = "";

@@ -5,6 +5,7 @@
     var ADMIN_PASSWORD = "prokuratura2025";
 
     var CATEGORIES = {
+        "crime":       { color: "#e74c3c", badgeKey: "badge_crime" },
         "blind-spots": { color: "#3498db", badgeKey: "badge_blind" },
         "abandoned":   { color: "#8e44ad", badgeKey: "badge_abandoned" },
         "unlit":       { color: "#f39c12", badgeKey: "badge_unlit" }
@@ -119,6 +120,7 @@
 
     // Each category gets its own smooth gradient
     var HEAT_GRADIENTS = {
+        "crime":       { 0: "rgba(231,76,60,0)", 0.2: "rgba(231,76,60,0.15)", 0.4: "rgba(231,76,60,0.35)", 0.7: "rgba(255,100,80,0.6)", 1: "#e74c3c" },
         "blind-spots": { 0: "rgba(52,152,219,0)", 0.2: "rgba(52,152,219,0.15)", 0.4: "rgba(52,152,219,0.35)", 0.7: "rgba(80,180,255,0.6)", 1: "#3498db" },
         "abandoned":   { 0: "rgba(142,68,173,0)", 0.2: "rgba(142,68,173,0.15)", 0.4: "rgba(142,68,173,0.35)", 0.7: "rgba(170,100,210,0.6)", 1: "#8e44ad" },
         "unlit":       { 0: "rgba(243,156,18,0)", 0.2: "rgba(243,156,18,0.15)", 0.4: "rgba(243,156,18,0.35)", 0.7: "rgba(255,180,50,0.6)", 1: "#f39c12" }
@@ -257,9 +259,10 @@
 
     // ── Stats ───────────────────────────────────────────────
     function updateStats() {
-        var counts = { "blind-spots": 0, "abandoned": 0, "unlit": 0 };
+        var counts = { "crime": 0, "blind-spots": 0, "abandoned": 0, "unlit": 0 };
         mapPoints.forEach(function (p) { if (counts.hasOwnProperty(p.category)) counts[p.category]++; });
 
+        document.getElementById("count-crime").textContent = counts["crime"];
         document.getElementById("count-blind-spots").textContent = counts["blind-spots"];
         document.getElementById("count-abandoned").textContent = counts["abandoned"];
         document.getElementById("count-unlit").textContent = counts["unlit"];
@@ -391,21 +394,11 @@
         if (e.target === this) this.classList.add("hidden");
     });
 
-    // Загрузить данные из Google Sheets → геокодировать → показать маркеры
-    var crimeCountEl = document.getElementById("count-crime-incidents");
+    // Загрузить данные из Google Sheets → определить координаты → показать маркеры
     var crimeLoadingEl = document.getElementById("crime-loading-status");
-    crimeCountEl.textContent = "...";
 
     initCrimeData(
-        // onProgress — обновляем счётчик по мере геокодирования
-        function (done, total) {
-            if (crimeLoadingEl) {
-                crimeLoadingEl.textContent = t("crime_geocoding") + " " + done + "/" + total;
-            }
-            // Показываем маркеры постепенно
-            buildCrimeMarkers();
-        },
-        // onDone — финальная сборка
+        null,
         function () {
             if (crimeLoadingEl) crimeLoadingEl.classList.add("hidden");
             buildCrimeMarkers();
@@ -1290,7 +1283,7 @@
 
     function updatePhotoSectionVisibility() {
         if (photoSection) {
-            photoSection.style.display = "";
+            photoSection.style.display = selectedCategory === "crime" ? "none" : "";
         }
     }
 
@@ -1396,7 +1389,7 @@
             address_kz: addressKz,
             description_ru: document.getElementById("add-desc-ru").value.trim(),
             description_kz: document.getElementById("add-desc-kz").value.trim(),
-            photos: selectedPhotos.slice()
+            photos: selectedCategory === "crime" ? [] : selectedPhotos.slice()
         };
 
         savePoint(newPoint);
