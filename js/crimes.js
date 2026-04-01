@@ -40,7 +40,7 @@ var CRIMES_SHEET_CSV_URL =
 
 var GEOCODE_CACHE_KEY = "atyrau-crime-geocode-cache";
 var GEOCODE_CACHE_VERSION_KEY = "atyrau-crime-geocode-version";
-var GEOCODE_CACHE_VERSION = 2;  // Увеличивать при изменении логики геокодирования
+var GEOCODE_CACHE_VERSION = 3;  // Увеличивать при изменении логики геокодирования
 var CRIMES_DATA_CACHE_KEY = "atyrau-crimes-data-cache";
 
 // ══════════════════════════════════════════════════════════════
@@ -303,38 +303,30 @@ function _geocodeAddress(query) {
 
 /**
  * Попробовать несколько вариантов запроса: от подробного к общему.
+ * Основной формат: "улица дом, город Атырау"
  */
 function _geocodeWithFallback(crime) {
     var queries = [];
 
-    var street = (crime.street || "").replace(/№/g, "").trim();
-    var house = (crime.house || "").trim();
+    var street = (crime.street || "").replace(/№/g, "").replace(/\s+/g, " ").trim();
+    var house = (crime.house || "").replace(/№/g, "").trim();
     var city = (crime.city || "").trim();
-    var district = (crime.district || "").trim();
 
-    // 1. Полный адрес: улица + дом + город
-    if (street && house && city) {
-        queries.push(street + " " + house + ", " + city + ", Атырау");
+    // 1. Главный запрос: улица + дом + город Атырау
+    if (street && house) {
+        queries.push(street + " " + house + ", Атырау, Казахстан");
+        queries.push(street + ", " + house + ", Атырау");
     }
 
-    // 2. Улица + город
-    if (street && city) {
-        queries.push(street + ", " + city + ", Атырау");
+    // 2. Только улица + Атырау
+    if (street) {
+        queries.push(street + ", Атырау, Казахстан");
     }
 
-    // 3. Город/населённый пункт + район
-    if (city && district && district !== "Атырау" &&
-        district.toLowerCase() !== city.toLowerCase()) {
-        queries.push(city + ", " + district + ", Атырау");
+    // 3. Если город не "АТЫРАУ" (посёлки области) — город + район
+    if (city && city.toUpperCase() !== "АТЫРАУ") {
+        queries.push(city + ", Атырау облысы, Казахстан");
     }
-
-    // 4. Только город
-    if (city) {
-        queries.push(city + ", Атырау");
-    }
-
-    // 5. Fallback: Атырау
-    queries.push("Атырау, Казахстан");
 
     function tryNext(idx) {
         if (idx >= queries.length) return Promise.resolve(null);
@@ -516,8 +508,9 @@ function initCrimeData(onProgress, onDone) {
 
 /**
  * Фильтрация инцидентов по периоду.
+ * Показываются только записи с координатами (где были город + улица + дом).
  * @param {string} period — "all" | "month" | "week" | "day"
- * @returns {Array} Отфильтрованный массив (только с координатами)
+ * @returns {Array} Отфильтрованный массив
  */
 function filterCrimesByPeriod(period) {
     var list = crimeIncidents.filter(function (c) {
