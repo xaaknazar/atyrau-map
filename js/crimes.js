@@ -37,7 +37,7 @@
 // Google Apps Script web app — возвращает JSON с координатами
 var CRIMES_API_URL =
     "https://script.google.com/macros/s/" +
-    "AKfycbz9Q5pkCGFgOZJbrxb_peozbGT9Kr8sj4VEa-0U46lh3g5Xw6DGOTis2tEfTQFBUagj" +
+    "AKfycbyrbsDiPVyUJ3DZP7JtjvcY6a1dEUwvBVoK0otyJmmlb5RMDo7WAs7uMsbUUwIylmjX" +
     "/exec";
 
 // Резервная ссылка — CSV из таблицы (без координат, на случай если API недоступен)
@@ -192,30 +192,48 @@ function jsonRowToCrime(row, idx) {
         return csvRowToCrime(row, idx);
     }
 
-    // Если row — объект с ключами
+    // Вспомогательная: безопасно привести к строке (числа, даты, пустые)
+    function s(v) { return (v === undefined || v === null || v === "") ? "" : String(v); }
+
+    // Даты из API приходят в ISO формате "2026-02-04T06:43:00.000Z"
+    // parseDateToISO ожидает "ДД.ММ.ГГГГ ЧЧ:ММ", поэтому ISO пропускаем как есть
+    function parseDate(v) {
+        if (!v) return "";
+        var str = String(v);
+        // Уже ISO формат
+        if (str.indexOf("T") !== -1) return str;
+        return parseDateToISO(str);
+    }
+
+    // Координаты — поля "U (Широта)" и "V (Долгота)"
+    var latVal = row["U (Широта)"] || row["Широта"] || row["lat"] || "";
+    var lngVal = row["V (Долгота)"] || row["Долгота"] || row["lng"] || "";
+    var lat = latVal !== "" ? parseFloat(latVal) : null;
+    var lng = lngVal !== "" ? parseFloat(lngVal) : null;
+
     return {
         id: idx + 1,
-        erdr: row["1.Номер ЕРДР"] || row["erdr"] || row["ЕРДР"] || "",
-        regDate: parseDateToISO(row["1.Дата-время регистрации"] || row["regDate"] || ""),
-        organ: row["2.Орган регистрации"] || row["organ"] || "",
-        kuiNumber: row["4.Номер КУИ"] || row["kuiNumber"] || "",
-        kuiDate: row["4.Дата-время регистрации в КУИ"] || row["kuiDate"] || "",
-        crimeDate: parseDateToISO(row["9.Дата совершения"] || row["crimeDate"] || ""),
-        crimeTime: row["9.время совершения"] || row["crimeTime"] || "",
-        description: row["9.1 Описание преступления/проступка"] || row["description"] || "",
-        article: row["10.Квалификация"] || row["article"] || "",
-        articlePart: row["10.Квалификация п.п."] || row["articlePart"] || "",
-        placeType: row["29.Место совершения"] || row["placeType"] || "",
-        isPublic: (row["29.1.Общественное место"] || row["isPublic"] || "").toString().toLowerCase().indexOf("общественное") !== -1,
-        oblast: row["31.Место совершения Область"] || row["oblast"] || "",
-        district: row["31.Место совершения Район"] || row["district"] || "",
-        city: row["31.Место совершения Населенный пункт"] || row["city"] || "",
-        street: row["31.Место совершения Улица"] || row["street"] || "",
-        house: row["31.Место совершения Дом"] || row["house"] || "",
-        building: row["31.Место совершения Корпус"] || row["building"] || "",
-        apartment: row["31.Место совершения Квартира"] || row["apartment"] || "",
-        lat: parseFloat(row["Широта"] || row["lat"]) || null,
-        lng: parseFloat(row["Долгота"] || row["lng"]) || null
+        erdr: s(row["1.Номер ЕРДР"]),
+        regDate: parseDate(row["1.Дата-время регистрации"]),
+        organ: s(row["2.Орган регистрации"]),
+        kuiNumber: s(row["3. Номер КУИ"] || row["4.Номер КУИ"]),
+        kuiDate: parseDate(row["4.Дата-время регистрации в КУИ"]),
+        crimeDate: parseDate(row["9.Дата совершения"]),
+        crimeTime: s(row["9.время совершения"]),
+        description: s(row["9.1 Описание преступления/проступка"]),
+        article: s(row["10.Квалификация"]),
+        articlePart: s(row["10.Квалификация п.п."]),
+        placeType: s(row["29.Место совершения"]),
+        isPublic: s(row["29.1.Общественное место"]).toLowerCase().indexOf("общественное") !== -1,
+        oblast: s(row["31.Место совершения Область"]),
+        district: s(row["31.Место совершения Район"]),
+        city: s(row["31.Место совершения Населенный пункт"]),
+        street: s(row["31.Место совершения Улица"]),
+        house: s(row["31.Место совершения Дом"]),
+        building: s(row["31.Место совершения Корпус"]),
+        apartment: s(row["31.Место совершения Квартира"]),
+        lat: (lat !== null && !isNaN(lat)) ? lat : null,
+        lng: (lng !== null && !isNaN(lng)) ? lng : null
     };
 }
 
@@ -225,10 +243,19 @@ function jsonRowToCrime(row, idx) {
 function _loadFromAPI(callback) {
     console.log("[crimes] Загрузка из Apps Script API...");
 
-    fetch(CRIMES_API_URL)
+    fetch(CRIMES_API_URL, { redirect: "follow" })
         .then(function (resp) {
             if (!resp.ok) throw new Error("HTTP " + resp.status);
-            return resp.json();
+            return resp.text();
+        })
+        .then(function (text) {
+            var data;
+            try {
+                data = JSON.parse(text);
+            } catch (e) {
+                throw new Error("Ответ не JSON: " + text.substring(0, 100));
+            }
+            return data;
         })
         .then(function (data) {
             // data может быть: { data: [...] } или просто [...]
