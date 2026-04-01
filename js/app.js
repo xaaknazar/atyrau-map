@@ -391,11 +391,26 @@
         if (e.target === this) this.classList.add("hidden");
     });
 
-    // Геокодировать адреса, затем показать маркеры
-    geocodeAllCrimes(function () {
-        _crimeGeoReady = true;
-        buildCrimeMarkers();
-    });
+    // Загрузить данные из Google Sheets → геокодировать → показать маркеры
+    var crimeCountEl = document.getElementById("count-crime-incidents");
+    var crimeLoadingEl = document.getElementById("crime-loading-status");
+    crimeCountEl.textContent = "...";
+
+    initCrimeData(
+        // onProgress — обновляем счётчик по мере геокодирования
+        function (done, total) {
+            if (crimeLoadingEl) {
+                crimeLoadingEl.textContent = t("crime_geocoding") + " " + done + "/" + total;
+            }
+            // Показываем маркеры постепенно
+            buildCrimeMarkers();
+        },
+        // onDone — финальная сборка
+        function () {
+            if (crimeLoadingEl) crimeLoadingEl.classList.add("hidden");
+            buildCrimeMarkers();
+        }
+    );
 
     // ── Language switch ─────────────────────────────────────
     document.querySelectorAll(".lang-btn").forEach(function (btn) {

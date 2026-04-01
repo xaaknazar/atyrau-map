@@ -117,7 +117,9 @@ var I18N = {
         crime_place_type: "Место совершения",
         crime_public_place: "общественное место",
         crime_address: "Адрес",
-        crime_date_committed: "Дата совершения"
+        crime_date_committed: "Дата совершения",
+        crime_loading: "Загрузка данных из таблицы...",
+        crime_geocoding: "Определение координат:"
     },
     kz: {
         // Header
@@ -234,7 +236,9 @@ var I18N = {
         crime_place_type: "Жасалу орны",
         crime_public_place: "қоғамдық орын",
         crime_address: "Мекен-жай",
-        crime_date_committed: "Жасалу күні"
+        crime_date_committed: "Жасалу күні",
+        crime_loading: "Кестеден деректер жүктелуде...",
+        crime_geocoding: "Координаталар анықталуда:"
     }
 };
 
