@@ -337,64 +337,92 @@ function _geocodeWithFallback(crime) {
 
 /**
  * Геокодировать все инциденты.
- * Кэш + запросы с задержкой 1.1с (лимит Nominatim).
+ * ОПТИМИЗАЦИЯ: группировка по уникальным адресам.
+ * Вместо 719 запросов — только уникальные комбинации (город+улица+дом).
+ *
  * @param {Function} onProgress — вызывается после каждого геокодированного адреса
  * @param {Function} onDone — вызывается когда все готово
  */
 function geocodeAllCrimes(onProgress, onDone) {
     _loadGeoCache();
 
-    var needGeocode = [];
-
-    // Сначала применяем кэш
+    // 1. Применяем кэш ко всем записям
     crimeIncidents.forEach(function (crime) {
         var key = _geoCacheKey(crime);
         if (_geocodeCache[key]) {
             crime.lat = _geocodeCache[key].lat;
             crime.lng = _geocodeCache[key].lng;
-        } else {
-            needGeocode.push(crime);
         }
     });
 
-    if (needGeocode.length === 0) {
-        console.log("[geocode] Все адреса в кэше (" + crimeIncidents.length + ")");
+    // 2. Собираем УНИКАЛЬНЫЕ адреса, которых нет в кэше
+    var uniqueAddresses = {};   // key → первый crime с этим адресом
+    var crimesByKey = {};       // key → [crime, crime, ...]
+
+    crimeIncidents.forEach(function (crime) {
+        var key = _geoCacheKey(crime);
+        if (!crimesByKey[key]) crimesByKey[key] = [];
+        crimesByKey[key].push(crime);
+
+        if (!_geocodeCache[key] && !uniqueAddresses[key]) {
+            uniqueAddresses[key] = crime;
+        }
+    });
+
+    var keysToGeocode = Object.keys(uniqueAddresses);
+
+    if (keysToGeocode.length === 0) {
+        console.log("[geocode] Все адреса в кэше (" + crimeIncidents.length +
+            " записей, " + Object.keys(crimesByKey).length + " уникальных адресов)");
         if (onDone) onDone();
         return;
     }
 
-    console.log("[geocode] Нужно геокодировать: " + needGeocode.length + " из " + crimeIncidents.length);
+    var totalUnique = keysToGeocode.length;
+    var totalRecords = crimeIncidents.filter(function (c) { return !c.lat; }).length;
+    console.log("[geocode] Уникальных адресов для геокодирования: " + totalUnique +
+        " (покрывают " + totalRecords + " записей из " + crimeIncidents.length + ")");
 
     var idx = 0;
 
     function processNext() {
-        if (idx >= needGeocode.length) {
+        if (idx >= keysToGeocode.length) {
             _saveGeoCache();
             console.log("[geocode] Готово");
             if (onDone) onDone();
             return;
         }
 
-        var crime = needGeocode[idx];
-        var key = _geoCacheKey(crime);
+        var key = keysToGeocode[idx];
+        var sampleCrime = uniqueAddresses[key];
 
-        _geocodeWithFallback(crime).then(function (result) {
+        _geocodeWithFallback(sampleCrime).then(function (result) {
+            var coords;
             if (result) {
-                crime.lat = result.lat;
-                crime.lng = result.lng;
-                _geocodeCache[key] = result;
-                console.log("[geocode] " + crime.erdr + " → " +
+                coords = result;
+                console.log("[geocode] [" + (idx + 1) + "/" + totalUnique + "] " +
+                    key.replace(/\|/g, ", ") + " → " +
                     result.lat.toFixed(4) + ", " + result.lng.toFixed(4));
             } else {
-                // Fallback: центр Атырау
-                crime.lat = 47.1067;
-                crime.lng = 51.9203;
-                _geocodeCache[key] = { lat: crime.lat, lng: crime.lng };
-                console.warn("[geocode] " + crime.erdr + " — не найден, центр Атырау");
+                coords = { lat: 47.1067, lng: 51.9203 };
+                console.warn("[geocode] [" + (idx + 1) + "/" + totalUnique + "] " +
+                    key.replace(/\|/g, ", ") + " — не найден, центр Атырау");
             }
 
+            // Сохраняем в кэш
+            _geocodeCache[key] = coords;
+
+            // Раздаём координаты ВСЕМ записям с этим адресом
+            crimesByKey[key].forEach(function (crime) {
+                crime.lat = coords.lat;
+                crime.lng = coords.lng;
+            });
+
             idx++;
-            if (onProgress) onProgress(idx, needGeocode.length);
+            if (onProgress) onProgress(idx, totalUnique);
+
+            // Сохраняем кэш каждые 10 запросов
+            if (idx % 10 === 0) _saveGeoCache();
 
             // Nominatim: max 1 запрос в секунду
             setTimeout(processNext, 1100);
