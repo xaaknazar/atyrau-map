@@ -141,6 +141,47 @@ function onOpen() {
     .addToUi();
 }
 
+// ══════════════════════════════════════════════════════════════
+//  Web App — API для карты (doGet)
+// ══════════════════════════════════════════════════════════════
+
+/**
+ * Обработчик GET-запросов — возвращает данные из таблицы как JSON.
+ * Карта вызывает этот URL и получает массив объектов с координатами.
+ *
+ * Для работы:
+ * 1. Deploy → New deployment → Web app
+ * 2. Execute as: Me
+ * 3. Who has access: Anyone
+ */
+function doGet(e) {
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+  var data = sheet.getDataRange().getValues();
+
+  if (data.length < 2) {
+    return ContentService.createTextOutput(JSON.stringify([]))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+
+  var headers = data[0];
+  var rows = [];
+
+  for (var i = 1; i < data.length; i++) {
+    var row = data[i];
+    // Пропускаем пустые строки (без номера ЕРДР)
+    if (!row[1] || String(row[1]).trim() === "") continue;
+
+    var obj = {};
+    for (var j = 0; j < headers.length; j++) {
+      obj[headers[j]] = row[j] !== undefined ? row[j] : "";
+    }
+    rows.push(obj);
+  }
+
+  return ContentService.createTextOutput(JSON.stringify(rows))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+
 /**
  * Очистить все координаты (для повторного геокодирования).
  */
