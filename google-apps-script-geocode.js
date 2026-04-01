@@ -1,5 +1,5 @@
 /**
- * Google Apps Script для автоматического геокодирования адресов в Google Sheets.
+ * Google Apps Script для геокодирования адресов ЕРДР в Google Sheets.
  *
  * ═══════════════════════════════════════════════════════════════
  *  КАК ИСПОЛЬЗОВАТЬ:
@@ -10,19 +10,14 @@
  * 3. Удалите содержимое файла Code.gs
  * 4. Вставьте ВЕСЬ этот код
  * 5. Нажмите 💾 Сохранить
- * 6. Добавьте в таблицу колонки U (Широта) и V (Долгота) — колонки 21 и 22
- *    (или они уже могут быть — главное чтобы были пустые колонки после последней)
- * 7. Запустите функцию geocodeAllRows (кнопка ▶ Run)
+ * 6. Запустите: clearCoordinates() → затем geocodeAllRows()
  *    При первом запуске Google попросит разрешения — нажмите "Разрешить"
- * 8. Скрипт заполнит координаты для всех адресов г. Атырау
- *    (город = "АТЫРАУ", улица и дом не пустые)
  *
  * ВАЖНО:
- * - Скрипт использует Google Maps Geocoding (бесплатно в Apps Script)
- * - Обрабатывает только строки где город = "АТЫРАУ" и есть улица + дом
- * - Пропускает строки где координаты уже заполнены
- * - Работает пакетами по 50 строк с паузами (лимиты Google)
- * - После завершения таблицу нужно переопубликовать (Файл → Опубликовать)
+ * - Координаты проверяются: должны попадать в границы г. Атырау
+ * - Если Google не нашёл точный адрес (вернул центр города) — помечается как ошибка
+ * - Микрорайоны (№8, №20 и т.д.) преобразуются в "микрорайон 8"
+ * - Пауза между запросами для соблюдения лимитов Google
  *
  * ═══════════════════════════════════════════════════════════════
  */
@@ -31,12 +26,82 @@
 var COL_CITY   = 16;  // 31.Место совершения Населенный пункт
 var COL_STREET = 17;  // 31.Место совершения Улица
 var COL_HOUSE  = 18;  // 31.Место совершения Дом
-var COL_LAT    = 21;  // Широта (новая колонка U)
-var COL_LNG    = 22;  // Долгота (новая колонка V)
+var COL_LAT    = 21;  // U (Широта)
+var COL_LNG    = 22;  // V (Долгота)
+
+// Границы города Атырау — координаты за пределами = ошибка геокодирования
+var ATYRAU_MIN_LAT = 46.92;
+var ATYRAU_MAX_LAT = 47.20;
+var ATYRAU_MIN_LNG = 51.75;
+var ATYRAU_MAX_LNG = 52.05;
+
+// Координата центра Атырау — если Google вернул её, значит адрес НЕ найден
+var ATYRAU_CENTER_LAT = 47.0945;
+var ATYRAU_CENTER_LNG = 51.9238;
+var CENTER_THRESHOLD = 0.002;  // ~200 метров от центра = "не найдено"
+
+/**
+ * Проверить что координаты в пределах Атырау (не в Алматы, не в Кокшетау и т.д.)
+ */
+function isInAtyrauBounds(lat, lng) {
+  return lat >= ATYRAU_MIN_LAT && lat <= ATYRAU_MAX_LAT &&
+         lng >= ATYRAU_MIN_LNG && lng <= ATYRAU_MAX_LNG;
+}
+
+/**
+ * Проверить что координаты НЕ являются центром города (= адрес не найден)
+ */
+function isNotCityCenter(lat, lng) {
+  return Math.abs(lat - ATYRAU_CENTER_LAT) > CENTER_THRESHOLD ||
+         Math.abs(lng - ATYRAU_CENTER_LNG) > CENTER_THRESHOLD;
+}
+
+/**
+ * Нормализовать название улицы для лучшего геокодирования.
+ * - "№8" или "8" → "микрорайон 8"
+ * - "АВАНГАРД-3" → "Авангард 3"
+ * - Убрать лишние символы
+ */
+function normalizeStreet(street) {
+  var s = String(street).trim();
+
+  // Улица — просто число или "№число" → микрорайон
+  if (/^№?\s*\d+$/.test(s)) {
+    var num = s.replace(/[№\s]/g, "");
+    return "микрорайон " + num;
+  }
+
+  // "№ 27" формат
+  if (/^№\s*\d+/.test(s)) {
+    var num2 = s.replace(/[№\s]/g, "");
+    return "микрорайон " + num2;
+  }
+
+  return s;
+}
+
+/**
+ * Нормализовать номер дома — убрать даты и мусор.
+ * Иногда в поле "дом" попадает дата или другие данные.
+ */
+function normalizeHouse(house) {
+  var h = String(house).trim();
+
+  // Если это дата (содержит "Mon", "Tue", "GMT", "/" и т.д.)
+  if (/\b(Mon|Tue|Wed|Thu|Fri|Sat|Sun|Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec|GMT)\b/i.test(h)) {
+    return "";  // Невалидный дом
+  }
+
+  // Если содержит год (2024, 2025, 2026)
+  if (/\b20(2[0-9])\b/.test(h) && h.length > 10) {
+    return "";  // Это дата, не номер дома
+  }
+
+  return h;
+}
 
 /**
  * Главная функция — геокодировать все строки.
- * Запускайте эту функцию.
  */
 function geocodeAllRows() {
   var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
@@ -45,12 +110,12 @@ function geocodeAllRows() {
   var skipped = 0;
   var errors = 0;
   var alreadyDone = 0;
+  var outOfBounds = 0;
+  var centerHits = 0;
 
-  // Пропускаем заголовок (строка 1)
   for (var i = 1; i < data.length; i++) {
     var row = data[i];
 
-    // Колонки 0-based в массиве
     var city   = String(row[COL_CITY - 1] || "").trim().toUpperCase();
     var street = String(row[COL_STREET - 1] || "").trim();
     var house  = String(row[COL_HOUSE - 1] || "").trim();
@@ -69,37 +134,74 @@ function geocodeAllRows() {
       continue;
     }
 
-    // Формируем адрес для геокодирования
-    var address = "Казахстан, Атырау, " + street + " " + house;
+    // Нормализация
+    var normStreet = normalizeStreet(street);
+    var normHouse = normalizeHouse(house);
+
+    if (!normHouse) {
+      errors++;
+      Logger.log("✗ Строка " + (i + 1) + ": невалидный дом — '" + house + "'");
+      continue;
+    }
+
+    // Формируем адрес — добавляем "улица" для обычных названий
+    var address;
+    if (normStreet.indexOf("микрорайон") === 0) {
+      address = "Казахстан, город Атырау, " + normStreet + ", дом " + normHouse;
+    } else {
+      address = "Казахстан, город Атырау, улица " + normStreet + ", дом " + normHouse;
+    }
 
     try {
+      // Пауза перед каждым запросом для избежания rate limit
+      Utilities.sleep(200);
+
       var coords = geocodeAddress(address);
-      if (coords) {
-        // Записываем в ячейки (строка i+1 т.к. 1-based)
-        sheet.getRange(i + 1, COL_LAT).setValue(coords.lat);
-        sheet.getRange(i + 1, COL_LNG).setValue(coords.lng);
-        updated++;
-        Logger.log("✓ Строка " + (i + 1) + ": " + address + " → " + coords.lat + ", " + coords.lng);
-      } else {
+
+      if (!coords) {
         errors++;
         Logger.log("✗ Строка " + (i + 1) + ": не найден — " + address);
+        continue;
       }
+
+      // Проверка 1: координаты в пределах Атырау?
+      if (!isInAtyrauBounds(coords.lat, coords.lng)) {
+        outOfBounds++;
+        Logger.log("⚠ Строка " + (i + 1) + ": ВНЕ АТЫРАУ (" + coords.lat + ", " + coords.lng + ") — " + address);
+        continue;
+      }
+
+      // Проверка 2: не центр города? (= адрес не найден точно)
+      if (!isNotCityCenter(coords.lat, coords.lng)) {
+        centerHits++;
+        Logger.log("⚠ Строка " + (i + 1) + ": ЦЕНТР ГОРОДА (неточно) — " + address);
+        continue;
+      }
+
+      // Координаты валидны — записываем
+      sheet.getRange(i + 1, COL_LAT).setValue(coords.lat);
+      sheet.getRange(i + 1, COL_LNG).setValue(coords.lng);
+      updated++;
+      Logger.log("✓ Строка " + (i + 1) + ": " + address + " → " + coords.lat + ", " + coords.lng);
+
     } catch (e) {
       errors++;
       Logger.log("✗ Строка " + (i + 1) + ": ошибка — " + e.message);
-    }
-
-    // Пауза каждые 50 строк чтобы не превысить лимиты
-    if (updated > 0 && updated % 50 === 0) {
-      Utilities.sleep(1000);
+      // Если rate limit — подождать подольше
+      if (e.message.indexOf("too many times") !== -1) {
+        Utilities.sleep(5000);
+      }
     }
   }
 
-  var msg = "Готово!\n" +
-    "Обновлено: " + updated + "\n" +
+  var msg = "Готово!\n\n" +
+    "Точно определено: " + updated + "\n" +
     "Уже было: " + alreadyDone + "\n" +
     "Пропущено (не Атырау / нет улицы): " + skipped + "\n" +
-    "Ошибки: " + errors;
+    "Вне границ Атырау (отклонено): " + outOfBounds + "\n" +
+    "Центр города / неточно (отклонено): " + centerHits + "\n" +
+    "Ошибки: " + errors + "\n\n" +
+    "Адреса помеченные ⚠ нужно проверить вручную через 2ГИС.";
 
   Logger.log(msg);
   SpreadsheetApp.getUi().alert(msg);
@@ -107,15 +209,13 @@ function geocodeAllRows() {
 
 /**
  * Геокодирование одного адреса через Google Maps Geocoding API.
- * Бесплатно в Google Apps Script (не требует API ключа).
- *
- * @param {string} address — полный адрес
- * @returns {{lat: number, lng: number} | null}
+ * Ограничивает поиск рамками Атырауской области.
  */
 function geocodeAddress(address) {
   var geocoder = Maps.newGeocoder()
     .setRegion("kz")
-    .setLanguage("ru");
+    .setLanguage("ru")
+    .setBounds(ATYRAU_MIN_LAT, ATYRAU_MIN_LNG, ATYRAU_MAX_LAT, ATYRAU_MAX_LNG);
 
   var response = geocoder.geocode(address);
 
@@ -147,12 +247,6 @@ function onOpen() {
 
 /**
  * Обработчик GET-запросов — возвращает данные из таблицы как JSON.
- * Карта вызывает этот URL и получает массив объектов с координатами.
- *
- * Для работы:
- * 1. Deploy → New deployment → Web app
- * 2. Execute as: Me
- * 3. Who has access: Anyone
  */
 function doGet(e) {
   var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
@@ -168,7 +262,6 @@ function doGet(e) {
 
   for (var i = 1; i < data.length; i++) {
     var row = data[i];
-    // Пропускаем пустые строки (без номера ЕРДР)
     if (!row[1] || String(row[1]).trim() === "") continue;
 
     var obj = {};
