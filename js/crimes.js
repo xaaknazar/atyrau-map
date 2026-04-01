@@ -337,91 +337,128 @@ function _geocodeWithFallback(crime) {
 
 /**
  * Геокодировать все инциденты.
- * ОПТИМИЗАЦИЯ: группировка по уникальным адресам.
- * Вместо 719 запросов — только уникальные комбинации (город+улица+дом).
  *
- * @param {Function} onProgress — вызывается после каждого геокодированного адреса
+ * Порядок определения координат:
+ * 1. localStorage кэш (мгновенно)
+ * 2. Локальный справочник geodict.js (мгновенно, точные координаты)
+ * 3. Nominatim API (только для адресов, которых нет в справочнике)
+ *
+ * Группировка по уникальным адресам — один запрос на одинаковые адреса.
+ *
+ * @param {Function} onProgress — вызывается после каждого адреса
  * @param {Function} onDone — вызывается когда все готово
  */
 function geocodeAllCrimes(onProgress, onDone) {
     _loadGeoCache();
 
-    // 1. Применяем кэш ко всем записям
-    crimeIncidents.forEach(function (crime) {
-        var key = _geoCacheKey(crime);
-        if (_geocodeCache[key]) {
-            crime.lat = _geocodeCache[key].lat;
-            crime.lng = _geocodeCache[key].lng;
-        }
-    });
-
-    // 2. Собираем УНИКАЛЬНЫЕ адреса, которых нет в кэше
-    var uniqueAddresses = {};   // key → первый crime с этим адресом
     var crimesByKey = {};       // key → [crime, crime, ...]
+    var uniqueAddresses = {};   // key → первый crime с этим адресом
 
+    // 1. Группируем по уникальным адресам
     crimeIncidents.forEach(function (crime) {
         var key = _geoCacheKey(crime);
         if (!crimesByKey[key]) crimesByKey[key] = [];
         crimesByKey[key].push(crime);
 
-        if (!_geocodeCache[key] && !uniqueAddresses[key]) {
+        if (!uniqueAddresses[key]) {
             uniqueAddresses[key] = crime;
         }
     });
 
-    var keysToGeocode = Object.keys(uniqueAddresses);
+    var totalUniqueKeys = Object.keys(uniqueAddresses).length;
+    var resolvedFromCache = 0;
+    var resolvedFromDict = 0;
+    var needNominatim = [];
 
-    if (keysToGeocode.length === 0) {
-        console.log("[geocode] Все адреса в кэше (" + crimeIncidents.length +
-            " записей, " + Object.keys(crimesByKey).length + " уникальных адресов)");
+    // 2. Применяем кэш, затем локальный справочник
+    Object.keys(uniqueAddresses).forEach(function (key) {
+        var sampleCrime = uniqueAddresses[key];
+        var coords = null;
+
+        // Сначала — кэш
+        if (_geocodeCache[key]) {
+            coords = _geocodeCache[key];
+            resolvedFromCache++;
+        }
+        // Затем — локальный справочник
+        else if (typeof lookupLocalGeo === "function") {
+            var localResult = lookupLocalGeo(sampleCrime);
+            if (localResult) {
+                coords = localResult;
+                _geocodeCache[key] = coords;
+                resolvedFromDict++;
+            }
+        }
+
+        if (coords) {
+            // Раздаём координаты всем записям с этим адресом
+            crimesByKey[key].forEach(function (crime) {
+                crime.lat = coords.lat;
+                crime.lng = coords.lng;
+            });
+        } else {
+            needNominatim.push(key);
+        }
+    });
+
+    console.log("[geocode] Уникальных адресов: " + totalUniqueKeys +
+        " | из кэша: " + resolvedFromCache +
+        " | из справочника: " + resolvedFromDict +
+        " | на Nominatim: " + needNominatim.length);
+
+    if (needNominatim.length === 0) {
+        _saveGeoCache();
         if (onDone) onDone();
         return;
     }
 
-    var totalUnique = keysToGeocode.length;
-    var totalRecords = crimeIncidents.filter(function (c) { return !c.lat; }).length;
-    console.log("[geocode] Уникальных адресов для геокодирования: " + totalUnique +
-        " (покрывают " + totalRecords + " записей из " + crimeIncidents.length + ")");
-
+    // 3. Nominatim — только для оставшихся
     var idx = 0;
 
     function processNext() {
-        if (idx >= keysToGeocode.length) {
+        if (idx >= needNominatim.length) {
             _saveGeoCache();
             console.log("[geocode] Готово");
             if (onDone) onDone();
             return;
         }
 
-        var key = keysToGeocode[idx];
+        var key = needNominatim[idx];
         var sampleCrime = uniqueAddresses[key];
 
         _geocodeWithFallback(sampleCrime).then(function (result) {
             var coords;
             if (result) {
                 coords = result;
-                console.log("[geocode] [" + (idx + 1) + "/" + totalUnique + "] " +
+                console.log("[geocode] [" + (idx + 1) + "/" + needNominatim.length + "] " +
                     key.replace(/\|/g, ", ") + " → " +
                     result.lat.toFixed(4) + ", " + result.lng.toFixed(4));
             } else {
-                coords = { lat: 47.1067, lng: 51.9203 };
-                console.warn("[geocode] [" + (idx + 1) + "/" + totalUnique + "] " +
-                    key.replace(/\|/g, ", ") + " — не найден, центр Атырау");
+                // Последний fallback — справочник по городу/району, или центр Атырау
+                var dictFallback = null;
+                if (typeof lookupLocalGeo === "function") {
+                    // Пробуем найти хотя бы по городу
+                    dictFallback = lookupLocalGeo({
+                        city: sampleCrime.city,
+                        street: "",
+                        district: sampleCrime.district
+                    });
+                }
+                coords = dictFallback || { lat: 47.1067, lng: 51.9203 };
+                console.warn("[geocode] [" + (idx + 1) + "/" + needNominatim.length + "] " +
+                    key.replace(/\|/g, ", ") + " — не найден, fallback");
             }
 
-            // Сохраняем в кэш
             _geocodeCache[key] = coords;
 
-            // Раздаём координаты ВСЕМ записям с этим адресом
             crimesByKey[key].forEach(function (crime) {
                 crime.lat = coords.lat;
                 crime.lng = coords.lng;
             });
 
             idx++;
-            if (onProgress) onProgress(idx, totalUnique);
+            if (onProgress) onProgress(idx, needNominatim.length);
 
-            // Сохраняем кэш каждые 10 запросов
             if (idx % 10 === 0) _saveGeoCache();
 
             // Nominatim: max 1 запрос в секунду
