@@ -66,11 +66,6 @@
         <!-- Crime incidents (ЕРДР) section -->
         <div class="crime-incidents-section">
             <h3 data-i18n="crime_incidents_title">Зарегистрированные правонарушения</h3>
-            <label class="legend-item">
-                <input type="checkbox" checked id="crime-incidents-toggle" />
-                <span class="legend-dot" style="background: #e74c3c;"></span>
-                <span data-i18n="crime_incidents_show">Показать на карте</span>
-            </label>
             <div class="crime-filter-group">
                 <label class="crime-filter-label" data-i18n="crime_filter_period">Период:</label>
                 <div class="crime-filter-buttons">
@@ -87,6 +82,7 @@
             <div id="crime-loading-status" class="crime-loading-status">
                 <span data-i18n="crime_loading">Загрузка данных из таблицы...</span>
             </div>
+            <div id="crime-list" class="crime-list"></div>
         </div>
 
         <div class="stats">

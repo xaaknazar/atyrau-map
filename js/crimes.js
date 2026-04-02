@@ -365,14 +365,12 @@ function initCrimeData(onProgress, onDone) {
 
 /**
  * Фильтрация инцидентов по периоду.
- * Показываются только записи с координатами (где были город + улица + дом).
+ * Показываются все записи (для отображения списком).
  * @param {string} period — "all" | "month" | "week" | "day"
  * @returns {Array} Отфильтрованный массив
  */
 function filterCrimesByPeriod(period) {
-    var list = crimeIncidents.filter(function (c) {
-        return typeof c.lat === "number" && typeof c.lng === "number";
-    });
+    var list = crimeIncidents.slice();
 
     if (period === "all") return list;
 

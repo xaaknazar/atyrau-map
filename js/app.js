@@ -280,80 +280,46 @@
     });
 
     // ═══════════════════════════════════════════════════════
-    //  CRIME INCIDENTS (ЕРДР) — separate layer from static points
+    //  CRIME INCIDENTS (ЕРДР) — sidebar list (not map markers)
+    //  Manual crime points stay on the map as before.
+    //  ст.190 hidden from map but visible in list.
     // ═══════════════════════════════════════════════════════
-    var crimeIncidentLayer = L.markerClusterGroup({
-        maxClusterRadius: 40,
-        spiderfyOnMaxZoom: true,
-        showCoverageOnHover: false,
-        iconCreateFunction: function (cluster) {
-            var count = cluster.getChildCount();
-            var size = count < 10 ? 36 : count < 50 ? 44 : 52;
-            return L.divIcon({
-                html: '<div style="background:#e74c3c;width:' + (size - 10) + 'px;height:' + (size - 10) + 'px;' +
-                    'border-radius:50%;display:flex;align-items:center;justify-content:center;' +
-                    'color:#fff;font-weight:700;font-size:12px;">' + count + '</div>',
-                className: 'cat-cluster cat-cluster-crime',
-                iconSize: L.point(size, size)
-            });
-        }
-    });
-    map.addLayer(crimeIncidentLayer);
-
-    var crimeMarkers = [];
     var currentCrimePeriod = "all";
 
-    function createCrimeMarkerIcon() {
-        return L.divIcon({
-            className: "custom-marker",
-            html: '<div class="marker-pin crime-incident"></div>',
-            iconSize: [20, 20],
-            iconAnchor: [10, 10]
-        });
-    }
-
-    function buildCrimeMarkers() {
-        crimeIncidentLayer.clearLayers();
-        crimeMarkers = [];
+    /**
+     * Построить список правонарушений в сайдбаре.
+     * Все записи из ЕРДР показываются списком.
+     */
+    function buildCrimeList() {
+        var listEl = document.getElementById("crime-list");
+        if (!listEl) return;
+        listEl.innerHTML = "";
 
         var filtered = filterCrimesByPeriod(currentCrimePeriod);
 
         filtered.forEach(function (crime) {
-            if (!crime.lat || !crime.lng) return;
-            var marker = L.marker([crime.lat, crime.lng], {
-                icon: createCrimeMarkerIcon()
-            });
+            var item = document.createElement("div");
+            item.className = "crime-list-item";
 
-            marker.on("click", function () {
+            var dateStr = formatCrimeDate(crime.regDate);
+            var address = buildCrimeAddress(crime);
+
+            item.innerHTML =
+                '<div class="crime-list-item-header">' +
+                    '<span class="crime-list-article">' + (crime.article || "—") + '</span>' +
+                    '<span class="crime-list-date">' + dateStr + '</span>' +
+                '</div>' +
+                '<div class="crime-list-address">' + (address || "—") + '</div>' +
+                '<div class="crime-list-organ">' + (crime.organ || "") + '</div>';
+
+            item.addEventListener("click", function () {
                 openCrimeModal(crime);
             });
 
-            var tooltipText = crime.article + " — " + buildCrimeAddress(crime);
-            if (tooltipText.length > 80) tooltipText = tooltipText.substring(0, 77) + "...";
-
-            marker.bindTooltip(tooltipText, {
-                direction: "top",
-                offset: [0, -12],
-                className: "marker-tooltip crime-tooltip"
-            });
-
-            crimeIncidentLayer.addLayer(marker);
-            crimeMarkers.push(marker);
+            listEl.appendChild(item);
         });
 
         document.getElementById("count-crime-incidents").textContent = filtered.length;
-    }
-
-    // Crime toggle
-    var crimeToggle = document.getElementById("crime-incidents-toggle");
-    if (crimeToggle) {
-        crimeToggle.addEventListener("change", function () {
-            if (this.checked) {
-                map.addLayer(crimeIncidentLayer);
-            } else {
-                map.removeLayer(crimeIncidentLayer);
-            }
-        });
     }
 
     // Crime period filter buttons
@@ -364,7 +330,7 @@
             });
             this.classList.add("active");
             currentCrimePeriod = this.getAttribute("data-period");
-            buildCrimeMarkers();
+            buildCrimeList();
         });
     });
 
@@ -401,7 +367,7 @@
         null,
         function () {
             if (crimeLoadingEl) crimeLoadingEl.classList.add("hidden");
-            buildCrimeMarkers();
+            buildCrimeList();
         }
     );
 
