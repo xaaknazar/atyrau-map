@@ -2411,10 +2411,53 @@ body {
     font-size: 14px;
     color: #c0c8e0;
     line-height: 1.7;
-    white-space: pre-wrap;
 }
 
 .an-ai-result:empty { display: none; }
+
+.an-ai-result h2 {
+    font-size: 20px;
+    color: #fff;
+    margin: 24px 0 12px 0;
+    padding-bottom: 6px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+.an-ai-result h2:first-child { margin-top: 0; }
+
+.an-ai-result h3 {
+    font-size: 17px;
+    color: #e0e6f0;
+    margin: 20px 0 8px 0;
+}
+
+.an-ai-result h4 {
+    font-size: 15px;
+    color: #b0b8d0;
+    margin: 16px 0 6px 0;
+}
+
+.an-ai-result p {
+    margin: 6px 0;
+}
+
+.an-ai-result ul, .an-ai-result ol {
+    margin: 8px 0;
+    padding-left: 24px;
+}
+
+.an-ai-result li {
+    margin: 4px 0;
+}
+
+.an-ai-result strong {
+    color: #fff;
+}
+
+.an-ai-result hr {
+    border: none;
+    border-top: 1px solid rgba(255,255,255,0.1);
+    margin: 16px 0;
+}
 
 /* Problem zone circles on map */
 .zone-circle-label {

@@ -1,6 +1,43 @@
 (function () {
     "use strict";
 
+    // ── Markdown to HTML ───────────────────────────────────
+    function markdownToHtml(md) {
+        // Escape HTML
+        var html = md.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        // Headers
+        html = html.replace(/^### (.+)$/gm, "<h4>$1</h4>");
+        html = html.replace(/^## (.+)$/gm, "<h3>$1</h3>");
+        html = html.replace(/^# (.+)$/gm, "<h2>$1</h2>");
+        // Bold
+        html = html.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
+        // Italic
+        html = html.replace(/\*(.+?)\*/g, "<em>$1</em>");
+        // Horizontal rule
+        html = html.replace(/^---$/gm, "<hr>");
+        // Bullet lists: group consecutive lines starting with "- "
+        html = html.replace(/(^- .+$(\n|$))+/gm, function (block) {
+            var items = block.trim().split("\n").map(function (line) {
+                return "<li>" + line.replace(/^- /, "") + "</li>";
+            }).join("");
+            return "<ul>" + items + "</ul>\n";
+        });
+        // Numbered lists: group consecutive lines starting with "N. "
+        html = html.replace(/(^\d+\. .+$(\n|$))+/gm, function (block) {
+            var items = block.trim().split("\n").map(function (line) {
+                return "<li>" + line.replace(/^\d+\. /, "") + "</li>";
+            }).join("");
+            return "<ol>" + items + "</ol>\n";
+        });
+        // Paragraphs: wrap remaining non-tag lines
+        html = html.replace(/^(?!<[houl])(.*\S.*)$/gm, function (m, p1) {
+            return "<p>" + p1 + "</p>";
+        });
+        // Clean up extra newlines
+        html = html.replace(/\n{2,}/g, "\n");
+        return html.trim();
+    }
+
     // ── Config ──────────────────────────────────────────────
     var ADMIN_PASSWORD = "prokuratura2025";
 
@@ -848,7 +885,7 @@
                 if (err) {
                     resultEl.textContent = "Ошибка: " + err.message;
                 } else {
-                    resultEl.textContent = text;
+                    resultEl.innerHTML = markdownToHtml(text);
                 }
             });
         });
