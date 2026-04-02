@@ -281,26 +281,99 @@
 
     // ═══════════════════════════════════════════════════════
     //  CRIME INCIDENTS (ЕРДР) — full panel view
-    //  Manual crime points stay on the map.
-    //  ЕРДР data shown as a full-screen list panel.
     // ═══════════════════════════════════════════════════════
     var currentCrimePeriod = "all";
     var crimeSearchQuery = "";
+    var crimeFilterArticle = "";
+    var crimeFilterOrgan = "";
+    var crimeFilterPlace = "";
+    var crimeFilterPublic = "";
+    var crimeSortMode = "date-desc";
 
     /**
-     * Построить список правонарушений в панели.
+     * Заполнить выпадающие списки фильтров уникальными значениями.
      */
-    function buildCrimeList() {
-        var listEl = document.getElementById("crime-list");
-        if (!listEl) return;
-        listEl.innerHTML = "";
+    function populateCrimeFilters() {
+        var articles = {}, organs = {}, places = {};
 
-        var filtered = filterCrimesByPeriod(currentCrimePeriod);
+        crimeIncidents.forEach(function (c) {
+            if (c.article) articles[c.article] = true;
+            if (c.organ) organs[c.organ] = true;
+            if (c.placeType) places[c.placeType] = true;
+        });
 
-        // Поиск
+        _fillSelect("crime-filter-article", articles, "Все статьи");
+        _fillSelect("crime-filter-organ", organs, "Все органы");
+        _fillSelect("crime-filter-place", places, "Все");
+    }
+
+    function _fillSelect(id, valuesObj, defaultLabel) {
+        var el = document.getElementById(id);
+        if (!el) return;
+        var current = el.value;
+        el.innerHTML = '<option value="">' + defaultLabel + '</option>';
+        Object.keys(valuesObj).sort().forEach(function (v) {
+            var opt = document.createElement("option");
+            opt.value = v;
+            opt.textContent = v;
+            el.appendChild(opt);
+        });
+        el.value = current;
+    }
+
+    /**
+     * Обновить карточки статистики.
+     */
+    function updateCrimeStats() {
+        var all = crimeIncidents;
+        var total = all.length;
+        var publicCount = all.filter(function (c) { return c.isPublic; }).length;
+        var withCoords = all.filter(function (c) {
+            return typeof c.lat === "number" && !isNaN(c.lat);
+        }).length;
+        var articleSet = {};
+        all.forEach(function (c) { if (c.article) articleSet[c.article] = true; });
+        var uniqueArticles = Object.keys(articleSet).length;
+
+        _setText("cs-total", total);
+        _setText("cs-public", publicCount);
+        _setText("cs-coords", withCoords);
+        _setText("cs-articles", uniqueArticles);
+    }
+
+    function _setText(id, val) {
+        var el = document.getElementById(id);
+        if (el) el.textContent = val;
+    }
+
+    /**
+     * Получить отфильтрованный и отсортированный список.
+     */
+    function getFilteredCrimes() {
+        var list = filterCrimesByPeriod(currentCrimePeriod);
+
+        // Фильтр по статье
+        if (crimeFilterArticle) {
+            list = list.filter(function (c) { return c.article === crimeFilterArticle; });
+        }
+        // Фильтр по органу
+        if (crimeFilterOrgan) {
+            list = list.filter(function (c) { return c.organ === crimeFilterOrgan; });
+        }
+        // Фильтр по месту
+        if (crimeFilterPlace) {
+            list = list.filter(function (c) { return c.placeType === crimeFilterPlace; });
+        }
+        // Фильтр по общественному месту
+        if (crimeFilterPublic === "yes") {
+            list = list.filter(function (c) { return c.isPublic; });
+        } else if (crimeFilterPublic === "no") {
+            list = list.filter(function (c) { return !c.isPublic; });
+        }
+        // Текстовый поиск
         if (crimeSearchQuery) {
             var q = crimeSearchQuery.toLowerCase();
-            filtered = filtered.filter(function (c) {
+            list = list.filter(function (c) {
                 return (c.article || "").toLowerCase().indexOf(q) !== -1 ||
                        (c.street || "").toLowerCase().indexOf(q) !== -1 ||
                        (c.city || "").toLowerCase().indexOf(q) !== -1 ||
@@ -310,9 +383,33 @@
                        buildCrimeAddress(c).toLowerCase().indexOf(q) !== -1;
             });
         }
+        // Сортировка
+        list.sort(function (a, b) {
+            switch (crimeSortMode) {
+                case "date-asc":
+                    return (a.regDate || "").localeCompare(b.regDate || "");
+                case "article":
+                    return (a.article || "").localeCompare(b.article || "");
+                default: // date-desc
+                    return (b.regDate || "").localeCompare(a.regDate || "");
+            }
+        });
+
+        return list;
+    }
+
+    /**
+     * Построить список правонарушений в панели.
+     */
+    function buildCrimeList() {
+        var listEl = document.getElementById("crime-list");
+        if (!listEl) return;
+        listEl.innerHTML = "";
+
+        var filtered = getFilteredCrimes();
 
         if (filtered.length === 0) {
-            listEl.innerHTML = '<div class="crime-list-empty">Нет данных</div>';
+            listEl.innerHTML = '<div class="crime-list-empty">Нет данных по выбранным фильтрам</div>';
         }
 
         filtered.forEach(function (crime) {
@@ -321,7 +418,13 @@
 
             var dateStr = formatCrimeDate(crime.regDate);
             var address = buildCrimeAddress(crime);
-            var desc = (crime.description || "").substring(0, 150);
+            var desc = (crime.description || "").substring(0, 200);
+            var placeBadge = "";
+            if (crime.placeType) {
+                var cls = crime.isPublic ? "crime-list-place-badge public" : "crime-list-place-badge";
+                placeBadge = '<span class="' + cls + '">' + crime.placeType +
+                    (crime.isPublic ? " (общ.)" : "") + '</span>';
+            }
 
             item.innerHTML =
                 '<div class="crime-list-item-header">' +
@@ -332,6 +435,7 @@
                 '<div class="crime-list-erdr">ЕРДР: ' + (crime.erdr || "—") + '</div>' +
                 '<div class="crime-list-address">' + (address || "—") + '</div>' +
                 '<div class="crime-list-organ">' + (crime.organ || "") + '</div>' +
+                placeBadge +
                 (desc ? '<div class="crime-list-description">' + desc + '</div>' : '');
 
             item.addEventListener("click", function () {
@@ -342,15 +446,14 @@
         });
 
         // Обновить счётчики
-        document.getElementById("count-crime-incidents").textContent = filtered.length;
+        document.getElementById("count-crime-incidents").textContent = crimeIncidents.length;
         var panelCount = document.getElementById("crime-panel-count-value");
         if (panelCount) panelCount.textContent = filtered.length;
     }
 
-    // Crime period filter buttons (в панели)
+    // ── Filter event listeners ────────────────────────────
     document.querySelectorAll(".crime-period-btn").forEach(function (btn) {
         btn.addEventListener("click", function () {
-            // Обновить active только в текущем контейнере
             this.parentElement.querySelectorAll(".crime-period-btn").forEach(function (b) {
                 b.classList.remove("active");
             });
@@ -360,11 +463,59 @@
         });
     });
 
-    // Поиск в панели
     var crimeSearchInput = document.getElementById("crime-search-input");
     if (crimeSearchInput) {
+        var _searchTimer;
         crimeSearchInput.addEventListener("input", function () {
-            crimeSearchQuery = this.value.trim();
+            var self = this;
+            clearTimeout(_searchTimer);
+            _searchTimer = setTimeout(function () {
+                crimeSearchQuery = self.value.trim();
+                buildCrimeList();
+            }, 200);
+        });
+    }
+
+    ["crime-filter-article", "crime-filter-organ", "crime-filter-place", "crime-filter-public", "crime-sort"].forEach(function (id) {
+        var el = document.getElementById(id);
+        if (!el) return;
+        el.addEventListener("change", function () {
+            switch (id) {
+                case "crime-filter-article": crimeFilterArticle = this.value; break;
+                case "crime-filter-organ":   crimeFilterOrgan = this.value; break;
+                case "crime-filter-place":   crimeFilterPlace = this.value; break;
+                case "crime-filter-public":  crimeFilterPublic = this.value; break;
+                case "crime-sort":           crimeSortMode = this.value; break;
+            }
+            buildCrimeList();
+        });
+    });
+
+    // Сброс фильтров
+    var resetBtn = document.getElementById("crime-reset-filters");
+    if (resetBtn) {
+        resetBtn.addEventListener("click", function () {
+            crimeSearchQuery = "";
+            crimeFilterArticle = "";
+            crimeFilterOrgan = "";
+            crimeFilterPlace = "";
+            crimeFilterPublic = "";
+            crimeSortMode = "date-desc";
+            currentCrimePeriod = "all";
+
+            if (crimeSearchInput) crimeSearchInput.value = "";
+            ["crime-filter-article", "crime-filter-organ", "crime-filter-place", "crime-filter-public"].forEach(function (id) {
+                var el = document.getElementById(id);
+                if (el) el.value = "";
+            });
+            var sortEl = document.getElementById("crime-sort");
+            if (sortEl) sortEl.value = "date-desc";
+
+            document.querySelectorAll(".crime-period-btn").forEach(function (b) {
+                b.classList.remove("active");
+                if (b.getAttribute("data-period") === "all") b.classList.add("active");
+            });
+
             buildCrimeList();
         });
     }
@@ -380,8 +531,10 @@
         if (searchBar) searchBar.classList.add("hidden");
         if (mapControls) mapControls.classList.add("hidden");
         crimePanel.classList.remove("hidden");
+        populateCrimeFilters();
+        updateCrimeStats();
         buildCrimeList();
-        // Закрыть мобильное меню если открыто
+        // Закрыть мобильное меню
         var sidebar = document.getElementById("sidebar");
         if (sidebar) sidebar.classList.remove("open");
         var overlay = document.getElementById("sidebar-overlay");

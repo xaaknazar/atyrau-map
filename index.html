@@ -127,27 +127,104 @@
     <!-- Crime panel (ЕРДР) — replaces map when active -->
     <div id="crime-panel" class="hidden">
         <div class="crime-panel-header">
-            <button id="close-crime-panel" class="close-crime-panel-btn" aria-label="Назад к карте">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <polyline points="15 18 9 12 15 6"/>
-                </svg>
-                <span data-i18n="crime_back_to_map">Назад к карте</span>
-            </button>
-            <h2 data-i18n="crime_incidents_title">Зарегистрированные правонарушения</h2>
-            <div class="crime-panel-controls">
-                <div class="crime-filter-buttons">
-                    <button class="crime-period-btn active" data-period="all" data-i18n="crime_period_all">Все</button>
-                    <button class="crime-period-btn" data-period="month" data-i18n="crime_period_month">Месяц</button>
-                    <button class="crime-period-btn" data-period="week" data-i18n="crime_period_week">Неделя</button>
-                    <button class="crime-period-btn" data-period="day" data-i18n="crime_period_day">День</button>
+            <div class="crime-panel-top-row">
+                <button id="close-crime-panel" class="close-crime-panel-btn" aria-label="Назад к карте">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="15 18 9 12 15 6"/>
+                    </svg>
+                    <span data-i18n="crime_back_to_map">Назад к карте</span>
+                </button>
+                <h2 data-i18n="crime_incidents_title">Зарегистрированные правонарушения</h2>
+            </div>
+
+            <!-- Статистика -->
+            <div class="crime-stats-cards">
+                <div class="crime-stat-card">
+                    <div class="crime-stat-value" id="cs-total">0</div>
+                    <div class="crime-stat-label">Всего</div>
                 </div>
-                <div class="crime-panel-count">
-                    <span data-i18n="crime_incidents_count">Правонарушений:</span>
-                    <strong id="crime-panel-count-value">0</strong>
+                <div class="crime-stat-card crime-stat-public">
+                    <div class="crime-stat-value" id="cs-public">0</div>
+                    <div class="crime-stat-label">Общественные места</div>
+                </div>
+                <div class="crime-stat-card crime-stat-with-coords">
+                    <div class="crime-stat-value" id="cs-coords">0</div>
+                    <div class="crime-stat-label">С координатами</div>
+                </div>
+                <div class="crime-stat-card crime-stat-articles">
+                    <div class="crime-stat-value" id="cs-articles">0</div>
+                    <div class="crime-stat-label">Уник. статей</div>
                 </div>
             </div>
-            <div class="crime-search-wrapper">
-                <input type="text" id="crime-search-input" placeholder="Поиск по статье, адресу, описанию..." data-i18n-placeholder="crime_search_placeholder" autocomplete="off" />
+
+            <!-- Фильтры -->
+            <div class="crime-panel-filters">
+                <div class="crime-filter-row">
+                    <!-- Период -->
+                    <div class="crime-filter-group-inline">
+                        <label>Период:</label>
+                        <div class="crime-filter-buttons">
+                            <button class="crime-period-btn active" data-period="all" data-i18n="crime_period_all">Все</button>
+                            <button class="crime-period-btn" data-period="month" data-i18n="crime_period_month">Месяц</button>
+                            <button class="crime-period-btn" data-period="week" data-i18n="crime_period_week">Неделя</button>
+                            <button class="crime-period-btn" data-period="day" data-i18n="crime_period_day">День</button>
+                        </div>
+                    </div>
+                    <!-- Сортировка -->
+                    <div class="crime-filter-group-inline">
+                        <label>Сортировка:</label>
+                        <select id="crime-sort" class="crime-select">
+                            <option value="date-desc">Сначала новые</option>
+                            <option value="date-asc">Сначала старые</option>
+                            <option value="article">По статье</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="crime-filter-row">
+                    <!-- Статья -->
+                    <div class="crime-filter-group-inline">
+                        <label>Статья:</label>
+                        <select id="crime-filter-article" class="crime-select">
+                            <option value="">Все статьи</option>
+                        </select>
+                    </div>
+                    <!-- Орган -->
+                    <div class="crime-filter-group-inline">
+                        <label>Орган:</label>
+                        <select id="crime-filter-organ" class="crime-select">
+                            <option value="">Все органы</option>
+                        </select>
+                    </div>
+                    <!-- Место -->
+                    <div class="crime-filter-group-inline">
+                        <label>Место:</label>
+                        <select id="crime-filter-place" class="crime-select">
+                            <option value="">Все</option>
+                        </select>
+                    </div>
+                    <!-- Общественное место -->
+                    <div class="crime-filter-group-inline">
+                        <label>Общ. место:</label>
+                        <select id="crime-filter-public" class="crime-select">
+                            <option value="">Все</option>
+                            <option value="yes">Да</option>
+                            <option value="no">Нет</option>
+                        </select>
+                    </div>
+                </div>
+                <!-- Поиск -->
+                <div class="crime-search-wrapper">
+                    <svg class="crime-search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                    </svg>
+                    <input type="text" id="crime-search-input" placeholder="Поиск по статье, адресу, описанию..." data-i18n-placeholder="crime_search_placeholder" autocomplete="off" />
+                </div>
+            </div>
+
+            <!-- Показано записей -->
+            <div class="crime-panel-results-bar">
+                <span>Показано: <strong id="crime-panel-count-value">0</strong></span>
+                <button id="crime-reset-filters" class="crime-reset-btn">Сбросить фильтры</button>
             </div>
         </div>
         <div id="crime-list" class="crime-list"></div>
