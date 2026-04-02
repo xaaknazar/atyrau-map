@@ -555,6 +555,307 @@
     var closeBtn = document.getElementById("close-crime-panel");
     if (closeBtn) closeBtn.addEventListener("click", hideCrimePanel);
 
+    // ═══════════════════════════════════════════════════════
+    //  ANALYTICS PANEL
+    // ═══════════════════════════════════════════════════════
+    var analyticsPanel = document.getElementById("analytics-panel");
+    var zoneCircles = []; // circles on the map
+
+    function showAnalyticsPanel() {
+        mapEl.classList.add("hidden");
+        crimePanel.classList.add("hidden");
+        if (searchBar) searchBar.classList.add("hidden");
+        if (mapControls) mapControls.classList.add("hidden");
+        analyticsPanel.classList.remove("hidden");
+        renderAnalytics();
+        var sidebar = document.getElementById("sidebar");
+        if (sidebar) sidebar.classList.remove("open");
+        var ol = document.getElementById("sidebar-overlay");
+        if (ol) ol.classList.remove("active");
+    }
+
+    function hideAnalyticsPanel() {
+        analyticsPanel.classList.add("hidden");
+        mapEl.classList.remove("hidden");
+        if (searchBar) searchBar.classList.remove("hidden");
+        if (mapControls) mapControls.classList.remove("hidden");
+        map.invalidateSize();
+    }
+
+    var openAnBtn = document.getElementById("open-analytics-btn");
+    if (openAnBtn) openAnBtn.addEventListener("click", showAnalyticsPanel);
+    var closeAnBtn = document.getElementById("close-analytics");
+    if (closeAnBtn) closeAnBtn.addEventListener("click", hideAnalyticsPanel);
+
+    // Tabs
+    document.querySelectorAll(".analytics-tab").forEach(function (tab) {
+        tab.addEventListener("click", function () {
+            document.querySelectorAll(".analytics-tab").forEach(function (t) { t.classList.remove("active"); });
+            document.querySelectorAll(".analytics-tab-content").forEach(function (c) { c.classList.remove("active"); });
+            this.classList.add("active");
+            var target = this.getAttribute("data-tab");
+            var content = document.querySelector('.analytics-tab-content[data-tab="' + target + '"]');
+            if (content) content.classList.add("active");
+        });
+    });
+
+    function renderAnalytics() {
+        if (crimeIncidents.length === 0) return;
+        var analysis = runFullAnalysis(crimeIncidents);
+
+        renderOverviewStats(analysis);
+        renderBarChart("an-articles-chart", analysis.byArticle.slice(0, 15), "red");
+        renderMonthsChart(analysis.byMonth);
+        renderOrgansChart(analysis);
+        renderHoursChart(analysis.byHour);
+        renderDaysChart(analysis.byDayOfWeek);
+        renderDangerTimes(analysis);
+        renderBarChart("an-places-chart", analysis.byPlaceType.map(function (p) {
+            return { label: p.label + (p.publicCount ? " (" + p.publicCount + " общ.)" : ""), count: p.count };
+        }), "orange");
+        renderBarChart("an-areas-chart", analysis.byArea.slice(0, 15), "blue");
+        renderBarChart("an-streets-chart", analysis.byStreet.slice(0, 15), "purple");
+        renderZonesList(analysis.problemZones);
+
+        // Store for AI
+        window._lastAnalysis = analysis;
+    }
+
+    function renderOverviewStats(a) {
+        var el = document.getElementById("an-overview-stats");
+        if (!el) return;
+        var uniqueArticles = {};
+        crimeIncidents.forEach(function (c) { if (c.article) uniqueArticles[c.article] = true; });
+        var organs = {};
+        crimeIncidents.forEach(function (c) { if (c.organ) organs[c.organ] = true; });
+
+        el.innerHTML =
+            _statCard(a.total, "Всего") +
+            _statCard(a.publicCount, "Общ. места") +
+            _statCard(a.withCoords, "С координатами") +
+            _statCard(Object.keys(uniqueArticles).length, "Статей") +
+            _statCard(Object.keys(organs).length, "Органов") +
+            _statCard(a.problemZones.length, "Зон");
+    }
+
+    function _statCard(val, label) {
+        return '<div class="an-stat-card"><div class="an-stat-val">' + val + '</div><div class="an-stat-lbl">' + label + '</div></div>';
+    }
+
+    function renderBarChart(containerId, items, color) {
+        var el = document.getElementById(containerId);
+        if (!el || items.length === 0) return;
+        var max = items[0].count || 1;
+        el.innerHTML = items.map(function (item) {
+            var pct = Math.max(1, Math.round(item.count / max * 100));
+            return '<div class="an-bar-row">' +
+                '<span class="an-bar-label" title="' + item.label + '">' + item.label + '</span>' +
+                '<div class="an-bar-track"><div class="an-bar-fill ' + color + '" style="width:' + pct + '%"></div></div>' +
+                '<span class="an-bar-value">' + item.count + '</span>' +
+                '</div>';
+        }).join("");
+    }
+
+    function renderMonthsChart(byMonth) {
+        var items = byMonth.labels.map(function (l, i) {
+            return { label: l, count: byMonth.counts[i] };
+        });
+        renderBarChart("an-months-chart", items, "green");
+    }
+
+    function renderOrgansChart(analysis) {
+        var organMap = {};
+        crimeIncidents.forEach(function (c) {
+            var key = c.organ || "Не указан";
+            if (!organMap[key]) organMap[key] = 0;
+            organMap[key]++;
+        });
+        var items = Object.keys(organMap).map(function (k) { return { label: k, count: organMap[k] }; })
+            .sort(function (a, b) { return b.count - a.count; }).slice(0, 10);
+        renderBarChart("an-organs-chart", items, "teal");
+    }
+
+    function renderHoursChart(hours) {
+        var items = hours.map(function (count, h) {
+            return { label: ("0" + h).slice(-2) + ":00", count: count };
+        });
+        var el = document.getElementById("an-hours-chart");
+        if (!el) return;
+        var max = Math.max.apply(null, hours) || 1;
+        el.innerHTML = items.map(function (item) {
+            var pct = Math.max(1, Math.round(item.count / max * 100));
+            var color = item.count > max * 0.7 ? "red" : item.count > max * 0.4 ? "orange" : "blue";
+            return '<div class="an-bar-row">' +
+                '<span class="an-bar-label">' + item.label + '</span>' +
+                '<div class="an-bar-track"><div class="an-bar-fill ' + color + '" style="width:' + pct + '%"></div></div>' +
+                '<span class="an-bar-value">' + item.count + '</span>' +
+                '</div>';
+        }).join("");
+    }
+
+    function renderDaysChart(data) {
+        var items = data.labels.map(function (l, i) {
+            return { label: l, count: data.counts[i] };
+        });
+        renderBarChart("an-days-chart", items, "blue");
+    }
+
+    function renderDangerTimes(analysis) {
+        var el = document.getElementById("an-danger-times");
+        if (!el) return;
+
+        // Find peak hours
+        var hours = analysis.byHour;
+        var maxH = Math.max.apply(null, hours);
+        var peakHours = [];
+        hours.forEach(function (c, h) { if (c >= maxH * 0.7) peakHours.push(h); });
+
+        // Find peak day
+        var days = analysis.byDayOfWeek;
+        var maxD = Math.max.apply(null, days.counts);
+        var peakDay = days.labels[days.counts.indexOf(maxD)];
+
+        // Public percent
+        var pubPct = analysis.total > 0 ? Math.round(analysis.publicCount / analysis.total * 100) : 0;
+
+        el.innerHTML =
+            '<div class="an-insight-card">' +
+                '<span class="an-danger-badge an-danger-high">Пиковые часы</span>' +
+                '<h4>' + peakHours.map(function (h) { return ("0" + h).slice(-2) + ":00"; }).join(", ") + '</h4>' +
+                '<p>В это время совершается больше всего правонарушений. Рекомендуется усилить патрулирование.</p>' +
+            '</div>' +
+            '<div class="an-insight-card">' +
+                '<span class="an-danger-badge an-danger-med">Опасный день</span>' +
+                '<h4>' + peakDay + ' (' + maxD + ' случаев)</h4>' +
+                '<p>Самый криминогенный день недели. Необходимо дополнительное дежурство.</p>' +
+            '</div>' +
+            '<div class="an-insight-card">' +
+                '<span class="an-danger-badge ' + (pubPct > 50 ? "an-danger-high" : "an-danger-med") + '">Общ. места</span>' +
+                '<h4>' + pubPct + '% преступлений</h4>' +
+                '<p>Доля правонарушений в общественных местах. ' +
+                    (pubPct > 50 ? 'Критически высокий показатель — нужно усилить видеонаблюдение.' : 'Показатель в пределах нормы.') +
+                '</p>' +
+            '</div>';
+    }
+
+    function renderZonesList(zones) {
+        var el = document.getElementById("an-zones-list");
+        if (!el) return;
+        if (zones.length === 0) { el.innerHTML = '<p class="an-hint">Нет данных с координатами</p>'; return; }
+
+        el.innerHTML = zones.slice(0, 10).map(function (z, i) {
+            var tags = Object.keys(z.articles).sort(function (a, b) { return z.articles[b] - z.articles[a]; }).slice(0, 3)
+                .map(function (a) { return '<span class="an-zone-tag">' + a + ' (' + z.articles[a] + ')</span>'; }).join("");
+            var peakTime = z.peakHour !== undefined ? ("0" + z.peakHour).slice(-2) + ":00" : "—";
+
+            return '<div class="an-zone-card">' +
+                '<div class="an-zone-rank d' + z.dangerLevel + '">' + (i + 1) + '</div>' +
+                '<div class="an-zone-info">' +
+                    '<h4>' + z.count + ' правонарушений</h4>' +
+                    '<p>Координаты: ' + z.lat.toFixed(4) + ', ' + z.lng.toFixed(4) + '</p>' +
+                    '<p>Пиковое время: ' + peakTime + ' | В общ. местах: ' + z.publicCount + '</p>' +
+                    '<div class="an-zone-tags">' + tags + '</div>' +
+                '</div>' +
+            '</div>';
+        }).join("");
+    }
+
+    // Show zones on map
+    var showZonesBtn = document.getElementById("an-show-zones-on-map");
+    if (showZonesBtn) {
+        showZonesBtn.addEventListener("click", function () {
+            hideAnalyticsPanel();
+            showZonesOnMap();
+        });
+    }
+
+    function showZonesOnMap() {
+        clearZonesFromMap();
+        if (crimeIncidents.length === 0) return;
+        var zones = findProblemZones(crimeIncidents);
+        if (zones.length === 0) return;
+
+        var maxCount = zones[0].count;
+
+        zones.slice(0, 20).forEach(function (z) {
+            var radius = Math.max(150, Math.min(600, z.count / maxCount * 600));
+            var color = z.dangerLevel >= 4 ? "#e74c3c" : z.dangerLevel >= 3 ? "#e67e22" : z.dangerLevel >= 2 ? "#f39c12" : "#27ae60";
+            var opacity = 0.15 + (z.count / maxCount * 0.25);
+
+            var circle = L.circle([z.lat, z.lng], {
+                radius: radius,
+                color: color,
+                weight: 2,
+                fillColor: color,
+                fillOpacity: opacity
+            }).addTo(map);
+
+            var label = L.marker([z.lat, z.lng], {
+                icon: L.divIcon({
+                    className: "zone-circle-label",
+                    html: z.count,
+                    iconSize: [32, 32],
+                    iconAnchor: [16, 16]
+                })
+            }).addTo(map);
+
+            var peakTime = z.peakHour !== undefined ? ("0" + z.peakHour).slice(-2) + ":00" : "—";
+            var topArts = Object.keys(z.articles).sort(function (a, b) { return z.articles[b] - z.articles[a]; }).slice(0, 3).join(", ");
+
+            circle.bindPopup(
+                '<strong>' + z.count + ' правонарушений</strong><br>' +
+                'Основные статьи: ' + topArts + '<br>' +
+                'Пик: ' + peakTime + '<br>' +
+                'В общ. местах: ' + z.publicCount,
+                { maxWidth: 250 }
+            );
+
+            zoneCircles.push(circle);
+            zoneCircles.push(label);
+        });
+
+        // Zoom to fit zones
+        if (zoneCircles.length > 0) {
+            var group = L.featureGroup(zoneCircles);
+            map.fitBounds(group.getBounds().pad(0.1));
+        }
+    }
+
+    function clearZonesFromMap() {
+        zoneCircles.forEach(function (c) { map.removeLayer(c); });
+        zoneCircles = [];
+    }
+
+    // AI Analysis
+    var aiRunBtn = document.getElementById("an-ai-run");
+    if (aiRunBtn) {
+        aiRunBtn.addEventListener("click", function () {
+            var keyInput = document.getElementById("an-ai-key");
+            var apiKey = keyInput ? keyInput.value.trim() : "";
+            if (!apiKey) { alert("Введите API ключ Anthropic (sk-ant-...)"); return; }
+
+            var statusEl = document.getElementById("an-ai-status");
+            var resultEl = document.getElementById("an-ai-result");
+            statusEl.classList.remove("hidden");
+            statusEl.textContent = "AI анализирует данные...";
+            resultEl.textContent = "";
+            aiRunBtn.disabled = true;
+
+            var analysis = window._lastAnalysis || runFullAnalysis(crimeIncidents);
+            var summary = buildAnalysisSummaryForAI(analysis);
+
+            requestAIAnalysis(summary, apiKey, function (err, text) {
+                statusEl.classList.add("hidden");
+                aiRunBtn.disabled = false;
+                if (err) {
+                    resultEl.textContent = "Ошибка: " + err.message;
+                } else {
+                    resultEl.textContent = text;
+                }
+            });
+        });
+    }
+
     // Crime modal
     function openCrimeModal(crime) {
         var overlay = document.getElementById("crime-modal-overlay");

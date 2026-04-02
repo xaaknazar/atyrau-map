@@ -74,6 +74,7 @@
                 <span data-i18n="crime_loading">Загрузка данных из таблицы...</span>
             </div>
             <button id="open-crime-panel-btn" class="open-crime-panel-btn" data-i18n="crime_open_panel">Открыть список ЕРДР</button>
+            <button id="open-analytics-btn" class="open-analytics-btn">Аналитика преступлений</button>
         </div>
 
         <div class="stats">
@@ -228,6 +229,105 @@
             </div>
         </div>
         <div id="crime-list" class="crime-list"></div>
+    </div>
+
+    <!-- Analytics panel -->
+    <div id="analytics-panel" class="hidden">
+        <div class="analytics-header">
+            <div class="crime-panel-top-row">
+                <button id="close-analytics" class="close-crime-panel-btn" aria-label="Назад">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="15 18 9 12 15 6"/>
+                    </svg>
+                    <span>Назад к карте</span>
+                </button>
+                <h2>Аналитика преступлений — г. Атырау</h2>
+            </div>
+            <!-- Табы -->
+            <div class="analytics-tabs">
+                <button class="analytics-tab active" data-tab="overview">Обзор</button>
+                <button class="analytics-tab" data-tab="time">Время</button>
+                <button class="analytics-tab" data-tab="places">Места</button>
+                <button class="analytics-tab" data-tab="zones">Зоны</button>
+                <button class="analytics-tab" data-tab="ai">AI-анализ</button>
+            </div>
+        </div>
+        <div class="analytics-body">
+
+            <!-- Таб: Обзор -->
+            <div class="analytics-tab-content active" data-tab="overview">
+                <div class="an-stats-grid" id="an-overview-stats"></div>
+                <div class="an-section">
+                    <h3>Топ статьи</h3>
+                    <div id="an-articles-chart" class="an-bar-chart"></div>
+                </div>
+                <div class="an-section">
+                    <h3>По месяцам (тренд)</h3>
+                    <div id="an-months-chart" class="an-bar-chart"></div>
+                </div>
+                <div class="an-section">
+                    <h3>По органам регистрации</h3>
+                    <div id="an-organs-chart" class="an-bar-chart"></div>
+                </div>
+            </div>
+
+            <!-- Таб: Время -->
+            <div class="analytics-tab-content" data-tab="time">
+                <div class="an-section">
+                    <h3>По часам суток</h3>
+                    <p class="an-hint">Когда совершаются преступления</p>
+                    <div id="an-hours-chart" class="an-bar-chart an-hours"></div>
+                </div>
+                <div class="an-section">
+                    <h3>По дням недели</h3>
+                    <div id="an-days-chart" class="an-bar-chart"></div>
+                </div>
+                <div class="an-section">
+                    <h3>Опасное время</h3>
+                    <div id="an-danger-times" class="an-insight-cards"></div>
+                </div>
+            </div>
+
+            <!-- Таб: Места -->
+            <div class="analytics-tab-content" data-tab="places">
+                <div class="an-section">
+                    <h3>Тип места совершения</h3>
+                    <div id="an-places-chart" class="an-bar-chart"></div>
+                </div>
+                <div class="an-section">
+                    <h3>Топ районов / населённых пунктов</h3>
+                    <div id="an-areas-chart" class="an-bar-chart"></div>
+                </div>
+                <div class="an-section">
+                    <h3>Топ улиц</h3>
+                    <div id="an-streets-chart" class="an-bar-chart"></div>
+                </div>
+            </div>
+
+            <!-- Таб: Зоны -->
+            <div class="analytics-tab-content" data-tab="zones">
+                <div class="an-section">
+                    <h3>Проблемные зоны на карте</h3>
+                    <p class="an-hint">Зоны с наибольшей концентрацией преступлений (радиус ~500м)</p>
+                    <button id="an-show-zones-on-map" class="an-action-btn">Показать на карте</button>
+                </div>
+                <div id="an-zones-list" class="an-zones-list"></div>
+            </div>
+
+            <!-- Таб: AI-анализ -->
+            <div class="analytics-tab-content" data-tab="ai">
+                <div class="an-section an-ai-section">
+                    <h3>AI-анализ преступности</h3>
+                    <p class="an-hint">Искусственный интеллект проанализирует данные и даст рекомендации по снижению преступности</p>
+                    <div class="an-ai-key-row">
+                        <input type="password" id="an-ai-key" placeholder="Anthropic API ключ (sk-ant-...)" class="an-ai-input" />
+                        <button id="an-ai-run" class="an-action-btn">Запустить анализ</button>
+                    </div>
+                    <div id="an-ai-status" class="an-ai-status hidden">Анализ выполняется...</div>
+                    <div id="an-ai-result" class="an-ai-result"></div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Street search -->
@@ -458,6 +558,7 @@
     <script src="js/i18n.js"></script>
     <script src="js/photos.js"></script>
     <script src="js/crimes.js"></script>
+    <script src="js/analytics.js"></script>
     <script src="js/data.js"></script>
     <script src="js/app.js"></script>
 </body>
