@@ -610,12 +610,10 @@
         renderHoursChart(analysis.byHour);
         renderDaysChart(analysis.byDayOfWeek);
         renderDangerTimes(analysis);
-        renderBarChart("an-places-chart", analysis.byPlaceType.map(function (p) {
-            return { label: p.label + (p.publicCount ? " (" + p.publicCount + " общ.)" : ""), count: p.count };
-        }), "orange");
-        renderBarChart("an-areas-chart", analysis.byArea.slice(0, 15), "blue");
         renderBarChart("an-streets-chart", analysis.byStreet.slice(0, 15), "purple");
-        renderZonesList(analysis.problemZones);
+        // Фильтруем зоны с аномально большим числом (плохие координаты / центр города)
+        var validZones = analysis.problemZones.filter(function (z) { return z.count <= 30; });
+        renderZonesList(validZones);
 
         // Store for AI
         window._lastAnalysis = analysis;
@@ -772,10 +770,10 @@
     function showZonesOnMap() {
         clearZonesFromMap();
         if (crimeIncidents.length === 0) return;
-        var zones = findProblemZones(crimeIncidents);
+        var zones = findProblemZones(crimeIncidents).filter(function (z) { return z.count <= 30; });
         if (zones.length === 0) return;
 
-        var maxCount = zones[0].count;
+        var maxCount = zones[0].count || 1;
 
         zones.slice(0, 20).forEach(function (z) {
             var radius = Math.max(150, Math.min(600, z.count / maxCount * 600));
