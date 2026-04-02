@@ -648,8 +648,8 @@
         renderDaysChart(analysis.byDayOfWeek);
         renderDangerTimes(analysis);
         renderBarChart("an-streets-chart", analysis.byStreet.slice(0, 15), "purple");
-        // Фильтруем зоны с аномально большим числом (плохие координаты / центр города)
-        var validZones = analysis.problemZones.filter(function (z) { return z.count <= 30; });
+        // Фильтруем зоны с аномально большим числом (дополнительная защита)
+        var validZones = analysis.problemZones.filter(function (z) { return z.count <= 50; });
         renderZonesList(validZones);
 
         // Store for AI

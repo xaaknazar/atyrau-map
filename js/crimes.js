@@ -150,7 +150,26 @@ function parseDateToISO(dateStr) {
 /**
  * Конвертировать строку CSV в объект инцидента.
  */
+/**
+ * Проверка: координаты валидны (не центр города, в пределах Атырау).
+ */
+function _validateCoords(lat, lng) {
+    if (lat === null || lng === null || isNaN(lat) || isNaN(lng)) return { lat: null, lng: null };
+    // Центр Атырау — ошибка геокодинга (~47.0945, ~51.9238)
+    if (Math.abs(lat - 47.0945) < 0.003 && Math.abs(lng - 51.9238) < 0.003) return { lat: null, lng: null };
+    // За пределами Атырау
+    if (lat < 46.85 || lat > 47.25 || lng < 51.60 || lng > 52.15) return { lat: null, lng: null };
+    return { lat: lat, lng: lng };
+}
+
 function csvRowToCrime(cols, idx) {
+    var lat = cols[20] ? parseFloat(cols[20]) : null;
+    var lng = cols[21] ? parseFloat(cols[21]) : null;
+    var coords = _validateCoords(lat, lng);
+    var article = cols[9] || "";
+    // Статья 190 — не имеет точных координат
+    if (article.indexOf("190") !== -1) { coords.lat = null; coords.lng = null; }
+
     return {
         id: idx + 1,
         erdr: cols[1] || "",
@@ -161,7 +180,7 @@ function csvRowToCrime(cols, idx) {
         crimeDate: parseDateToISO(cols[6] || ""),
         crimeTime: cols[7] || "",
         description: cols[8] || "",
-        article: cols[9] || "",
+        article: article,
         articlePart: cols[10] || "",
         placeType: cols[11] || "",
         isPublic: (cols[12] || "").toLowerCase().indexOf("общественное") !== -1,
@@ -172,8 +191,8 @@ function csvRowToCrime(cols, idx) {
         house: cols[17] || "",
         building: cols[18] || "",
         apartment: cols[19] || "",
-        lat: cols[20] ? parseFloat(cols[20]) : null,
-        lng: cols[21] ? parseFloat(cols[21]) : null
+        lat: coords.lat,
+        lng: coords.lng
     };
 }
 
@@ -211,6 +230,19 @@ function jsonRowToCrime(row, idx) {
     var lat = latVal !== "" ? parseFloat(latVal) : null;
     var lng = lngVal !== "" ? parseFloat(lngVal) : null;
 
+    // Валидация координат на клиенте
+    var coords = _validateCoords(lat, lng);
+    lat = coords.lat;
+    lng = coords.lng;
+
+    var article = s(row["10.Квалификация"]);
+
+    // Статья 190 — не может иметь точных координат (мошенничество и т.п.)
+    if (article.indexOf("190") !== -1) {
+        lat = null;
+        lng = null;
+    }
+
     return {
         id: idx + 1,
         erdr: s(row["1.Номер ЕРДР"]),
@@ -221,7 +253,7 @@ function jsonRowToCrime(row, idx) {
         crimeDate: parseDate(row["9.Дата совершения"]),
         crimeTime: s(row["9.время совершения"]),
         description: s(row["9.1 Описание преступления/проступка"]),
-        article: s(row["10.Квалификация"]),
+        article: article,
         articlePart: s(row["10.Квалификация п.п."]),
         placeType: s(row["29.Место совершения"]),
         isPublic: s(row["29.1.Общественное место"]).toLowerCase().indexOf("общественное") !== -1,
