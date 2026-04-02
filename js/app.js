@@ -280,15 +280,15 @@
     });
 
     // ═══════════════════════════════════════════════════════
-    //  CRIME INCIDENTS (ЕРДР) — sidebar list (not map markers)
-    //  Manual crime points stay on the map as before.
-    //  ст.190 hidden from map but visible in list.
+    //  CRIME INCIDENTS (ЕРДР) — full panel view
+    //  Manual crime points stay on the map.
+    //  ЕРДР data shown as a full-screen list panel.
     // ═══════════════════════════════════════════════════════
     var currentCrimePeriod = "all";
+    var crimeSearchQuery = "";
 
     /**
-     * Построить список правонарушений в сайдбаре.
-     * Все записи из ЕРДР показываются списком.
+     * Построить список правонарушений в панели.
      */
     function buildCrimeList() {
         var listEl = document.getElementById("crime-list");
@@ -297,20 +297,42 @@
 
         var filtered = filterCrimesByPeriod(currentCrimePeriod);
 
+        // Поиск
+        if (crimeSearchQuery) {
+            var q = crimeSearchQuery.toLowerCase();
+            filtered = filtered.filter(function (c) {
+                return (c.article || "").toLowerCase().indexOf(q) !== -1 ||
+                       (c.street || "").toLowerCase().indexOf(q) !== -1 ||
+                       (c.city || "").toLowerCase().indexOf(q) !== -1 ||
+                       (c.description || "").toLowerCase().indexOf(q) !== -1 ||
+                       (c.organ || "").toLowerCase().indexOf(q) !== -1 ||
+                       (c.erdr || "").toString().indexOf(q) !== -1 ||
+                       buildCrimeAddress(c).toLowerCase().indexOf(q) !== -1;
+            });
+        }
+
+        if (filtered.length === 0) {
+            listEl.innerHTML = '<div class="crime-list-empty">Нет данных</div>';
+        }
+
         filtered.forEach(function (crime) {
             var item = document.createElement("div");
             item.className = "crime-list-item";
 
             var dateStr = formatCrimeDate(crime.regDate);
             var address = buildCrimeAddress(crime);
+            var desc = (crime.description || "").substring(0, 150);
 
             item.innerHTML =
                 '<div class="crime-list-item-header">' +
-                    '<span class="crime-list-article">' + (crime.article || "—") + '</span>' +
+                    '<span class="crime-list-article">' + (crime.article || "—") +
+                        (crime.articlePart ? " " + crime.articlePart : "") + '</span>' +
                     '<span class="crime-list-date">' + dateStr + '</span>' +
                 '</div>' +
+                '<div class="crime-list-erdr">ЕРДР: ' + (crime.erdr || "—") + '</div>' +
                 '<div class="crime-list-address">' + (address || "—") + '</div>' +
-                '<div class="crime-list-organ">' + (crime.organ || "") + '</div>';
+                '<div class="crime-list-organ">' + (crime.organ || "") + '</div>' +
+                (desc ? '<div class="crime-list-description">' + desc + '</div>' : '');
 
             item.addEventListener("click", function () {
                 openCrimeModal(crime);
@@ -319,13 +341,17 @@
             listEl.appendChild(item);
         });
 
+        // Обновить счётчики
         document.getElementById("count-crime-incidents").textContent = filtered.length;
+        var panelCount = document.getElementById("crime-panel-count-value");
+        if (panelCount) panelCount.textContent = filtered.length;
     }
 
-    // Crime period filter buttons
+    // Crime period filter buttons (в панели)
     document.querySelectorAll(".crime-period-btn").forEach(function (btn) {
         btn.addEventListener("click", function () {
-            document.querySelectorAll(".crime-period-btn").forEach(function (b) {
+            // Обновить active только в текущем контейнере
+            this.parentElement.querySelectorAll(".crime-period-btn").forEach(function (b) {
                 b.classList.remove("active");
             });
             this.classList.add("active");
@@ -333,6 +359,48 @@
             buildCrimeList();
         });
     });
+
+    // Поиск в панели
+    var crimeSearchInput = document.getElementById("crime-search-input");
+    if (crimeSearchInput) {
+        crimeSearchInput.addEventListener("input", function () {
+            crimeSearchQuery = this.value.trim();
+            buildCrimeList();
+        });
+    }
+
+    // ── Переключение Карта ↔ ЕРДР панель ──────────────────
+    var crimePanel = document.getElementById("crime-panel");
+    var mapEl = document.getElementById("map");
+    var searchBar = document.getElementById("search-bar");
+    var mapControls = document.getElementById("map-controls");
+
+    function showCrimePanel() {
+        mapEl.classList.add("hidden");
+        if (searchBar) searchBar.classList.add("hidden");
+        if (mapControls) mapControls.classList.add("hidden");
+        crimePanel.classList.remove("hidden");
+        buildCrimeList();
+        // Закрыть мобильное меню если открыто
+        var sidebar = document.getElementById("sidebar");
+        if (sidebar) sidebar.classList.remove("open");
+        var overlay = document.getElementById("sidebar-overlay");
+        if (overlay) overlay.classList.remove("active");
+    }
+
+    function hideCrimePanel() {
+        crimePanel.classList.add("hidden");
+        mapEl.classList.remove("hidden");
+        if (searchBar) searchBar.classList.remove("hidden");
+        if (mapControls) mapControls.classList.remove("hidden");
+        map.invalidateSize();
+    }
+
+    var openBtn = document.getElementById("open-crime-panel-btn");
+    if (openBtn) openBtn.addEventListener("click", showCrimePanel);
+
+    var closeBtn = document.getElementById("close-crime-panel");
+    if (closeBtn) closeBtn.addEventListener("click", hideCrimePanel);
 
     // Crime modal
     function openCrimeModal(crime) {
@@ -367,7 +435,7 @@
         null,
         function () {
             if (crimeLoadingEl) crimeLoadingEl.classList.add("hidden");
-            buildCrimeList();
+            document.getElementById("count-crime-incidents").textContent = crimeIncidents.length;
         }
     );
 

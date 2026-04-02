@@ -119,7 +119,10 @@ var I18N = {
         crime_address: "Адрес",
         crime_date_committed: "Дата совершения",
         crime_loading: "Загрузка данных из таблицы...",
-        crime_geocoding: "Определение координат:"
+        crime_geocoding: "Определение координат:",
+        crime_open_panel: "Открыть список ЕРДР",
+        crime_back_to_map: "Назад к карте",
+        crime_search_placeholder: "Поиск по статье, адресу, описанию..."
     },
     kz: {
         // Header
@@ -238,7 +241,10 @@ var I18N = {
         crime_address: "Мекен-жай",
         crime_date_committed: "Жасалу күні",
         crime_loading: "Кестеден деректер жүктелуде...",
-        crime_geocoding: "Координаталар анықталуда:"
+        crime_geocoding: "Координаталар анықталуда:",
+        crime_open_panel: "ЕРДР тізімін ашу",
+        crime_back_to_map: "Картаға оралу",
+        crime_search_placeholder: "Бап, мекен-жай, сипаттама бойынша іздеу..."
     }
 };
 
