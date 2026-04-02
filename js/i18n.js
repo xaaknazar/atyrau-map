@@ -118,7 +118,7 @@ var I18N = {
         crime_public_place: "общественное место",
         crime_address: "Адрес",
         crime_date_committed: "Дата совершения",
-        crime_loading: "Загрузка данных из таблицы...",
+        crime_loading: "Загрузка данных...",
         crime_geocoding: "Определение координат:",
         crime_open_panel: "Открыть список",
         crime_back_to_map: "Назад к карте",
