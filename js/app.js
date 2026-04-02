@@ -866,7 +866,7 @@
     if (aiRunBtn) {
         aiRunBtn.addEventListener("click", function () {
             var keyInput = document.getElementById("an-ai-key");
-            var apiKey = keyInput ? keyInput.value.trim() : "";
+            var apiKey = keyInput ? keyInput.value.trim().replace(/[^\x20-\x7E]/g, "") : "";
             if (!apiKey) { alert("Введите API ключ OpenAI (sk-...)"); return; }
 
             var statusEl = document.getElementById("an-ai-status");

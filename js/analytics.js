@@ -294,7 +294,7 @@ function buildAnalysisSummaryForAI(analysis) {
 }
 
 /**
- * Отправить данные в OpenAI (ChatGPT) API для анализа.
+ * Отправить данные в OpenAI API для ИИ-анализа.
  * @param {string} summaryText — текстовая сводка
  * @param {string} apiKey — ключ OpenAI API (sk-...)
  * @param {function} callback — function(error, analysisText)
