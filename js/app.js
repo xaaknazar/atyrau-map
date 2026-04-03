@@ -137,8 +137,10 @@
             showCoverageOnHover: false,
             iconCreateFunction: createClusterIcon(cat)
         });
-        // Ручные точки не добавляем на карту — только данные из ЕРДР
-        // map.addLayer(layers[cat]);
+        // Преступность — только из ЕРДР (отдельный слой), остальные — из Firebase
+        if (cat !== "crime") {
+            map.addLayer(layers[cat]);
+        }
     });
 
     function createMarkerIcon(category) {
@@ -300,11 +302,15 @@
         var counts = { "crime": 0, "blind-spots": 0, "abandoned": 0, "unlit": 0 };
         mapPoints.forEach(function (p) { if (counts.hasOwnProperty(p.category)) counts[p.category]++; });
 
-        document.getElementById("count-crime").textContent = counts["crime"];
+        // Преступность — количество из ЕРДР с координатами (на карте)
+        var crimeOnMap = crimeIncidents.filter(function (c) {
+            return typeof c.lat === "number" && !isNaN(c.lat);
+        }).length;
+        document.getElementById("count-crime").textContent = crimeOnMap;
         document.getElementById("count-blind-spots").textContent = counts["blind-spots"];
         document.getElementById("count-abandoned").textContent = counts["abandoned"];
         document.getElementById("count-unlit").textContent = counts["unlit"];
-        document.getElementById("count-total").textContent = mapPoints.length;
+        document.getElementById("count-total").textContent = crimeOnMap + counts["blind-spots"] + counts["abandoned"] + counts["unlit"];
     }
 
     // ── Filter checkboxes ───────────────────────────────────
@@ -1022,6 +1028,7 @@
             if (crimeLoadingEl) crimeLoadingEl.classList.add("hidden");
             document.getElementById("count-crime-incidents").textContent = crimeIncidents.length;
             buildCrimeMarkers();
+            updateStats();
         }
     );
 
