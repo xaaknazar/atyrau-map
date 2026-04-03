@@ -137,7 +137,8 @@
             showCoverageOnHover: false,
             iconCreateFunction: createClusterIcon(cat)
         });
-        map.addLayer(layers[cat]);
+        // Ручные точки не добавляем на карту — только данные из ЕРДР
+        // map.addLayer(layers[cat]);
     });
 
     function createMarkerIcon(category) {

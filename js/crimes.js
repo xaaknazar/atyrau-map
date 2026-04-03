@@ -69,6 +69,86 @@ function _notifyCrimesReady() {
 }
 
 // ══════════════════════════════════════════════════════════════
+//  Конвертация координат: Pulkovo 1942 / Gauss-Kruger CM 69E → WGS84
+//  (EPSG:2502 → EPSG:4326)
+//  Эллипсоид Красовского 1940, центральный меридиан 69°E
+// ══════════════════════════════════════════════════════════════
+
+/**
+ * Конвертировать координаты из Pulkovo 1942 GK CM 69E в широту/долготу WGS84.
+ * @param {number} easting — координата X (метры, с false easting 500000)
+ * @param {number} northing — координата Y (метры)
+ * @returns {{ lat: number, lng: number } | null}
+ */
+function pulkovoToWgs84(easting, northing) {
+    // Параметры эллипсоида Красовского
+    var a = 6378245.0;
+    var f = 1 / 298.3;
+    var b = a * (1 - f);
+    var e2 = (a * a - b * b) / (a * a);
+    var ep2 = (a * a - b * b) / (b * b);
+    var lon0 = 69 * Math.PI / 180; // центральный меридиан
+    var k0 = 1.0;
+    var x0 = 500000; // false easting
+
+    var x = easting - x0;
+    var y = northing;
+
+    // Footpoint latitude
+    var M = y / k0;
+    var mu = M / (a * (1 - e2 / 4 - 3 * e2 * e2 / 64 - 5 * e2 * e2 * e2 / 256));
+
+    var e1 = (1 - Math.sqrt(1 - e2)) / (1 + Math.sqrt(1 - e2));
+    var phi1 = mu +
+        (3 * e1 / 2 - 27 * e1 * e1 * e1 / 32) * Math.sin(2 * mu) +
+        (21 * e1 * e1 / 16 - 55 * e1 * e1 * e1 * e1 / 32) * Math.sin(4 * mu) +
+        (151 * e1 * e1 * e1 / 96) * Math.sin(6 * mu) +
+        (1097 * e1 * e1 * e1 * e1 / 512) * Math.sin(8 * mu);
+
+    var sinPhi = Math.sin(phi1);
+    var cosPhi = Math.cos(phi1);
+    var tanPhi = Math.tan(phi1);
+
+    var N1 = a / Math.sqrt(1 - e2 * sinPhi * sinPhi);
+    var T1 = tanPhi * tanPhi;
+    var C1 = ep2 * cosPhi * cosPhi;
+    var R1 = a * (1 - e2) / Math.pow(1 - e2 * sinPhi * sinPhi, 1.5);
+    var D = x / (N1 * k0);
+
+    var lat = phi1 -
+        (N1 * tanPhi / R1) * (
+            D * D / 2 -
+            (5 + 3 * T1 + 10 * C1 - 4 * C1 * C1 - 9 * ep2) * D * D * D * D / 24 +
+            (61 + 90 * T1 + 298 * C1 + 45 * T1 * T1 - 252 * ep2 - 3 * C1 * C1) * D * D * D * D * D * D / 720
+        );
+
+    var lng = lon0 + (
+        D -
+        (1 + 2 * T1 + C1) * D * D * D / 6 +
+        (5 - 2 * C1 + 28 * T1 - 3 * C1 * C1 + 8 * ep2 + 24 * T1 * T1) * D * D * D * D * D / 120
+    ) / cosPhi;
+
+    var latDeg = lat * 180 / Math.PI;
+    var lngDeg = lng * 180 / Math.PI;
+
+    return { lat: latDeg, lng: lngDeg };
+}
+
+/**
+ * Парсить значение координаты из таблицы.
+ * В таблице числа записаны с запятой как десятичный разделитель: "-799461,8249"
+ */
+function _parseCoordValue(v) {
+    if (v === undefined || v === null || v === "") return null;
+    if (typeof v === "number") return isNaN(v) ? null : v;
+    var s = String(v).trim().replace(/\s/g, "");
+    // Заменить запятую на точку (европейский формат: "-799461,8249")
+    s = s.replace(",", ".");
+    var num = parseFloat(s);
+    return isNaN(num) ? null : num;
+}
+
+// ══════════════════════════════════════════════════════════════
 //  Валидация координат
 // ══════════════════════════════════════════════════════════════
 
@@ -178,13 +258,21 @@ function jsonRowToCrime(row, idx) {
         return csvRowToCrime(row, idx);
     }
 
-    // Координаты — новые поля
-    var latVal = row["31. Место совершения (координата X)"] ||
-                 row["U (Широта)"] || row["Широта"] || row["lat"] || "";
-    var lngVal = row["31. Место совершения (координата Y)"] ||
-                 row["V (Долгота)"] || row["Долгота"] || row["lng"] || "";
-    var lat = latVal !== "" ? parseFloat(latVal) : null;
-    var lng = lngVal !== "" ? parseFloat(lngVal) : null;
+    // Координаты — Pulkovo 1942 / Gauss-Kruger CM 69E (EPSG:2502)
+    // В таблице: X = easting, Y = northing (метры, запятая = десятичный разделитель)
+    var rawX = _parseCoordValue(row["31. Место совершения (координата X)"]);
+    var rawY = _parseCoordValue(row["31. Место совершения (координата Y)"]);
+    var lat = null;
+    var lng = null;
+
+    if (rawX !== null && rawY !== null) {
+        // Конвертируем из Pulkovo GK → WGS84
+        var wgs = pulkovoToWgs84(rawX, rawY);
+        if (wgs) {
+            lat = wgs.lat;
+            lng = wgs.lng;
+        }
+    }
 
     var coords = _validateCoords(lat, lng);
     lat = coords.lat;
