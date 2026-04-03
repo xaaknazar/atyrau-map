@@ -153,14 +153,13 @@ function _parseCoordValue(v) {
 // ══════════════════════════════════════════════════════════════
 
 /**
- * Проверка: координаты валидны (не центр города, в пределах Атырау).
+ * Проверка: координаты валидны (в пределах Атырауской области).
+ * Границы области: ~45.5°N – 49.5°N, ~50°E – 55.5°E
  */
 function _validateCoords(lat, lng) {
     if (lat === null || lng === null || isNaN(lat) || isNaN(lng)) return { lat: null, lng: null };
-    // Центр Атырау — ошибка геокодинга (~47.0945, ~51.9238)
-    if (Math.abs(lat - 47.0945) < 0.003 && Math.abs(lng - 51.9238) < 0.003) return { lat: null, lng: null };
-    // За пределами Атырау
-    if (lat < 46.85 || lat > 47.25 || lng < 51.60 || lng > 52.15) return { lat: null, lng: null };
+    // За пределами Атырауской области
+    if (lat < 45.5 || lat > 49.5 || lng < 50.0 || lng > 55.5) return { lat: null, lng: null };
     return { lat: lat, lng: lng };
 }
 

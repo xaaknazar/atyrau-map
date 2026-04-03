@@ -651,6 +651,10 @@
         renderBarChart("an-articles-chart", analysis.byArticle.slice(0, 15), "red");
         renderMonthsChart(analysis.byMonth);
         renderOrgansChart(analysis);
+        renderBarChart("an-victim-chart", analysis.byVictimType.slice(0, 10), "blue");
+        renderBarChart("an-method-chart", analysis.byCrimeMethod.slice(0, 10), "orange");
+        renderBarChart("an-place-chart", analysis.byPlaceType.slice(0, 10), "green");
+        renderBarChart("an-security-chart", analysis.bySecurity, "purple");
         renderHoursChart(analysis.byHour);
         renderDaysChart(analysis.byDayOfWeek);
         renderDangerTimes(analysis);

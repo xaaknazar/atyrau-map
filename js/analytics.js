@@ -119,6 +119,36 @@ function analyzeByStreet(crimes) {
     return Object.values(map).sort(function (a, b) { return b.count - a.count; });
 }
 
+function analyzeByVictimType(crimes) {
+    var map = {};
+    crimes.forEach(function (c) {
+        var key = c.victimType || "Не указано";
+        if (!map[key]) map[key] = { count: 0, label: key };
+        map[key].count++;
+    });
+    return Object.values(map).sort(function (a, b) { return b.count - a.count; });
+}
+
+function analyzeByCrimeMethod(crimes) {
+    var map = {};
+    crimes.forEach(function (c) {
+        var key = c.crimeMethod || "Не указано";
+        if (!map[key]) map[key] = { count: 0, label: key };
+        map[key].count++;
+    });
+    return Object.values(map).sort(function (a, b) { return b.count - a.count; });
+}
+
+function analyzeBySecurity(crimes) {
+    var map = {};
+    crimes.forEach(function (c) {
+        var key = c.security || "Не указано";
+        if (!map[key]) map[key] = { count: 0, label: key };
+        map[key].count++;
+    });
+    return Object.values(map).sort(function (a, b) { return b.count - a.count; });
+}
+
 // ══════════════════════════════════════════════════════════════
 //  4. ПРОБЛЕМНЫЕ ЗОНЫ (кластеризация по координатам)
 // ══════════════════════════════════════════════════════════════
@@ -317,6 +347,9 @@ function runFullAnalysis(crimes) {
         byPlaceType: analyzeByPlaceType(crimes),
         byArea: analyzeByArea(crimes),
         byStreet: analyzeByStreet(crimes),
+        byVictimType: analyzeByVictimType(crimes),
+        byCrimeMethod: analyzeByCrimeMethod(crimes),
+        bySecurity: analyzeBySecurity(crimes),
         problemZones: findProblemZones(crimes),
         people: peopleAnalysis
     };
@@ -376,6 +409,24 @@ function buildAnalysisSummaryForAI(analysis) {
     lines.push("ПО ТИПУ МЕСТА:");
     analysis.byPlaceType.forEach(function (p) {
         lines.push("  " + p.label + " — " + p.count + " (из них в общественных: " + p.publicCount + ")");
+    });
+    lines.push("");
+
+    lines.push("СОВЕРШЕНО В ОТНОШЕНИИ:");
+    analysis.byVictimType.slice(0, 10).forEach(function (v) {
+        lines.push("  " + v.label + " — " + v.count);
+    });
+    lines.push("");
+
+    lines.push("СПОСОБ СОВЕРШЕНИЯ:");
+    analysis.byCrimeMethod.slice(0, 10).forEach(function (m) {
+        lines.push("  " + m.label + " — " + m.count);
+    });
+    lines.push("");
+
+    lines.push("ОХРАНА ОБЪЕКТА:");
+    analysis.bySecurity.forEach(function (s) {
+        lines.push("  " + s.label + " — " + s.count);
     });
     lines.push("");
 
@@ -469,26 +520,37 @@ function requestAIAnalysis(summaryText, apiKey, callback) {
         "- Что означает каждая ведущая статья (расшифровка)\n" +
         "- Связь между типом преступления и местом/временем\n\n" +
 
-        "═══ 5. КОРНЕВЫЕ ПРИЧИНЫ ═══\n" +
+        "═══ 5. АНАЛИЗ ЖЕРТВ И СПОСОБОВ СОВЕРШЕНИЯ ═══\n" +
+        "- В отношении кого совершаются преступления (физ. лица, юр. лица и т.д.)\n" +
+        "- Какими способами совершаются преступления\n" +
+        "- Наличие охраны на объектах — влияет ли на преступность\n\n" +
+
+        "═══ 6. ПОРТРЕТ ПОДОЗРЕВАЕМОГО ═══\n" +
+        "- Возрастные группы (какие доминируют)\n" +
+        "- Пол, образование, род занятий\n" +
+        "- Доля несовершеннолетних\n" +
+        "- Семейное положение — есть ли корреляция\n\n" +
+
+        "═══ 7. КОРНЕВЫЕ ПРИЧИНЫ ═══\n" +
         "- Социально-экономические факторы\n" +
         "- Инфраструктурные проблемы (освещение, камеры, патрулирование)\n" +
         "- Специфика города Атырау (нефтяной город, вахтовые работники и т.д.)\n\n" +
 
-        "═══ 6. РЕКОМЕНДАЦИИ ПО СНИЖЕНИЮ ПРЕСТУПНОСТИ ═══\n" +
+        "═══ 8. РЕКОМЕНДАЦИИ ПО СНИЖЕНИЮ ПРЕСТУПНОСТИ ═══\n" +
         "Конкретные, адресные меры:\n" +
-        "6.1. Патрулирование — где именно и в какое время усилить\n" +
-        "6.2. Видеонаблюдение — конкретные локации для установки камер\n" +
-        "6.3. Освещение — где улучшить уличное освещение\n" +
-        "6.4. Социальные программы — какие именно и для кого\n" +
-        "6.5. Работа с населением — профилактика, правовое просвещение\n" +
-        "6.6. Межведомственное взаимодействие — какие органы подключить\n\n" +
+        "8.1. Патрулирование — где именно и в какое время усилить\n" +
+        "8.2. Видеонаблюдение — конкретные локации для установки камер\n" +
+        "8.3. Освещение — где улучшить уличное освещение\n" +
+        "8.4. Социальные программы — какие именно и для кого\n" +
+        "8.5. Работа с населением — профилактика, правовое просвещение\n" +
+        "8.6. Межведомственное взаимодействие — какие органы подключить\n\n" +
 
-        "═══ 7. ПРОГНОЗ И ТРЕНДЫ ═══\n" +
+        "═══ 9. ПРОГНОЗ И ТРЕНДЫ ═══\n" +
         "- Растёт или снижается преступность\n" +
         "- Прогноз на ближайшие месяцы\n" +
         "- Какие виды преступлений могут вырасти\n\n" +
 
-        "═══ 8. ПРИОРИТЕТНЫЕ ДЕЙСТВИЯ (ТОП-5) ═══\n" +
+        "═══ 10. ПРИОРИТЕТНЫЕ ДЕЙСТВИЯ (ТОП-5) ═══\n" +
         "Самые важные и срочные меры, которые нужно предпринять прямо сейчас.\n\n" +
 
         "ДАННЫЕ ДЛЯ АНАЛИЗА:\n" + summaryText;
