@@ -35,7 +35,7 @@
 // Google Apps Script web app — возвращает JSON с обоими листами
 var CRIMES_API_URL =
     "https://script.google.com/macros/s/" +
-    "AKfycby-q4A-i6RYGRHGhwHs9nLDDz45Y36hhC_lyvHSe4dHXuVaXBF2LfcjoD5W_dOSLqjG" +
+    "AKfycbyIL49bcgNgfDcmurDPA6A_T0Ntzt0ACKb41LArY2_Lu9-XtXbUlUTpwNjZ5shaxZNW" +
     "/exec";
 
 // Резервная ссылка — CSV из таблицы (без координат, без людей)
