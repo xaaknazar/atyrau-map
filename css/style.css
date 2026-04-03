@@ -546,6 +546,21 @@ body {
 .marker-pin.abandoned   { background: #8e44ad; border-color: #e1bee7; }
 .marker-pin.unlit       { background: #f39c12; border-color: #fff3cd; }
 
+/* ЕРДР маркеры на карте */
+.erdr-marker-pin {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: #ff5252;
+    border: 2px solid rgba(255, 255, 255, 0.8);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+.erdr-marker-pin:hover {
+    transform: scale(1.4);
+}
+
 /* Category-colored clusters */
 .cat-cluster {
     background: transparent !important;
@@ -2600,6 +2615,16 @@ body {
     line-height: 1.6;
     white-space: pre-wrap;
     word-break: break-word;
+}
+
+.crime-person-card {
+    background: rgba(93, 173, 226, 0.08);
+    border: 1px solid rgba(93, 173, 226, 0.2);
+    border-radius: 8px;
+    padding: 8px 12px;
+    margin: 6px 0;
+    font-size: 13px;
+    color: #c0c8e0;
 }
 
 .crime-tooltip {

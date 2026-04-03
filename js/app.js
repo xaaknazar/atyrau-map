@@ -652,6 +652,17 @@
         var validZones = analysis.problemZones.filter(function (z) { return z.count <= 50; });
         renderZonesList(validZones);
 
+        // Люди
+        if (analysis.people) {
+            renderPeopleStats(analysis.people);
+            renderBarChart("an-people-age-chart", analysis.people.byAge, "blue");
+            renderBarChart("an-people-gender-chart", analysis.people.byGender, "green");
+            renderBarChart("an-people-education-chart", analysis.people.byEducation, "purple");
+            renderBarChart("an-people-occupation-chart", analysis.people.byOccupation.slice(0, 15), "orange");
+            renderBarChart("an-people-marital-chart", analysis.people.byMaritalStatus, "blue");
+            renderBarChart("an-people-nationality-chart", analysis.people.byNationality.slice(0, 10), "green");
+        }
+
         // Store for AI
         window._lastAnalysis = analysis;
     }
@@ -671,6 +682,18 @@
             _statCard(Object.keys(uniqueArticles).length, "Статей") +
             _statCard(Object.keys(organs).length, "Органов") +
             _statCard(a.problemZones.length, "Зон");
+    }
+
+    function renderPeopleStats(pa) {
+        var el = document.getElementById("an-people-stats");
+        if (!el) return;
+        el.innerHTML =
+            _statCard(pa.total, "Всего лиц") +
+            _statCard(pa.minors, "Несовершеннолетних") +
+            _statCard(pa.byGender.length, "Полов") +
+            _statCard(pa.byNationality.length, "Национальностей") +
+            _statCard(pa.byEducation.length, "Уровней образ.") +
+            _statCard(pa.byOccupation.length, "Родов занятий");
     }
 
     function _statCard(val, label) {
@@ -907,6 +930,31 @@
         document.getElementById("crime-modal-crime-date").innerHTML =
             '<strong>' + t("crime_date_committed") + ':</strong> ' + crime.crimeDate + ' ' + (crime.crimeTime || '');
         document.getElementById("crime-modal-description").textContent = crime.description;
+
+        // Показать связанных лиц
+        var peopleEl = document.getElementById("crime-modal-people");
+        if (peopleEl) {
+            var people = getPeopleForCrime(crime);
+            if (people.length > 0) {
+                peopleEl.innerHTML = '<h3 style="margin:12px 0 8px;color:#5dade2;">Лица (' + people.length + ')</h3>' +
+                    people.map(function (p, i) {
+                        var parts = [];
+                        if (p.gender) parts.push(p.gender);
+                        if (p.age) parts.push(p.age + " лет");
+                        if (p.nationality) parts.push(p.nationality);
+                        if (p.education) parts.push(p.education);
+                        if (p.occupation) parts.push(p.occupation);
+                        if (p.maritalStatus) parts.push(p.maritalStatus);
+                        if (p.isMinor && p.isMinor.toLowerCase().indexOf("да") !== -1) parts.push("несовершеннолетний");
+                        return '<div class="crime-person-card">' +
+                            '<strong>Лицо ' + (i + 1) + ':</strong> ' + parts.join(", ") +
+                            '</div>';
+                    }).join("");
+            } else {
+                peopleEl.innerHTML = "";
+            }
+        }
+
         overlay.classList.remove("hidden");
     }
 
@@ -917,7 +965,54 @@
         if (e.target === this) this.classList.add("hidden");
     });
 
-    // Загрузить данные из Google Sheets → определить координаты → показать маркеры
+    // ── ЕРДР маркеры на карте (из координат X/Y, без ст. 190) ──
+    var crimeErdrLayer = L.markerClusterGroup({
+        maxClusterRadius: 50,
+        spiderfyOnMaxZoom: true,
+        showCoverageOnHover: false,
+        iconCreateFunction: function (cluster) {
+            var count = cluster.getChildCount();
+            var size = count < 10 ? 30 : count < 50 ? 38 : 46;
+            return L.divIcon({
+                html: '<div style="background:rgba(231,76,60,0.85);width:' + size + 'px;height:' + size + 'px;' +
+                    'border-radius:50%;display:flex;align-items:center;justify-content:center;' +
+                    'color:#fff;font-weight:700;font-size:12px;border:2px solid rgba(255,255,255,0.6);">' + count + '</div>',
+                className: 'erdr-cluster',
+                iconSize: L.point(size, size)
+            });
+        }
+    });
+    map.addLayer(crimeErdrLayer);
+
+    function buildCrimeMarkers() {
+        crimeErdrLayer.clearLayers();
+        var added = 0;
+        crimeIncidents.forEach(function (c) {
+            if (typeof c.lat !== "number" || typeof c.lng !== "number") return;
+            if (isNaN(c.lat) || isNaN(c.lng)) return;
+
+            var marker = L.marker([c.lat, c.lng], {
+                icon: L.divIcon({
+                    className: "erdr-marker",
+                    html: '<div class="erdr-marker-pin"></div>',
+                    iconSize: [12, 12],
+                    iconAnchor: [6, 6]
+                })
+            });
+
+            var tooltipText = (c.article || "—") + " | " + (c.street ? "ул. " + c.street : "");
+            marker.bindTooltip(tooltipText, {
+                direction: "top", offset: [0, -8], className: "marker-tooltip"
+            });
+
+            marker.on("click", function () { openCrimeModal(c); });
+            crimeErdrLayer.addLayer(marker);
+            added++;
+        });
+        console.log("[map] ЕРДР маркеров на карте: " + added);
+    }
+
+    // Загрузить данные
     var crimeLoadingEl = document.getElementById("crime-loading-status");
 
     initCrimeData(
@@ -925,6 +1020,7 @@
         function () {
             if (crimeLoadingEl) crimeLoadingEl.classList.add("hidden");
             document.getElementById("count-crime-incidents").textContent = crimeIncidents.length;
+            buildCrimeMarkers();
         }
     );
 

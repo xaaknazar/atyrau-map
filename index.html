@@ -248,6 +248,7 @@
                 <button class="analytics-tab active" data-tab="overview">Обзор</button>
                 <button class="analytics-tab" data-tab="time">Время</button>
                 <button class="analytics-tab" data-tab="places">Улицы</button>
+                <button class="analytics-tab" data-tab="people">Лица</button>
                 <button class="analytics-tab" data-tab="zones">Зоны</button>
                 <button class="analytics-tab" data-tab="ai">AI-анализ</button>
             </div>
@@ -293,6 +294,35 @@
                 <div class="an-section">
                     <h3>Топ улиц по преступлениям</h3>
                     <div id="an-streets-chart" class="an-bar-chart"></div>
+                </div>
+            </div>
+
+            <!-- Таб: Лица -->
+            <div class="analytics-tab-content" data-tab="people">
+                <div class="an-stats-grid" id="an-people-stats"></div>
+                <div class="an-section">
+                    <h3>По возрасту</h3>
+                    <div id="an-people-age-chart" class="an-bar-chart"></div>
+                </div>
+                <div class="an-section">
+                    <h3>По полу</h3>
+                    <div id="an-people-gender-chart" class="an-bar-chart"></div>
+                </div>
+                <div class="an-section">
+                    <h3>По образованию</h3>
+                    <div id="an-people-education-chart" class="an-bar-chart"></div>
+                </div>
+                <div class="an-section">
+                    <h3>По роду занятий</h3>
+                    <div id="an-people-occupation-chart" class="an-bar-chart"></div>
+                </div>
+                <div class="an-section">
+                    <h3>По семейному положению</h3>
+                    <div id="an-people-marital-chart" class="an-bar-chart"></div>
+                </div>
+                <div class="an-section">
+                    <h3>По национальности</h3>
+                    <div id="an-people-nationality-chart" class="an-bar-chart"></div>
                 </div>
             </div>
 
@@ -536,6 +566,7 @@
                 <div id="crime-modal-address" class="crime-info-row"></div>
                 <div id="crime-modal-crime-date" class="crime-info-row"></div>
                 <div id="crime-modal-description" class="crime-description"></div>
+                <div id="crime-modal-people" class="crime-modal-people"></div>
             </div>
         </div>
     </div>

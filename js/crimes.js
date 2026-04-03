@@ -1,62 +1,63 @@
 /**
- * Загрузка правонарушений (ЕРДР) из Google Sheets.
+ * Загрузка данных ЕРДР из Google Sheets (Apps Script API).
  *
- * Таблица публикуется как CSV, парсится на клиенте.
- * Координаты (широта/долгота) заполняются ВНУТРИ таблицы
- * через Google Apps Script — клиент только читает готовые значения.
+ * Таблица имеет 2 листа:
+ *  Лист 1 — «Основная информация» (преступления)
+ *  Лист 2 — «Люди» (подозреваемые/лица)
+ *  Связь через поле «Номер ЕРДР»
  *
- * Колонки таблицы (по порядку):
- *  0  — №
- *  1  — 1.Номер ЕРДР
- *  2  — 1.Дата-время регистрации
- *  3  — 2.Орган регистрации
- *  4  — 4.Номер КУИ
- *  5  — 4.Дата-время регистрации в КУИ
- *  6  — 9.Дата совершения
- *  7  — 9.время совершения
- *  8  — 9.1 Описание преступления/проступка
- *  9  — 10.Квалификация
- *  10 — 10.Квалификация п.п.
- *  11 — 29.Место совершения
- *  12 — 29.1.Общественное место
- *  13 — 31.Место совершения Область
- *  14 — 31.Место совершения Район
- *  15 — 31.Место совершения Населенный пункт
- *  16 — 31.Место совершения Улица
- *  17 — 31.Место совершения Дом
- *  18 — 31.Место совершения Корпус
- *  19 — 31.Место совершения Квартира
- *  20 — Широта (lat)
- *  21 — Долгота (lng)
+ * Колонки Лист 1:
+ *  №, Номер ЕРДР, Дата-время регистрации, Орган регистрации,
+ *  Номер КУИ, Дата-время регистрации в КУИ, Дата совершения,
+ *  время совершения, Описание преступления/проступка,
+ *  10.Квалификация, 10.Квалификация п.п., 10.3.Совершено в отношении,
+ *  28.Преступление совершено, 29.Место совершения, 29.1.Общественное место,
+ *  30.Охрана объекта, 31.Место совершения Республика,
+ *  31.Место совершения Область, 31.Место совершения Район,
+ *  31.Место совершения Населенный пункт, 31.Место совершения Улица,
+ *  31.Место совершения Дом, 31.Место совершения Корпус,
+ *  31.Место совершения Квартира,
+ *  31. Место совершения (координата X), 31. Место совершения (координата Y)
+ *
+ * Колонки Лист 2:
+ *  №, Возраст на момент совершения, Пол, Место рождения Республика,
+ *  Место рождения Область, Место рождения Район, Место рождения Населенный пункт,
+ *  Гражданство, Гражданство иностранца, Национальность, Образование,
+ *  Семейное положение, Дополнительные сведения, Несовершеннолетний,
+ *  Род занятий, Доп.отметки, Место работы (учебы), Должность,
+ *  Номер ЕРДР, Дата-время регистрации
  */
 
 // ══════════════════════════════════════════════════════════════
 //  Конфигурация
 // ══════════════════════════════════════════════════════════════
 
-// Google Apps Script web app — возвращает JSON с координатами
+// Google Apps Script web app — возвращает JSON с обоими листами
 var CRIMES_API_URL =
     "https://script.google.com/macros/s/" +
     "AKfycbyrbsDiPVyUJ3DZP7JtjvcY6a1dEUwvBVoK0otyJmmlb5RMDo7WAs7uMsbUUwIylmjX" +
     "/exec";
 
-// Резервная ссылка — CSV из таблицы (без координат, на случай если API недоступен)
+// Резервная ссылка — CSV из таблицы (без координат, без людей)
 var CRIMES_SHEET_CSV_URL =
     "https://docs.google.com/spreadsheets/d/e/" +
     "2PACX-1vRdNcnBVsk8JV3lsjicAt9erR4jAmaq8Pj4AsC5eIcqGqR_q3OLkU2Eujn9eG99WEdzMUzA1OEHf7wE" +
     "/pub?gid=0&single=true&output=csv";
 
 var CRIMES_DATA_CACHE_KEY = "atyrau-crimes-data-cache";
+var PEOPLE_DATA_CACHE_KEY = "atyrau-people-data-cache";
 
 // ══════════════════════════════════════════════════════════════
 //  Глобальные переменные
 // ══════════════════════════════════════════════════════════════
 
 var crimeIncidents = [];
+var crimePeople = [];       // данные о лицах
+var crimePeopleByErdr = {}; // { "номер ЕРДР": [person, ...] }
 var _crimeGeoCallbacks = [];
 var _crimeDataReady = false;
 
-/** Вызывается когда данные загружены и геокодированы */
+/** Вызывается когда данные загружены */
 function onCrimesReady(fn) {
     if (_crimeDataReady) { fn(); return; }
     _crimeGeoCallbacks.push(fn);
@@ -68,12 +69,25 @@ function _notifyCrimesReady() {
 }
 
 // ══════════════════════════════════════════════════════════════
-//  Парсинг CSV
+//  Валидация координат
 // ══════════════════════════════════════════════════════════════
 
 /**
- * Простой парсер CSV с поддержкой кавычек и переносов строк внутри полей.
+ * Проверка: координаты валидны (не центр города, в пределах Атырау).
  */
+function _validateCoords(lat, lng) {
+    if (lat === null || lng === null || isNaN(lat) || isNaN(lng)) return { lat: null, lng: null };
+    // Центр Атырау — ошибка геокодинга (~47.0945, ~51.9238)
+    if (Math.abs(lat - 47.0945) < 0.003 && Math.abs(lng - 51.9238) < 0.003) return { lat: null, lng: null };
+    // За пределами Атырау
+    if (lat < 46.85 || lat > 47.25 || lng < 51.60 || lng > 52.15) return { lat: null, lng: null };
+    return { lat: lat, lng: lng };
+}
+
+// ══════════════════════════════════════════════════════════════
+//  Парсинг CSV
+// ══════════════════════════════════════════════════════════════
+
 function parseCSV(text) {
     var rows = [];
     var row = [];
@@ -83,7 +97,6 @@ function parseCSV(text) {
 
     while (i < text.length) {
         var ch = text[i];
-
         if (inQuotes) {
             if (ch === '"') {
                 if (i + 1 < text.length && text[i + 1] === '"') {
@@ -120,7 +133,6 @@ function parseCSV(text) {
         }
     }
 
-    // Последняя строка
     if (field || row.length > 0) {
         row.push(field.trim());
         if (row.length > 1) rows.push(row);
@@ -129,17 +141,12 @@ function parseCSV(text) {
     return rows;
 }
 
-/**
- * Парсинг даты формата "ДД.ММ.ГГГГ ЧЧ:ММ" в ISO строку.
- */
 function parseDateToISO(dateStr) {
     if (!dateStr) return "";
-    // Пример: "04.02.2026 11:43"
     var m = dateStr.match(/(\d{2})\.(\d{2})\.(\d{4})\s*(\d{2}):(\d{2})/);
     if (m) {
         return m[3] + "-" + m[2] + "-" + m[1] + "T" + m[4] + ":" + m[5] + ":00";
     }
-    // Попробуем только дату "ДД.ММ.ГГГГ"
     var m2 = dateStr.match(/(\d{2})\.(\d{2})\.(\d{4})/);
     if (m2) {
         return m2[3] + "-" + m2[2] + "-" + m2[1];
@@ -147,27 +154,88 @@ function parseDateToISO(dateStr) {
     return dateStr;
 }
 
-/**
- * Конвертировать строку CSV в объект инцидента.
- */
-/**
- * Проверка: координаты валидны (не центр города, в пределах Атырау).
- */
-function _validateCoords(lat, lng) {
-    if (lat === null || lng === null || isNaN(lat) || isNaN(lng)) return { lat: null, lng: null };
-    // Центр Атырау — ошибка геокодинга (~47.0945, ~51.9238)
-    if (Math.abs(lat - 47.0945) < 0.003 && Math.abs(lng - 51.9238) < 0.003) return { lat: null, lng: null };
-    // За пределами Атырау
-    if (lat < 46.85 || lat > 47.25 || lng < 51.60 || lng > 52.15) return { lat: null, lng: null };
-    return { lat: lat, lng: lng };
+// ══════════════════════════════════════════════════════════════
+//  Парсинг строк — преступления
+// ══════════════════════════════════════════════════════════════
+
+/** Безопасно привести к строке */
+function _s(v) { return (v === undefined || v === null || v === "") ? "" : String(v); }
+
+/** Парсинг даты (ISO или ДД.ММ.ГГГГ) */
+function _parseDate(v) {
+    if (!v) return "";
+    var str = String(v);
+    if (str.indexOf("T") !== -1) return str;
+    return parseDateToISO(str);
 }
 
+/**
+ * Конвертировать JSON-объект (строку из Apps Script) в объект инцидента.
+ * Новая структура с координатами X/Y.
+ */
+function jsonRowToCrime(row, idx) {
+    if (Array.isArray(row)) {
+        return csvRowToCrime(row, idx);
+    }
+
+    // Координаты — новые поля
+    var latVal = row["31. Место совершения (координата X)"] ||
+                 row["U (Широта)"] || row["Широта"] || row["lat"] || "";
+    var lngVal = row["31. Место совершения (координата Y)"] ||
+                 row["V (Долгота)"] || row["Долгота"] || row["lng"] || "";
+    var lat = latVal !== "" ? parseFloat(latVal) : null;
+    var lng = lngVal !== "" ? parseFloat(lngVal) : null;
+
+    var coords = _validateCoords(lat, lng);
+    lat = coords.lat;
+    lng = coords.lng;
+
+    var article = _s(row["10.Квалификация"]);
+
+    // Статья 190 — не имеет точных координат
+    if (article.indexOf("190") !== -1) {
+        lat = null;
+        lng = null;
+    }
+
+    return {
+        id: idx + 1,
+        erdr: _s(row["Номер ЕРДР"] || row["1.Номер ЕРДР"]),
+        regDate: _parseDate(row["Дата-время регистрации"] || row["1.Дата-время регистрации"]),
+        organ: _s(row["Орган регистрации"] || row["2.Орган регистрации"]),
+        kuiNumber: _s(row["Номер КУИ"] || row["3. Номер КУИ"] || row["4.Номер КУИ"]),
+        kuiDate: _parseDate(row["Дата-время регистрации в КУИ"] || row["4.Дата-время регистрации в КУИ"]),
+        crimeDate: _parseDate(row["Дата совершения"] || row["9.Дата совершения"]),
+        crimeTime: _s(row["время совершения"] || row["9.время совершения"]),
+        description: _s(row["Описание преступления/проступка"] || row["9.1 Описание преступления/проступка"]),
+        article: article,
+        articlePart: _s(row["10.Квалификация п.п."]),
+        victimType: _s(row["10.3.Совершено в отношении"]),
+        crimeMethod: _s(row["28.Преступление совершено"]),
+        placeType: _s(row["29.Место совершения"]),
+        isPublic: _s(row["29.1.Общественное место"]).toLowerCase().indexOf("общественное") !== -1,
+        security: _s(row["30.Охрана объекта"]),
+        republic: _s(row["31.Место совершения Республика"]),
+        oblast: _s(row["31.Место совершения Область"]),
+        district: _s(row["31.Место совершения Район"]),
+        city: _s(row["31.Место совершения Населенный пункт"]),
+        street: _s(row["31.Место совершения Улица"]),
+        house: _s(row["31.Место совершения Дом"]),
+        building: _s(row["31.Место совершения Корпус"]),
+        apartment: _s(row["31.Место совершения Квартира"]),
+        lat: (lat !== null && !isNaN(lat)) ? lat : null,
+        lng: (lng !== null && !isNaN(lng)) ? lng : null
+    };
+}
+
+/**
+ * CSV fallback (старый формат).
+ */
 function csvRowToCrime(cols, idx) {
-    var lat = cols[20] ? parseFloat(cols[20]) : null;
-    var lng = cols[21] ? parseFloat(cols[21]) : null;
+    var lat = cols[24] ? parseFloat(cols[24]) : (cols[20] ? parseFloat(cols[20]) : null);
+    var lng = cols[25] ? parseFloat(cols[25]) : (cols[21] ? parseFloat(cols[21]) : null);
     var coords = _validateCoords(lat, lng);
     var article = cols[9] || "";
-    // Статья 190 — не имеет точных координат
     if (article.indexOf("190") !== -1) { coords.lat = null; coords.lng = null; }
 
     return {
@@ -182,95 +250,84 @@ function csvRowToCrime(cols, idx) {
         description: cols[8] || "",
         article: article,
         articlePart: cols[10] || "",
-        placeType: cols[11] || "",
-        isPublic: (cols[12] || "").toLowerCase().indexOf("общественное") !== -1,
-        oblast: cols[13] || "",
-        district: cols[14] || "",
-        city: cols[15] || "",
-        street: cols[16] || "",
-        house: cols[17] || "",
-        building: cols[18] || "",
-        apartment: cols[19] || "",
+        victimType: cols[11] || "",
+        crimeMethod: cols[12] || "",
+        placeType: cols[13] || "",
+        isPublic: (cols[14] || "").toLowerCase().indexOf("общественное") !== -1,
+        security: cols[15] || "",
+        republic: cols[16] || "",
+        oblast: cols[17] || "",
+        district: cols[18] || "",
+        city: cols[19] || "",
+        street: cols[20] || "",
+        house: cols[21] || "",
+        building: cols[22] || "",
+        apartment: cols[23] || "",
         lat: coords.lat,
         lng: coords.lng
     };
 }
 
 // ══════════════════════════════════════════════════════════════
-//  Загрузка данных из Google Sheets
+//  Парсинг строк — люди
 // ══════════════════════════════════════════════════════════════
 
 /**
- * Конвертировать JSON-объект (строку из Apps Script) в объект инцидента.
- * Apps Script может вернуть массив объектов с ключами-заголовками
- * или массив массивов (как CSV).
+ * Конвертировать JSON-объект (лист «Люди») в объект лица.
  */
-function jsonRowToCrime(row, idx) {
-    // Если row — массив (array of arrays формат)
-    if (Array.isArray(row)) {
-        return csvRowToCrime(row, idx);
-    }
-
-    // Вспомогательная: безопасно привести к строке (числа, даты, пустые)
-    function s(v) { return (v === undefined || v === null || v === "") ? "" : String(v); }
-
-    // Даты из API приходят в ISO формате "2026-02-04T06:43:00.000Z"
-    // parseDateToISO ожидает "ДД.ММ.ГГГГ ЧЧ:ММ", поэтому ISO пропускаем как есть
-    function parseDate(v) {
-        if (!v) return "";
-        var str = String(v);
-        // Уже ISO формат
-        if (str.indexOf("T") !== -1) return str;
-        return parseDateToISO(str);
-    }
-
-    // Координаты — поля "U (Широта)" и "V (Долгота)"
-    var latVal = row["U (Широта)"] || row["Широта"] || row["lat"] || "";
-    var lngVal = row["V (Долгота)"] || row["Долгота"] || row["lng"] || "";
-    var lat = latVal !== "" ? parseFloat(latVal) : null;
-    var lng = lngVal !== "" ? parseFloat(lngVal) : null;
-
-    // Валидация координат на клиенте
-    var coords = _validateCoords(lat, lng);
-    lat = coords.lat;
-    lng = coords.lng;
-
-    var article = s(row["10.Квалификация"]);
-
-    // Статья 190 — не может иметь точных координат (мошенничество и т.п.)
-    if (article.indexOf("190") !== -1) {
-        lat = null;
-        lng = null;
-    }
+function jsonRowToPerson(row, idx) {
+    if (Array.isArray(row)) return null;
 
     return {
         id: idx + 1,
-        erdr: s(row["1.Номер ЕРДР"]),
-        regDate: parseDate(row["1.Дата-время регистрации"]),
-        organ: s(row["2.Орган регистрации"]),
-        kuiNumber: s(row["3. Номер КУИ"] || row["4.Номер КУИ"]),
-        kuiDate: parseDate(row["4.Дата-время регистрации в КУИ"]),
-        crimeDate: parseDate(row["9.Дата совершения"]),
-        crimeTime: s(row["9.время совершения"]),
-        description: s(row["9.1 Описание преступления/проступка"]),
-        article: article,
-        articlePart: s(row["10.Квалификация п.п."]),
-        placeType: s(row["29.Место совершения"]),
-        isPublic: s(row["29.1.Общественное место"]).toLowerCase().indexOf("общественное") !== -1,
-        oblast: s(row["31.Место совершения Область"]),
-        district: s(row["31.Место совершения Район"]),
-        city: s(row["31.Место совершения Населенный пункт"]),
-        street: s(row["31.Место совершения Улица"]),
-        house: s(row["31.Место совершения Дом"]),
-        building: s(row["31.Место совершения Корпус"]),
-        apartment: s(row["31.Место совершения Квартира"]),
-        lat: (lat !== null && !isNaN(lat)) ? lat : null,
-        lng: (lng !== null && !isNaN(lng)) ? lng : null
+        age: parseInt(_s(row["Возраст на момент совершения"])) || null,
+        gender: _s(row["Пол"]),
+        birthRepublic: _s(row["Место рождения Республика"]),
+        birthOblast: _s(row["Место рождения Область"]),
+        birthDistrict: _s(row["Место рождения Район"]),
+        birthCity: _s(row["Место рождения Населенный пункт"]),
+        citizenship: _s(row["Гражданство"]),
+        foreignCitizenship: _s(row["Гражданство иностранца"]),
+        nationality: _s(row["Национальность"]),
+        education: _s(row["Образование"]),
+        maritalStatus: _s(row["Семейное положение"]),
+        additionalInfo: _s(row["Дополнительные сведения"]),
+        isMinor: _s(row["Несовершеннолетний"]),
+        occupation: _s(row["Род занятий"]),
+        extraMarks: _s(row["Доп.отметки"]),
+        workplace: _s(row["Место работы (учебы)"]),
+        position: _s(row["Должность"]),
+        erdr: _s(row["Номер ЕРДР"]),
+        regDate: _parseDate(row["Дата-время регистрации"])
     };
 }
 
 /**
- * Загрузить из Apps Script API (JSON с координатами).
+ * Построить индекс людей по номеру ЕРДР.
+ */
+function _buildPeopleIndex() {
+    crimePeopleByErdr = {};
+    crimePeople.forEach(function (p) {
+        if (!p.erdr) return;
+        if (!crimePeopleByErdr[p.erdr]) crimePeopleByErdr[p.erdr] = [];
+        crimePeopleByErdr[p.erdr].push(p);
+    });
+    console.log("[crimes] Людей привязано к ЕРДР: " + Object.keys(crimePeopleByErdr).length + " уникальных номеров");
+}
+
+/**
+ * Получить людей для данного преступления.
+ */
+function getPeopleForCrime(crime) {
+    return crimePeopleByErdr[crime.erdr] || [];
+}
+
+// ══════════════════════════════════════════════════════════════
+//  Загрузка данных
+// ══════════════════════════════════════════════════════════════
+
+/**
+ * Загрузить из Apps Script API (JSON — оба листа).
  */
 function _loadFromAPI(callback) {
     console.log("[crimes] Загрузка из Apps Script API...");
@@ -290,34 +347,54 @@ function _loadFromAPI(callback) {
             return data;
         })
         .then(function (data) {
-            // data может быть: { data: [...] } или просто [...]
-            var rows = Array.isArray(data) ? data : (data.data || data.rows || []);
+            // Новый формат: { crimes: [...], people: [...] }
+            // Старый формат: просто массив [...]
+            var crimeRows, peopleRows;
 
-            if (rows.length === 0) {
+            if (data.crimes) {
+                crimeRows = data.crimes;
+                peopleRows = data.people || [];
+            } else {
+                crimeRows = Array.isArray(data) ? data : (data.data || data.rows || []);
+                peopleRows = [];
+            }
+
+            if (crimeRows.length === 0) {
                 throw new Error("API вернул пустые данные");
             }
 
+            // Парсим преступления
             crimeIncidents = [];
-            for (var i = 0; i < rows.length; i++) {
-                var crime = jsonRowToCrime(rows[i], i);
+            for (var i = 0; i < crimeRows.length; i++) {
+                var crime = jsonRowToCrime(crimeRows[i], i);
                 if (crime.erdr) {
                     crimeIncidents.push(crime);
                 }
             }
 
-            console.log("[crimes] Загружено из API: " + crimeIncidents.length);
+            // Парсим людей
+            crimePeople = [];
+            for (var j = 0; j < peopleRows.length; j++) {
+                var person = jsonRowToPerson(peopleRows[j], j);
+                if (person && person.erdr) {
+                    crimePeople.push(person);
+                }
+            }
+
+            _buildPeopleIndex();
+
+            console.log("[crimes] Загружено из API: " + crimeIncidents.length + " преступлений, " + crimePeople.length + " лиц");
             _saveCrimesCache();
             callback();
         })
         .catch(function (err) {
             console.warn("[crimes] API недоступен:", err.message);
-            // Fallback на CSV
             _loadFromCSV(callback);
         });
 }
 
 /**
- * Загрузить из CSV (резервный вариант).
+ * Загрузить из CSV (резервный вариант — только преступления).
  */
 function _loadFromCSV(callback) {
     console.log("[crimes] Загрузка из CSV (резервный)...");
@@ -361,6 +438,9 @@ function loadCrimesFromSheet(callback) {
 function _saveCrimesCache() {
     try {
         localStorage.setItem(CRIMES_DATA_CACHE_KEY, JSON.stringify(crimeIncidents));
+        if (crimePeople.length > 0) {
+            localStorage.setItem(PEOPLE_DATA_CACHE_KEY, JSON.stringify(crimePeople));
+        }
     } catch (e) { /* ignore */ }
 }
 
@@ -371,12 +451,17 @@ function _tryLoadFromCache() {
             crimeIncidents = JSON.parse(saved);
             console.log("[crimes] Загружено из кэша: " + crimeIncidents.length);
         }
+        var savedPeople = localStorage.getItem(PEOPLE_DATA_CACHE_KEY);
+        if (savedPeople) {
+            crimePeople = JSON.parse(savedPeople);
+            _buildPeopleIndex();
+            console.log("[crimes] Людей из кэша: " + crimePeople.length);
+        }
     } catch (e) { /* ignore */ }
 }
 
 /**
- * Полная инициализация: загрузить из таблицы → уведомить.
- * Координаты уже содержатся в таблице (колонки 20-21).
+ * Полная инициализация.
  */
 function initCrimeData(onProgress, onDone) {
     loadCrimesFromSheet(function () {
@@ -395,15 +480,8 @@ function initCrimeData(onProgress, onDone) {
 //  Утилиты
 // ══════════════════════════════════════════════════════════════
 
-/**
- * Фильтрация инцидентов по периоду.
- * Показываются все записи (для отображения списком).
- * @param {string} period — "all" | "month" | "week" | "day"
- * @returns {Array} Отфильтрованный массив
- */
 function filterCrimesByPeriod(period) {
     var list = crimeIncidents.slice();
-
     if (period === "all") return list;
 
     var now = new Date();
@@ -429,9 +507,6 @@ function filterCrimesByPeriod(period) {
     });
 }
 
-/**
- * Построить адресную строку из полей инцидента.
- */
 function buildCrimeAddress(c) {
     var parts = [];
     if (c.oblast) parts.push(c.oblast);
@@ -444,9 +519,6 @@ function buildCrimeAddress(c) {
     return parts.join(", ");
 }
 
-/**
- * Форматировать дату для отображения.
- */
 function formatCrimeDate(isoStr) {
     if (!isoStr) return "—";
     var d = new Date(isoStr);

@@ -204,10 +204,107 @@ function findProblemZones(crimes, gridSize) {
 }
 
 // ══════════════════════════════════════════════════════════════
-//  5. ПОЛНЫЙ АНАЛИЗ — собрать все данные
+//  5. АНАЛИЗ ЛЮДЕЙ (Лист 2)
+// ══════════════════════════════════════════════════════════════
+
+function analyzePeopleByAge(people) {
+    var groups = {
+        "до 18": 0,
+        "18-25": 0,
+        "26-35": 0,
+        "36-45": 0,
+        "46-55": 0,
+        "56+": 0,
+        "Не указан": 0
+    };
+    people.forEach(function (p) {
+        if (!p.age) { groups["Не указан"]++; return; }
+        if (p.age < 18) groups["до 18"]++;
+        else if (p.age <= 25) groups["18-25"]++;
+        else if (p.age <= 35) groups["26-35"]++;
+        else if (p.age <= 45) groups["36-45"]++;
+        else if (p.age <= 55) groups["46-55"]++;
+        else groups["56+"]++;
+    });
+    return Object.keys(groups).filter(function (k) { return groups[k] > 0; }).map(function (k) {
+        return { label: k, count: groups[k] };
+    });
+}
+
+function analyzePeopleByGender(people) {
+    var map = {};
+    people.forEach(function (p) {
+        var key = p.gender || "Не указан";
+        if (!map[key]) map[key] = { count: 0, label: key };
+        map[key].count++;
+    });
+    return Object.values(map).sort(function (a, b) { return b.count - a.count; });
+}
+
+function analyzePeopleByEducation(people) {
+    var map = {};
+    people.forEach(function (p) {
+        var key = p.education || "Не указано";
+        if (!map[key]) map[key] = { count: 0, label: key };
+        map[key].count++;
+    });
+    return Object.values(map).sort(function (a, b) { return b.count - a.count; });
+}
+
+function analyzePeopleByOccupation(people) {
+    var map = {};
+    people.forEach(function (p) {
+        var key = p.occupation || "Не указан";
+        if (!map[key]) map[key] = { count: 0, label: key };
+        map[key].count++;
+    });
+    return Object.values(map).sort(function (a, b) { return b.count - a.count; });
+}
+
+function analyzePeopleByNationality(people) {
+    var map = {};
+    people.forEach(function (p) {
+        var key = p.nationality || "Не указана";
+        if (!map[key]) map[key] = { count: 0, label: key };
+        map[key].count++;
+    });
+    return Object.values(map).sort(function (a, b) { return b.count - a.count; });
+}
+
+function analyzePeopleByMaritalStatus(people) {
+    var map = {};
+    people.forEach(function (p) {
+        var key = p.maritalStatus || "Не указано";
+        if (!map[key]) map[key] = { count: 0, label: key };
+        map[key].count++;
+    });
+    return Object.values(map).sort(function (a, b) { return b.count - a.count; });
+}
+
+function runPeopleAnalysis(people) {
+    var minorsCount = people.filter(function (p) {
+        return p.isMinor && p.isMinor.toLowerCase().indexOf("да") !== -1;
+    }).length;
+
+    return {
+        total: people.length,
+        minors: minorsCount,
+        byAge: analyzePeopleByAge(people),
+        byGender: analyzePeopleByGender(people),
+        byEducation: analyzePeopleByEducation(people),
+        byOccupation: analyzePeopleByOccupation(people),
+        byNationality: analyzePeopleByNationality(people),
+        byMaritalStatus: analyzePeopleByMaritalStatus(people)
+    };
+}
+
+// ══════════════════════════════════════════════════════════════
+//  6. ПОЛНЫЙ АНАЛИЗ — собрать все данные
 // ══════════════════════════════════════════════════════════════
 
 function runFullAnalysis(crimes) {
+    var peopleAnalysis = crimePeople.length > 0 ? runPeopleAnalysis(crimePeople) : null;
+
     return {
         total: crimes.length,
         publicCount: crimes.filter(function (c) { return c.isPublic; }).length,
@@ -219,7 +316,8 @@ function runFullAnalysis(crimes) {
         byPlaceType: analyzeByPlaceType(crimes),
         byArea: analyzeByArea(crimes),
         byStreet: analyzeByStreet(crimes),
-        problemZones: findProblemZones(crimes)
+        problemZones: findProblemZones(crimes),
+        people: peopleAnalysis
     };
 }
 
@@ -287,6 +385,45 @@ function buildAnalysisSummaryForAI(analysis) {
                 " — " + z.count + " преступлений" +
                 ", основная статья: " + z.topArticle +
                 ", пик: " + (z.peakHour !== undefined ? z.peakHour + ":00" : "нет данных"));
+        });
+    }
+    lines.push("");
+
+    // Данные о лицах (Лист 2)
+    if (analysis.people) {
+        var pa = analysis.people;
+        lines.push("ДАННЫЕ О ЛИЦАХ (подозреваемые):");
+        lines.push("Всего лиц: " + pa.total);
+        lines.push("Несовершеннолетних: " + pa.minors);
+        lines.push("");
+
+        lines.push("ПО ВОЗРАСТУ:");
+        pa.byAge.forEach(function (a) {
+            lines.push("  " + a.label + " — " + a.count);
+        });
+        lines.push("");
+
+        lines.push("ПО ПОЛУ:");
+        pa.byGender.forEach(function (g) {
+            lines.push("  " + g.label + " — " + g.count);
+        });
+        lines.push("");
+
+        lines.push("ПО ОБРАЗОВАНИЮ:");
+        pa.byEducation.forEach(function (e) {
+            lines.push("  " + e.label + " — " + e.count);
+        });
+        lines.push("");
+
+        lines.push("ПО РОДУ ЗАНЯТИЙ:");
+        pa.byOccupation.slice(0, 10).forEach(function (o) {
+            lines.push("  " + o.label + " — " + o.count);
+        });
+        lines.push("");
+
+        lines.push("ПО СЕМЕЙНОМУ ПОЛОЖЕНИЮ:");
+        pa.byMaritalStatus.forEach(function (m) {
+            lines.push("  " + m.label + " — " + m.count);
         });
     }
 
