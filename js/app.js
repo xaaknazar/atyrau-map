@@ -697,7 +697,6 @@
         el.innerHTML =
             _statCard(pa.total, "Всего лиц") +
             _statCard(pa.minors, "Несовершеннолетних") +
-            _statCard(pa.byGender.length, "Полов") +
             _statCard(pa.byNationality.length, "Национальностей") +
             _statCard(pa.byEducation.length, "Уровней образ.") +
             _statCard(pa.byOccupation.length, "Родов занятий");

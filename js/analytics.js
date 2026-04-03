@@ -283,7 +283,8 @@ function analyzePeopleByMaritalStatus(people) {
 
 function runPeopleAnalysis(people) {
     var minorsCount = people.filter(function (p) {
-        return p.isMinor && p.isMinor.toLowerCase().indexOf("да") !== -1;
+        // Считаем по возрасту < 18 (надёжнее чем поле "Несовершеннолетний")
+        return p.age !== null && p.age < 18;
     }).length;
 
     return {
