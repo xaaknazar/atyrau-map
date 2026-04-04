@@ -2167,6 +2167,52 @@ body {
     font-weight: 700;
 }
 
+.analytics-period-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 0 12px;
+}
+
+.analytics-period-label {
+    color: #8892b0;
+    font-size: 13px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.analytics-period-row .crime-period-buttons {
+    display: flex;
+    gap: 4px;
+    background: rgba(255, 255, 255, 0.04);
+    padding: 3px;
+    border-radius: 8px;
+    flex: 1;
+}
+
+.an-period-btn {
+    flex: 1;
+    padding: 6px 8px;
+    border: none;
+    background: transparent;
+    color: #8892b0;
+    font-size: 12px;
+    font-weight: 600;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.an-period-btn.active {
+    background: rgba(52, 152, 219, 0.25);
+    color: #3498db;
+}
+
+.an-period-btn:hover:not(.active) {
+    background: rgba(255, 255, 255, 0.05);
+    color: #c0c8e0;
+}
+
 .analytics-tabs {
     display: flex;
     gap: 2px;

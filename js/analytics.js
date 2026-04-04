@@ -333,8 +333,9 @@ function runPeopleAnalysis(people) {
 //  6. ПОЛНЫЙ АНАЛИЗ — собрать все данные
 // ══════════════════════════════════════════════════════════════
 
-function runFullAnalysis(crimes) {
-    var peopleAnalysis = crimePeople.length > 0 ? runPeopleAnalysis(crimePeople) : null;
+function runFullAnalysis(crimes, people) {
+    var ppl = people || crimePeople;
+    var peopleAnalysis = ppl.length > 0 ? runPeopleAnalysis(ppl) : null;
 
     return {
         total: crimes.length,

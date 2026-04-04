@@ -395,7 +395,7 @@
      * Обновить карточки статистики.
      */
     function updateCrimeStats() {
-        var all = crimeIncidents;
+        var all = filterCrimesByPeriod(currentCrimePeriod);
         var total = all.length;
         var publicCount = all.filter(function (c) { return c.isPublic; }).length;
         var withCoords = all.filter(function (c) {
@@ -529,6 +529,7 @@
             });
             this.classList.add("active");
             currentCrimePeriod = this.getAttribute("data-period");
+            updateCrimeStats();
             buildCrimeList();
         });
     });
@@ -669,14 +670,32 @@
         });
     });
 
+    var analyticsPeriod = "all";
+
+    document.querySelectorAll(".an-period-btn").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+            document.querySelectorAll(".an-period-btn").forEach(function (b) {
+                b.classList.remove("active");
+            });
+            this.classList.add("active");
+            analyticsPeriod = this.getAttribute("data-period");
+            renderAnalytics();
+        });
+    });
+
     function renderAnalytics() {
         if (crimeIncidents.length === 0) return;
-        var analysis = runFullAnalysis(crimeIncidents);
+        var filtered = filterCrimesByPeriod(analyticsPeriod);
+        // Фильтруем людей по ЕРДР номерам отфильтрованных преступлений
+        var erdrSet = {};
+        filtered.forEach(function (c) { if (c.erdr) erdrSet[c.erdr] = true; });
+        var filteredPeople = crimePeople.filter(function (p) { return erdrSet[p.erdr]; });
+        var analysis = runFullAnalysis(filtered, filteredPeople);
 
-        renderOverviewStats(analysis);
+        renderOverviewStats(analysis, filtered);
         renderBarChart("an-articles-chart", analysis.byArticle.slice(0, 15), "red");
         renderMonthsChart(analysis.byMonth);
-        renderOrgansChart(analysis);
+        renderOrgansChart(filtered);
         renderBarChart("an-method-chart", analysis.byCrimeMethod.slice(0, 10), "orange");
         renderBarChart("an-place-chart", analysis.byPlaceType.slice(0, 10), "green");
         renderHoursChart(analysis.byHour);
@@ -702,19 +721,17 @@
         window._lastAnalysis = analysis;
     }
 
-    function renderOverviewStats(a) {
+    function renderOverviewStats(a, filtered) {
         var el = document.getElementById("an-overview-stats");
         if (!el) return;
-        var uniqueArticles = {};
-        crimeIncidents.forEach(function (c) { if (c.article) uniqueArticles[c.article] = true; });
         var organs = {};
-        crimeIncidents.forEach(function (c) { if (c.organ) organs[c.organ] = true; });
+        filtered.forEach(function (c) { if (c.organ) organs[c.organ] = true; });
 
         el.innerHTML =
             _statCard(a.total, "Всего") +
             _statCard(a.publicCount, "Общ. места") +
             _statCard(a.withCoords, "С координатами") +
-            _statCard(Object.keys(uniqueArticles).length, "Статей") +
+            _statCard(a.byArticle.length, "Статей") +
             _statCard(Object.keys(organs).length, "Органов") +
             _statCard(a.problemZones.length, "Зон");
     }
@@ -755,9 +772,9 @@
         renderBarChart("an-months-chart", items, "green");
     }
 
-    function renderOrgansChart(analysis) {
+    function renderOrgansChart(filtered) {
         var organMap = {};
-        crimeIncidents.forEach(function (c) {
+        filtered.forEach(function (c) {
             var key = c.organ || "Не указан";
             if (!organMap[key]) organMap[key] = 0;
             organMap[key]++;
