@@ -257,19 +257,34 @@ function jsonRowToCrime(row, idx) {
         return csvRowToCrime(row, idx);
     }
 
-    // Координаты — Pulkovo 1942 / Gauss-Kruger CM 69E (EPSG:2502)
-    // В таблице: X = easting, Y = northing (метры, запятая = десятичный разделитель)
-    var rawX = _parseCoordValue(row["31. Место совершения (координата X)"]);
-    var rawY = _parseCoordValue(row["31. Место совершения (координата Y)"]);
+    // Координаты — приоритет: "Новые координаты" (WGS84: "47.120578, 51.924944")
+    // Если нет — конвертируем из Pulkovo X/Y
     var lat = null;
     var lng = null;
 
-    if (rawX !== null && rawY !== null) {
-        // Конвертируем из Pulkovo GK → WGS84
-        var wgs = pulkovoToWgs84(rawX, rawY);
-        if (wgs) {
-            lat = wgs.lat;
-            lng = wgs.lng;
+    var newCoords = _s(row["Новые координаты"]);
+    if (newCoords) {
+        var parts = newCoords.replace(/\s/g, "").split(",");
+        if (parts.length === 2) {
+            var nLat = parseFloat(parts[0]);
+            var nLng = parseFloat(parts[1]);
+            if (!isNaN(nLat) && !isNaN(nLng)) {
+                lat = nLat;
+                lng = nLng;
+            }
+        }
+    }
+
+    // Если новых координат нет — берём из Pulkovo X/Y
+    if (lat === null || lng === null) {
+        var rawX = _parseCoordValue(row["31. Место совершения (координата X)"]);
+        var rawY = _parseCoordValue(row["31. Место совершения (координата Y)"]);
+        if (rawX !== null && rawY !== null) {
+            var wgs = pulkovoToWgs84(rawX, rawY);
+            if (wgs) {
+                lat = wgs.lat;
+                lng = wgs.lng;
+            }
         }
     }
 
