@@ -217,6 +217,50 @@
 
     document.getElementById("heatmap-toggle").addEventListener("click", toggleHeatmap);
 
+    // ═══════════════════════════════════════════════════════
+    //  360° PANORAMA (Google Street View)
+    // ═══════════════════════════════════════════════════════
+    var panoramaMode = false;
+    var panoramaBtn = document.getElementById("panorama-toggle");
+    var panoramaModal = document.getElementById("panorama-modal");
+    var panoramaFrame = document.getElementById("panorama-frame");
+    var panoramaClose = document.getElementById("panorama-close");
+    var panoramaOpenNew = document.getElementById("panorama-open-new");
+
+    function openPanorama(lat, lng) {
+        // Google Maps Street View embed URL
+        var embedUrl = "https://www.google.com/maps/embed?pb=!4v0!6m8!1m7!1sCBxBQ!2m2!1d" +
+            lat + "!2d" + lng + "!3f0!4f0!5f0.7820865974627469";
+        // Fallback: regular Google Maps Street View
+        var mapsUrl = "https://www.google.com/maps/@" + lat + "," + lng + ",3a,75y,0h,90t/data=!3m4!1e1!3m2!1s!2e0";
+
+        panoramaFrame.src = mapsUrl;
+        panoramaOpenNew.href = mapsUrl;
+        panoramaModal.classList.remove("hidden");
+    }
+
+    function closePanorama() {
+        panoramaModal.classList.add("hidden");
+        panoramaFrame.src = "";
+    }
+
+    panoramaBtn.addEventListener("click", function () {
+        panoramaMode = !panoramaMode;
+        panoramaBtn.classList.toggle("active", panoramaMode);
+        document.getElementById("map").classList.toggle("panorama-mode", panoramaMode);
+    });
+
+    panoramaClose.addEventListener("click", closePanorama);
+
+    map.on("click", function (e) {
+        if (!panoramaMode) return;
+        openPanorama(e.latlng.lat.toFixed(6), e.latlng.lng.toFixed(6));
+        // Выключить режим панорамы после клика
+        panoramaMode = false;
+        panoramaBtn.classList.remove("active");
+        document.getElementById("map").classList.remove("panorama-mode");
+    });
+
     function refreshHeatmap() {
         if (!heatmapActive) return;
         removeHeatLayers();
@@ -960,6 +1004,20 @@
                     }).join("");
             } else {
                 peopleEl.innerHTML = "";
+            }
+        }
+
+        // Кнопка панорамы (если есть координаты)
+        var panoramaBtnEl = document.getElementById("crime-modal-panorama");
+        if (panoramaBtnEl) {
+            if (typeof crime.lat === "number" && typeof crime.lng === "number") {
+                panoramaBtnEl.classList.remove("hidden");
+                panoramaBtnEl.onclick = function () {
+                    overlay.classList.add("hidden");
+                    openPanorama(crime.lat.toFixed(6), crime.lng.toFixed(6));
+                };
+            } else {
+                panoramaBtnEl.classList.add("hidden");
             }
         }
 
