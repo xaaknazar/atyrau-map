@@ -20,6 +20,17 @@
 </head>
 <body>
 
+    <!-- Экран ввода пароля -->
+    <div id="auth-screen">
+        <div class="auth-box">
+            <h2>Вход в систему</h2>
+            <p>Цифровая карта прокуратуры г. Атырау</p>
+            <input type="password" id="auth-password" placeholder="Введите пароль" autofocus />
+            <button id="auth-submit">Войти</button>
+            <div id="auth-error" class="auth-error hidden">Неверный пароль</div>
+        </div>
+    </div>
+
     <!-- Floating menu button for mobile (over the map) -->
     <button id="mobile-menu-btn" aria-label="Меню">
         <span></span><span></span><span></span>
@@ -583,6 +594,34 @@
     <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
     <script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
     <!-- Firebase SDK (Realtime Database) -->
+    <script>
+    (function() {
+        var AUTH_HASH = "1345";
+        if (sessionStorage.getItem("atyrau-auth") === "ok") {
+            document.getElementById("auth-screen").classList.add("hidden");
+            return;
+        }
+        var screen = document.getElementById("auth-screen");
+        var input = document.getElementById("auth-password");
+        var btn = document.getElementById("auth-submit");
+        var err = document.getElementById("auth-error");
+
+        function tryLogin() {
+            if (input.value === AUTH_HASH) {
+                sessionStorage.setItem("atyrau-auth", "ok");
+                screen.classList.add("hidden");
+            } else {
+                err.classList.remove("hidden");
+                input.value = "";
+                input.focus();
+            }
+        }
+        btn.addEventListener("click", tryLogin);
+        input.addEventListener("keydown", function(e) {
+            if (e.key === "Enter") tryLogin();
+        });
+    })();
+    </script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
     <script src="js/firebase-config.js"></script>
