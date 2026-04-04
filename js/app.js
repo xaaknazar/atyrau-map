@@ -523,6 +523,7 @@
 
     // ── Подсказка дат для периода ──────────────────────────
     var MONTHS_RU = ["января","февраля","марта","апреля","мая","июня","июля","августа","сентября","октября","ноября","декабря"];
+    var MONTHS_RU_NOM = ["Январь","Февраль","Март","Апрель","Май","Июнь","Июль","Август","Сентябрь","Октябрь","Ноябрь","Декабрь"];
     function _pad2(n) { return n < 10 ? "0" + n : "" + n; }
     function _fmtDate(d) { return d.getDate() + " " + MONTHS_RU[d.getMonth()] + " " + d.getFullYear(); }
 
@@ -537,8 +538,7 @@
             return _fmtDate(weekAgo) + " — " + _fmtDate(now);
         }
         if (period === "month") {
-            var monthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-            return _fmtDate(monthAgo) + " — " + _fmtDate(now);
+            return MONTHS_RU_NOM[now.getMonth()] + " " + now.getFullYear();
         }
         return "";
     }
