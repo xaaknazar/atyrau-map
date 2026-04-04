@@ -521,6 +521,33 @@
         if (panelCount) panelCount.textContent = filtered.length;
     }
 
+    // ── Подсказка дат для периода ──────────────────────────
+    var MONTHS_RU = ["января","февраля","марта","апреля","мая","июня","июля","августа","сентября","октября","ноября","декабря"];
+    function _pad2(n) { return n < 10 ? "0" + n : "" + n; }
+    function _fmtDate(d) { return d.getDate() + " " + MONTHS_RU[d.getMonth()] + " " + d.getFullYear(); }
+
+    function getPeriodHint(period) {
+        if (period === "all") return "";
+        var now = new Date();
+        if (period === "day") {
+            return _fmtDate(now);
+        }
+        if (period === "week") {
+            var weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+            return _fmtDate(weekAgo) + " — " + _fmtDate(now);
+        }
+        if (period === "month") {
+            var monthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+            return _fmtDate(monthAgo) + " — " + _fmtDate(now);
+        }
+        return "";
+    }
+
+    function updatePeriodHint(hintId, period) {
+        var el = document.getElementById(hintId);
+        if (el) el.textContent = getPeriodHint(period);
+    }
+
     // ── Filter event listeners ────────────────────────────
     document.querySelectorAll(".crime-period-btn").forEach(function (btn) {
         btn.addEventListener("click", function () {
@@ -529,6 +556,7 @@
             });
             this.classList.add("active");
             currentCrimePeriod = this.getAttribute("data-period");
+            updatePeriodHint("crime-period-hint", currentCrimePeriod);
             updateCrimeStats();
             buildCrimeList();
         });
@@ -679,6 +707,7 @@
             });
             this.classList.add("active");
             analyticsPeriod = this.getAttribute("data-period");
+            updatePeriodHint("analytics-period-hint", analyticsPeriod);
             renderAnalytics();
         });
     });

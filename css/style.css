@@ -2213,6 +2213,14 @@ body {
     color: #c0c8e0;
 }
 
+.period-hint {
+    display: block;
+    font-size: 11px;
+    color: #5a6a8a;
+    margin-top: 4px;
+    font-style: italic;
+}
+
 .analytics-tabs {
     display: flex;
     gap: 2px;
