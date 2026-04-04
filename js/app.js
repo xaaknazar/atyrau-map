@@ -402,7 +402,7 @@
             return typeof c.lat === "number" && !isNaN(c.lat);
         }).length;
         var articleSet = {};
-        all.forEach(function (c) { if (c.article) articleSet[c.article] = true; });
+        all.forEach(function (c) { if (c.article) articleSet[extractArticleNumber(c.article)] = true; });
         var uniqueArticles = Object.keys(articleSet).length;
 
         _setText("cs-total", total);

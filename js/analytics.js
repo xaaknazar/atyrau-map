@@ -15,10 +15,22 @@
 //  1. РАСПРЕДЕЛЕНИЕ ПО СТАТЬЯМ
 // ══════════════════════════════════════════════════════════════
 
+/**
+ * Извлечь номер статьи из полной квалификации.
+ * "ст.214 ч.2" → "ст. 214"
+ * "ст. 188 ч.1 п.г" → "ст. 188"
+ */
+function extractArticleNumber(article) {
+    if (!article) return "Не указана";
+    var m = article.match(/(\d{2,4})/);
+    if (m) return "ст. " + m[1];
+    return article;
+}
+
 function analyzeByArticle(crimes) {
     var map = {};
     crimes.forEach(function (c) {
-        var key = c.article || "Не указана";
+        var key = extractArticleNumber(c.article);
         if (!map[key]) map[key] = { count: 0, label: key };
         map[key].count++;
     });
@@ -97,8 +109,9 @@ function analyzeByArea(crimes) {
         if (!map[area]) map[area] = { count: 0, label: area, articles: {} };
         map[area].count++;
         if (c.article) {
-            if (!map[area].articles[c.article]) map[area].articles[c.article] = 0;
-            map[area].articles[c.article]++;
+            var artKey = extractArticleNumber(c.article);
+            if (!map[area].articles[artKey]) map[area].articles[artKey] = 0;
+            map[area].articles[artKey]++;
         }
     });
     return Object.values(map).sort(function (a, b) { return b.count - a.count; });
@@ -112,8 +125,9 @@ function analyzeByStreet(crimes) {
         if (!map[key]) map[key] = { count: 0, label: key, city: c.city || "", articles: {} };
         map[key].count++;
         if (c.article) {
-            if (!map[key].articles[c.article]) map[key].articles[c.article] = 0;
-            map[key].articles[c.article]++;
+            var artKey = extractArticleNumber(c.article);
+            if (!map[key].articles[artKey]) map[key].articles[artKey] = 0;
+            map[key].articles[artKey]++;
         }
     });
     return Object.values(map).sort(function (a, b) { return b.count - a.count; });
@@ -188,8 +202,9 @@ function findProblemZones(crimes, gridSize) {
         zone.count++;
         zone.crimes.push(c);
         if (c.article) {
-            if (!zone.articles[c.article]) zone.articles[c.article] = 0;
-            zone.articles[c.article]++;
+            var zArtKey = extractArticleNumber(c.article);
+            if (!zone.articles[zArtKey]) zone.articles[zArtKey] = 0;
+            zone.articles[zArtKey]++;
         }
         if (c.isPublic) zone.publicCount++;
 
