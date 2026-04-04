@@ -414,12 +414,81 @@ function getPeopleForCrime(crime) {
 // ══════════════════════════════════════════════════════════════
 
 /**
- * Загрузить из Apps Script API (JSON — оба листа).
+ * Один запрос к API с таймаутом.
  */
-function _loadFromAPI(callback) {
-    console.log("[crimes] Загрузка из Apps Script API...");
+function _fetchWithTimeout(url, timeoutMs) {
+    return new Promise(function (resolve, reject) {
+        var controller = window.AbortController ? new AbortController() : null;
+        var timer = setTimeout(function () {
+            if (controller) controller.abort();
+            reject(new Error("Таймаут " + timeoutMs + "мс"));
+        }, timeoutMs);
 
-    fetch(CRIMES_API_URL, { redirect: "follow" })
+        fetch(url, {
+            redirect: "follow",
+            signal: controller ? controller.signal : undefined
+        })
+        .then(function (resp) {
+            clearTimeout(timer);
+            resolve(resp);
+        })
+        .catch(function (err) {
+            clearTimeout(timer);
+            reject(err);
+        });
+    });
+}
+
+/**
+ * Распарсить JSON-ответ API в crimeIncidents и crimePeople.
+ */
+function _parseAPIResponse(data) {
+    var crimeRows, peopleRows;
+
+    if (data.crimes) {
+        crimeRows = data.crimes;
+        peopleRows = data.people || [];
+    } else {
+        crimeRows = Array.isArray(data) ? data : (data.data || data.rows || []);
+        peopleRows = [];
+    }
+
+    if (crimeRows.length === 0) {
+        throw new Error("API вернул пустые данные");
+    }
+
+    crimeIncidents = [];
+    for (var i = 0; i < crimeRows.length; i++) {
+        var crime = jsonRowToCrime(crimeRows[i], i);
+        if (crime.erdr) {
+            crimeIncidents.push(crime);
+        }
+    }
+
+    crimePeople = [];
+    for (var j = 0; j < peopleRows.length; j++) {
+        var person = jsonRowToPerson(peopleRows[j], j);
+        if (person && person.erdr) {
+            crimePeople.push(person);
+        }
+    }
+
+    _buildPeopleIndex();
+    console.log("[crimes] Загружено: " + crimeIncidents.length + " преступлений, " + crimePeople.length + " лиц");
+}
+
+/**
+ * Загрузить из Apps Script API с повторными попытками.
+ * До 3 попыток с экспоненциальной паузой (2с, 4с, 8с).
+ */
+function _loadFromAPI(callback, attempt) {
+    attempt = attempt || 1;
+    var maxAttempts = 3;
+    var delays = [2000, 4000, 8000];
+
+    console.log("[crimes] API запрос (попытка " + attempt + "/" + maxAttempts + ")...");
+
+    _fetchWithTimeout(CRIMES_API_URL, 30000)
         .then(function (resp) {
             if (!resp.ok) throw new Error("HTTP " + resp.status);
             return resp.text();
@@ -431,95 +500,41 @@ function _loadFromAPI(callback) {
             } catch (e) {
                 throw new Error("Ответ не JSON: " + text.substring(0, 100));
             }
-            return data;
-        })
-        .then(function (data) {
-            // Новый формат: { crimes: [...], people: [...] }
-            // Старый формат: просто массив [...]
-            var crimeRows, peopleRows;
-
-            if (data.crimes) {
-                crimeRows = data.crimes;
-                peopleRows = data.people || [];
-            } else {
-                crimeRows = Array.isArray(data) ? data : (data.data || data.rows || []);
-                peopleRows = [];
-            }
-
-            if (crimeRows.length === 0) {
-                throw new Error("API вернул пустые данные");
-            }
-
-            // Парсим преступления
-            crimeIncidents = [];
-            for (var i = 0; i < crimeRows.length; i++) {
-                var crime = jsonRowToCrime(crimeRows[i], i);
-                if (crime.erdr) {
-                    crimeIncidents.push(crime);
-                }
-            }
-
-            // Парсим людей
-            crimePeople = [];
-            for (var j = 0; j < peopleRows.length; j++) {
-                var person = jsonRowToPerson(peopleRows[j], j);
-                if (person && person.erdr) {
-                    crimePeople.push(person);
-                }
-            }
-
-            _buildPeopleIndex();
-
-            console.log("[crimes] Загружено из API: " + crimeIncidents.length + " преступлений, " + crimePeople.length + " лиц");
+            _parseAPIResponse(data);
             _saveCrimesCache();
             callback();
         })
         .catch(function (err) {
-            console.warn("[crimes] API недоступен:", err.message);
-            _loadFromCSV(callback);
-        });
-}
+            console.warn("[crimes] Попытка " + attempt + " не удалась:", err.message);
 
-/**
- * Загрузить из CSV (резервный вариант — только преступления).
- */
-function _loadFromCSV(callback) {
-    console.log("[crimes] Загрузка из CSV (резервный)...");
-
-    fetch(CRIMES_SHEET_CSV_URL)
-        .then(function (resp) {
-            if (!resp.ok) throw new Error("HTTP " + resp.status);
-            return resp.text();
-        })
-        .then(function (csv) {
-            var rows = parseCSV(csv);
-            if (rows.length < 2) {
-                console.warn("[crimes] Таблица пуста");
+            if (attempt < maxAttempts) {
+                var delay = delays[attempt - 1] || 4000;
+                console.log("[crimes] Повтор через " + (delay / 1000) + "с...");
+                setTimeout(function () {
+                    _loadFromAPI(callback, attempt + 1);
+                }, delay);
+            } else {
+                console.warn("[crimes] Все попытки исчерпаны, загружаю из кэша...");
                 _tryLoadFromCache();
                 callback();
-                return;
             }
-
-            crimeIncidents = [];
-            for (var i = 1; i < rows.length; i++) {
-                var cols = rows[i];
-                if (!cols[1] || cols[1].trim() === "") continue;
-                crimeIncidents.push(csvRowToCrime(cols, i - 1));
-            }
-
-            console.log("[crimes] Загружено из CSV: " + crimeIncidents.length);
-            _saveCrimesCache();
-            callback();
-        })
-        .catch(function (err) {
-            console.warn("[crimes] CSV тоже недоступен:", err.message);
-            _tryLoadFromCache();
-            callback();
         });
 }
 
 function loadCrimesFromSheet(callback) {
-    _loadFromAPI(callback);
+    // Сначала показать кэш (мгновенно), затем обновить из API
+    _tryLoadFromCache();
+    if (crimeIncidents.length > 0) {
+        console.log("[crimes] Показываем кэш, обновляем в фоне...");
+        callback(); // сразу показать кэшированные данные
+        // Обновить из API в фоне
+        _loadFromAPI(function () {
+            callback(); // обновить UI свежими данными
+        });
+    } else {
+        // Кэша нет — ждём API
+        _loadFromAPI(callback);
+    }
 }
 
 function _saveCrimesCache() {
