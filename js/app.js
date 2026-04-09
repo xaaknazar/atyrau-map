@@ -200,7 +200,13 @@
             removeHeatLayers();
             Object.keys(layers).forEach(function (cat) {
                 var cb = document.querySelector('[data-filter="' + cat + '"]');
-                if (cb && cb.checked) map.addLayer(layers[cat]);
+                if (cb && cb.checked) {
+                    if (cat === "crime") {
+                        map.addLayer(crimeErdrLayer);
+                    } else {
+                        map.addLayer(layers[cat]);
+                    }
+                }
             });
             heatmapActive = false;
             btn.classList.remove("active");
@@ -209,6 +215,7 @@
             Object.keys(layers).forEach(function (cat) {
                 map.removeLayer(layers[cat]);
             });
+            map.removeLayer(crimeErdrLayer);
             addHeatLayers();
             heatmapActive = true;
             btn.classList.add("active");
@@ -344,8 +351,13 @@
         cb.addEventListener("change", function () {
             var cat = this.getAttribute("data-filter");
             if (heatmapActive) return; // don't toggle layers in heatmap mode
-            if (this.checked) map.addLayer(layers[cat]);
-            else map.removeLayer(layers[cat]);
+            if (cat === "crime") {
+                if (this.checked) map.addLayer(crimeErdrLayer);
+                else map.removeLayer(crimeErdrLayer);
+            } else {
+                if (this.checked) map.addLayer(layers[cat]);
+                else map.removeLayer(layers[cat]);
+            }
         });
     });
 
