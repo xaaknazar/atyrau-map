@@ -65,7 +65,10 @@ if (useFirebase) {
             mapPoints = [];
             if (data) {
                 Object.keys(data).forEach(function (key) {
-                    mapPoints.push(data[key]);
+                    // Преступность берётся только из таблицы (ЕРДР)
+                    if (data[key].category !== "crime") {
+                        mapPoints.push(data[key]);
+                    }
                 });
             }
             _notifyListeners();

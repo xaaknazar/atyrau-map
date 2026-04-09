@@ -167,6 +167,11 @@
     };
 
     function buildHeatDataByCategory(cat) {
+        if (cat === "crime") {
+            return crimeIncidents
+                .filter(function (c) { return typeof c.lat === "number" && !isNaN(c.lat); })
+                .map(function (c) { return [c.lat, c.lng, 0.6]; });
+        }
         return mapPoints
             .filter(function (p) { return p.category === cat; })
             .map(function (p) { return [p.lat, p.lng, 0.6]; });
