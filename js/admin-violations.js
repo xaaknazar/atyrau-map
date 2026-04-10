@@ -143,27 +143,12 @@ function _parseAdminViolationsCSV(text) {
 }
 
 /**
- * Фильтр по периоду.
+ * Фильтр по периоду. Использует getPeriodCutoff() из crimes.js
  */
 function filterAVByPeriod(period) {
     var list = adminViolations.slice();
-    if (period === "all") return list;
-
-    var now = new Date();
-    var cutoff;
-    switch (period) {
-        case "day":
-            cutoff = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-            break;
-        case "week":
-            cutoff = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-            break;
-        case "month":
-            cutoff = new Date(now.getFullYear(), now.getMonth(), 1);
-            break;
-        default:
-            return list;
-    }
+    var cutoff = getPeriodCutoff(period);
+    if (!cutoff) return list;
     return list.filter(function (v) {
         var d = new Date(v.regDate);
         return d >= cutoff;

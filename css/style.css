@@ -225,6 +225,43 @@ body {
     box-shadow: 0 0 8px rgba(255, 255, 255, 0.15);
 }
 
+/* ── Sidebar period ── */
+.sidebar-period-section {
+    padding: 16px 24px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+.sidebar-period-section h3 {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: #8892b0;
+    margin-bottom: 10px;
+}
+.sidebar-period-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+.sidebar-period-btn {
+    padding: 5px 10px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.04);
+    color: #a0a8c0;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+}
+.sidebar-period-btn.active {
+    background: rgba(93, 173, 226, 0.2);
+    color: #5dade2;
+    border-color: rgba(93, 173, 226, 0.3);
+}
+.sidebar-period-btn:hover:not(.active) {
+    background: rgba(255, 255, 255, 0.08);
+    color: #c0c8e0;
+}
+
 /* ── Stats ── */
 .stats {
     padding: 20px 24px;
@@ -660,6 +697,17 @@ body {
     width: 18px;
     height: 18px;
     fill: #fff;
+}
+
+/* Адм. правонарушения маркеры на карте */
+.av-marker-pin {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #e67e22;
+    border: 2px solid rgba(255, 255, 255, 0.8);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+    cursor: pointer;
 }
 
 /* Category-colored clusters */
@@ -2269,7 +2317,8 @@ body {
    ANALYTICS PANEL
    ═══════════════════════════════════════════════════════════ */
 
-#analytics-panel {
+#analytics-panel,
+#av-analytics-panel {
     flex: 1;
     height: 100vh;
     height: 100dvh;
@@ -2280,7 +2329,8 @@ body {
     overflow: hidden;
 }
 
-#analytics-panel.hidden { display: none !important; }
+#analytics-panel.hidden,
+#av-analytics-panel.hidden { display: none !important; }
 
 .analytics-header {
     padding: 16px 24px 0;
@@ -2319,7 +2369,8 @@ body {
     flex: 1;
 }
 
-.an-period-btn {
+.an-period-btn,
+.av-an-period-btn {
     flex: 1;
     padding: 6px 8px;
     border: none;
@@ -2331,12 +2382,14 @@ body {
     cursor: pointer;
 }
 
-.an-period-btn.active {
+.an-period-btn.active,
+.av-an-period-btn.active {
     background: rgba(52, 152, 219, 0.25);
     color: #3498db;
 }
 
-.an-period-btn:hover:not(.active) {
+.an-period-btn:hover:not(.active),
+.av-an-period-btn:hover:not(.active) {
     background: rgba(255, 255, 255, 0.05);
     color: #c0c8e0;
 }

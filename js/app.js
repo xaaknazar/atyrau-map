@@ -213,7 +213,9 @@
                     }
                 }
             });
-            // Restore cameras & police
+            // Restore cameras, police, AV
+            var avCb = document.querySelector('[data-filter="admin-violations"]');
+            if (avCb && avCb.checked) map.addLayer(avLayer);
             var camCb = document.querySelector('[data-filter="cameras"]');
             if (camCb && camCb.checked) map.addLayer(cameraLayer);
             var polCb = document.querySelector('[data-filter="police"]');
@@ -226,6 +228,7 @@
                 map.removeLayer(layers[cat]);
             });
             map.removeLayer(crimeErdrLayer);
+            map.removeLayer(avLayer);
             map.removeLayer(cameraLayer);
             map.removeLayer(policeLayer);
             addHeatLayers();
@@ -355,9 +358,11 @@
         document.getElementById("count-blind-spots").textContent = counts["blind-spots"];
         document.getElementById("count-abandoned").textContent = counts["abandoned"];
         document.getElementById("count-unlit").textContent = counts["unlit"];
+        var avOnMap = adminViolations.filter(function (v) { return v.lat !== null; }).length;
+        document.getElementById("count-av").textContent = avOnMap;
         document.getElementById("count-cameras").textContent = cameraPoints.length;
         document.getElementById("count-police").textContent = policePoints.length;
-        document.getElementById("count-total").textContent = crimeOnMap + counts["blind-spots"] + counts["abandoned"] + counts["unlit"] + cameraPoints.length + policePoints.length;
+        document.getElementById("count-total").textContent = crimeOnMap + avOnMap + counts["blind-spots"] + counts["abandoned"] + counts["unlit"] + cameraPoints.length + policePoints.length;
     }
 
     // ── Filter checkboxes ───────────────────────────────────
@@ -368,6 +373,9 @@
             if (cat === "crime") {
                 if (this.checked) map.addLayer(crimeErdrLayer);
                 else map.removeLayer(crimeErdrLayer);
+            } else if (cat === "admin-violations") {
+                if (this.checked) map.addLayer(avLayer);
+                else map.removeLayer(avLayer);
             } else if (cat === "cameras") {
                 if (this.checked) map.addLayer(cameraLayer);
                 else map.removeLayer(cameraLayer);
@@ -565,11 +573,20 @@
             return _fmtDate(now);
         }
         if (period === "week") {
-            var weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-            return _fmtDate(weekAgo) + " — " + _fmtDate(now);
+            var day = now.getDay();
+            var diff = (day === 0) ? 6 : day - 1;
+            var monday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - diff);
+            return _fmtDate(monday) + " — " + _fmtDate(now);
         }
         if (period === "month") {
             return MONTHS_RU_NOM[now.getMonth()] + " " + now.getFullYear();
+        }
+        if (period === "quarter") {
+            var qMonth = Math.floor(now.getMonth() / 3) * 3;
+            return MONTHS_RU_NOM[qMonth] + " — " + MONTHS_RU_NOM[qMonth + 2] + " " + now.getFullYear();
+        }
+        if (period === "year") {
+            return now.getFullYear() + " год";
         }
         return "";
     }
@@ -1229,25 +1246,6 @@
         showReportSelector();
     });
 
-    // Tabs
-    document.querySelectorAll(".av-tab").forEach(function (tab) {
-        tab.addEventListener("click", function () {
-            document.querySelectorAll(".av-tab").forEach(function (t) { t.classList.remove("active"); });
-            this.classList.add("active");
-            var target = this.getAttribute("data-tab");
-            document.querySelectorAll(".av-tab-content").forEach(function (c) {
-                c.classList.remove("active");
-                c.style.display = "none";
-            });
-            var content = document.getElementById(target === "av-list-tab" ? "av-list-content" : "av-analytics-content");
-            if (content) {
-                content.classList.add("active");
-                content.style.display = "";
-            }
-            if (target === "av-analytics-tab") renderAVAnalytics();
-        });
-    });
-
     function populateAVFilters() {
         var articles = {}, units = {}, authors = {};
         adminViolations.forEach(function (v) {
@@ -1339,7 +1337,6 @@
             updatePeriodHint("av-period-hint", avPeriod);
             updateAVStats();
             buildAVList();
-            renderAVAnalytics();
         });
     });
 
@@ -1386,14 +1383,68 @@
         updatePeriodHint("av-period-hint", "all");
         updateAVStats();
         buildAVList();
-        renderAVAnalytics();
     });
 
-    // Analytics
+    // ═══════════════════════════════════════════════════════
+    //  AV ANALYTICS PANEL (separate page)
+    // ═══════════════════════════════════════════════════════
+    var avAnalyticsPanel = document.getElementById("av-analytics-panel");
+    var avAnalyticsPeriod = "all";
+
+    function showAVAnalyticsPanel() {
+        mapEl.classList.add("hidden");
+        if (searchBar) searchBar.classList.add("hidden");
+        if (mapControls) mapControls.classList.add("hidden");
+        avAnalyticsPanel.classList.remove("hidden");
+        renderAVAnalytics();
+        var sidebar = document.getElementById("sidebar");
+        if (sidebar) sidebar.classList.remove("open");
+        var ol = document.getElementById("sidebar-overlay");
+        if (ol) ol.classList.remove("active");
+    }
+
+    function hideAVAnalyticsPanel() {
+        avAnalyticsPanel.classList.add("hidden");
+        mapEl.classList.remove("hidden");
+        if (searchBar) searchBar.classList.remove("hidden");
+        if (mapControls) mapControls.classList.remove("hidden");
+        map.invalidateSize();
+    }
+
+    document.getElementById("close-av-analytics").addEventListener("click", function () {
+        hideAVAnalyticsPanel();
+        showReportSelector();
+    });
+
+    document.getElementById("report-card-av-analytics").addEventListener("click", function () {
+        reportSelector.classList.add("hidden");
+        showAVAnalyticsPanel();
+    });
+
+    document.querySelectorAll(".av-an-period-btn").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+            document.querySelectorAll(".av-an-period-btn").forEach(function (b) { b.classList.remove("active"); });
+            this.classList.add("active");
+            avAnalyticsPeriod = this.getAttribute("data-period");
+            updatePeriodHint("av-analytics-period-hint", avAnalyticsPeriod);
+            renderAVAnalytics();
+        });
+    });
+
     function renderAVAnalytics() {
-        var filtered = filterAVByPeriod(avPeriod);
+        var filtered = filterAVByPeriod(avAnalyticsPeriod);
         if (filtered.length === 0) return;
         var a = analyzeAdminViolations(filtered);
+
+        // Overview stats
+        var statsEl = document.getElementById("av-an-overview-stats");
+        if (statsEl) {
+            statsEl.innerHTML =
+                _statCard(a.total, "Всего") +
+                _statCard(a.withCoords, "С координатами") +
+                _statCard(a.uniqueArticles, "Статей") +
+                _statCard(a.uniqueAuthors, "Инспекторов");
+        }
 
         renderBarChart("av-chart-authors", a.byAuthor.slice(0, 15), "blue");
         renderBarChart("av-chart-units", a.byUnit.slice(0, 10), "teal");
@@ -1407,6 +1458,8 @@
     // Загрузка данных
     loadAdminViolations(function () {
         console.log("[app] Админ. правонарушения: " + adminViolations.length);
+        buildAVMarkers();
+        updateStats();
     });
 
     // ── Камеры на карте ────────────────────────────────────
@@ -1484,6 +1537,120 @@
     loadPoliceStations(function () {
         buildPoliceMarkers();
         updateStats();
+    });
+
+    // ── Административные правонарушения на карте ───────────
+    var avLayer = L.layerGroup();
+    map.addLayer(avLayer);
+
+    function buildAVMarkers() {
+        avLayer.clearLayers();
+        var added = 0;
+        adminViolations.forEach(function (v) {
+            if (v.lat === null || v.lng === null) return;
+
+            var marker = L.marker([v.lat, v.lng], {
+                icon: L.divIcon({
+                    className: "av-marker",
+                    html: '<div class="av-marker-pin"></div>',
+                    iconSize: [12, 12],
+                    iconAnchor: [6, 6]
+                })
+            });
+
+            var fio = [v.lastName, v.firstName, v.patronymic].filter(Boolean).join(" ") || "";
+            var tooltipText = (v.article || "—") + (fio ? " | " + fio : "") + (v.place ? " | " + v.place : "");
+            marker.bindTooltip(tooltipText, {
+                direction: "top", offset: [0, -8], className: "marker-tooltip"
+            });
+
+            marker.bindPopup(
+                '<strong>' + (v.article || "—") + '</strong><br>' +
+                (fio ? fio + '<br>' : '') +
+                (v.place ? v.place + '<br>' : '') +
+                (v.regDate ? 'Дата: ' + v.regDate + '<br>' : '') +
+                (v.podrazdelenie ? v.podrazdelenie : '')
+            );
+
+            avLayer.addLayer(marker);
+            added++;
+        });
+        console.log("[map] АП маркеров на карте: " + added);
+    }
+
+    // ── Sidebar period filter (affects crime + AV on map) ───
+    var sidebarPeriod = "all";
+
+    function applySidebarPeriod() {
+        var cutoff = getPeriodCutoff(sidebarPeriod);
+
+        // Rebuild ЕРДР markers filtered by period
+        crimeErdrLayer.clearLayers();
+        var crimeFiltered = cutoff ? crimeIncidents.filter(function (c) {
+            return new Date(c.regDate) >= cutoff;
+        }) : crimeIncidents;
+        crimeFiltered.forEach(function (c) {
+            if (typeof c.lat !== "number" || isNaN(c.lat)) return;
+            var marker = L.marker([c.lat, c.lng], {
+                icon: L.divIcon({
+                    className: "erdr-marker",
+                    html: '<div class="erdr-marker-pin"></div>',
+                    iconSize: [12, 12],
+                    iconAnchor: [6, 6]
+                })
+            });
+            marker.bindTooltip((c.article || "—") + " | " + (c.street ? "ул. " + c.street : ""), {
+                direction: "top", offset: [0, -8], className: "marker-tooltip"
+            });
+            marker.on("click", function () { openCrimeModal(c); });
+            crimeErdrLayer.addLayer(marker);
+        });
+
+        // Rebuild AV markers filtered by period
+        avLayer.clearLayers();
+        var avFiltered = cutoff ? adminViolations.filter(function (v) {
+            return v.regDate && new Date(v.regDate) >= cutoff;
+        }) : adminViolations;
+        avFiltered.forEach(function (v) {
+            if (v.lat === null || v.lng === null) return;
+            var marker = L.marker([v.lat, v.lng], {
+                icon: L.divIcon({
+                    className: "av-marker",
+                    html: '<div class="av-marker-pin"></div>',
+                    iconSize: [12, 12],
+                    iconAnchor: [6, 6]
+                })
+            });
+            var fio = [v.lastName, v.firstName, v.patronymic].filter(Boolean).join(" ") || "";
+            marker.bindTooltip((v.article || "—") + (fio ? " | " + fio : ""), {
+                direction: "top", offset: [0, -8], className: "marker-tooltip"
+            });
+            marker.bindPopup(
+                '<strong>' + (v.article || "—") + '</strong><br>' +
+                (fio ? fio + '<br>' : '') +
+                (v.place ? v.place + '<br>' : '') +
+                (v.regDate ? 'Дата: ' + v.regDate : '')
+            );
+            avLayer.addLayer(marker);
+        });
+
+        // Update sidebar counts
+        document.getElementById("count-crime").textContent = crimeFiltered.filter(function (c) {
+            return typeof c.lat === "number" && !isNaN(c.lat);
+        }).length;
+        document.getElementById("count-av").textContent = avFiltered.filter(function (v) {
+            return v.lat !== null;
+        }).length;
+    }
+
+    document.querySelectorAll(".sidebar-period-btn").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+            document.querySelectorAll(".sidebar-period-btn").forEach(function (b) { b.classList.remove("active"); });
+            this.classList.add("active");
+            sidebarPeriod = this.getAttribute("data-period");
+            updatePeriodHint("sidebar-period-hint", sidebarPeriod);
+            applySidebarPeriod();
+        });
     });
 
     // ── Language switch ─────────────────────────────────────

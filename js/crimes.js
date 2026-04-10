@@ -597,26 +597,34 @@ function initCrimeData(onProgress, onDone) {
 //  Утилиты
 // ══════════════════════════════════════════════════════════════
 
-function filterCrimesByPeriod(period) {
-    var list = crimeIncidents.slice();
-    if (period === "all") return list;
-
+function getPeriodCutoff(period) {
+    if (period === "all") return null;
     var now = new Date();
-    var cutoff;
-
     switch (period) {
         case "day":
-            cutoff = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-            break;
+            return new Date(now.getFullYear(), now.getMonth(), now.getDate());
         case "week":
-            cutoff = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-            break;
+            // Понедельник текущей недели
+            var day = now.getDay(); // 0=Sun..6=Sat
+            var diff = (day === 0) ? 6 : day - 1; // days since Monday
+            var monday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - diff);
+            return monday;
         case "month":
-            cutoff = new Date(now.getFullYear(), now.getMonth(), 1);
-            break;
+            return new Date(now.getFullYear(), now.getMonth(), 1);
+        case "quarter":
+            var qMonth = Math.floor(now.getMonth() / 3) * 3;
+            return new Date(now.getFullYear(), qMonth, 1);
+        case "year":
+            return new Date(now.getFullYear(), 0, 1);
         default:
-            return list;
+            return null;
     }
+}
+
+function filterCrimesByPeriod(period) {
+    var list = crimeIncidents.slice();
+    var cutoff = getPeriodCutoff(period);
+    if (!cutoff) return list;
 
     return list.filter(function (c) {
         var d = new Date(c.regDate);
