@@ -541,7 +541,6 @@
         });
 
         // Обновить счётчики
-        document.getElementById("count-crime-incidents").textContent = crimeIncidents.length;
         var panelCount = document.getElementById("crime-panel-count-value");
         if (panelCount) panelCount.textContent = filtered.length;
     }
@@ -1138,7 +1137,6 @@
         null,
         function () {
             if (crimeLoadingEl) crimeLoadingEl.classList.add("hidden");
-            document.getElementById("count-crime-incidents").textContent = crimeIncidents.length;
             buildCrimeMarkers();
             updateStats();
         }
