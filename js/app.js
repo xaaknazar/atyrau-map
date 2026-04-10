@@ -1150,11 +1150,9 @@
     );
 
     // ── Камеры на карте ────────────────────────────────────
-    var CAMERA_SVG = '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">' +
-        '<path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/>' +
-        '</svg>';
+    // CCTV камера (камера видеонаблюдения)
     var CAMERA_ICON_SVG = '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">' +
-        '<path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z"/>' +
+        '<path d="M18 10.48V6c0-1.1-.9-2-2-2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2v-4.48l4 3.98v-11l-4 3.98zm-2-.79V18H4V6h12v3.69z"/>' +
         '</svg>';
 
     var cameraLayer = L.markerClusterGroup({
@@ -1182,8 +1180,8 @@
                 icon: L.divIcon({
                     className: "camera-marker",
                     html: '<div class="camera-marker-icon">' + CAMERA_ICON_SVG + '</div>',
-                    iconSize: [28, 28],
-                    iconAnchor: [14, 14]
+                    iconSize: [20, 20],
+                    iconAnchor: [10, 10]
                 })
             });
 
@@ -1209,10 +1207,6 @@
     });
 
     // ── Участковые пункты на карте ──────────────────────────
-    var POLICE_ICON_SVG = '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">' +
-        '<path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 4l3.5 2H15v2h-2v1h2v2h-2v3h-2v-3H9v-2h2v-1H9V9h2.5L12 5z"/>' +
-        '</svg>';
-
     var policeLayer = L.layerGroup();
     map.addLayer(policeLayer);
 
@@ -1220,11 +1214,11 @@
         policeLayer.clearLayers();
         policePoints.forEach(function (p) {
             var marker = L.marker([p.lat, p.lng], {
-                icon: L.divIcon({
-                    className: "police-marker",
-                    html: '<div class="police-marker-icon">' + POLICE_ICON_SVG + '</div>',
-                    iconSize: [30, 30],
-                    iconAnchor: [15, 15]
+                icon: L.icon({
+                    iconUrl: "images/police-icon.png",
+                    iconSize: [36, 36],
+                    iconAnchor: [18, 18],
+                    popupAnchor: [0, -18]
                 })
             });
 
