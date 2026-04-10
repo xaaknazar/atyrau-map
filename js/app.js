@@ -1150,14 +1150,8 @@
     );
 
     // ── Камеры на карте ────────────────────────────────────
-    // Уличная камера видеонаблюдения (CCTV на кронштейне)
-    var CAMERA_ICON_SVG = '<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" fill="white">' +
-        '<rect x="2" y="14" width="4" height="16" rx="1"/>' +
-        '<rect x="4" y="6" width="3" height="10" rx="1"/>' +
-        '<rect x="7" y="4" width="16" height="12" rx="2"/>' +
-        '<polygon points="23,6 29,3 29,17 23,14"/>' +
-        '<circle cx="15" cy="10" r="3.5" fill="rgba(46,204,113,0.9)"/>' +
-        '<circle cx="15" cy="10" r="1.8" fill="white"/>' +
+    var CAMERA_ICON_SVG = '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">' +
+        '<path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z"/>' +
         '</svg>';
 
     var cameraLayer = L.layerGroup();
@@ -1170,8 +1164,8 @@
                 icon: L.divIcon({
                     className: "camera-marker",
                     html: '<div class="camera-marker-icon">' + CAMERA_ICON_SVG + '</div>',
-                    iconSize: [24, 24],
-                    iconAnchor: [12, 12]
+                    iconSize: [20, 20],
+                    iconAnchor: [10, 10]
                 })
             });
 
