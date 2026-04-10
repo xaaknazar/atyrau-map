@@ -152,7 +152,6 @@ body {
     font-weight: 600;
     border-radius: 6px;
     cursor: pointer;
-    transition: all 0.2s;
 }
 
 .lang-btn.active {
@@ -272,7 +271,6 @@ body {
     font-weight: 600;
     border-radius: 8px;
     cursor: pointer;
-    transition: all 0.2s;
 }
 
 #suggest-btn:hover {
@@ -306,7 +304,6 @@ body {
     font-weight: 600;
     border-radius: 8px;
     cursor: pointer;
-    transition: all 0.2s;
 }
 
 #admin-toggle-btn:hover {
@@ -531,7 +528,6 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: all 0.2s;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
@@ -568,7 +564,6 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: all 0.2s;
 }
 
 .tile-btn:hover {
@@ -610,12 +605,6 @@ body {
     border: 3px solid #fff;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4), 0 0 12px rgba(0, 0, 0, 0.2);
     cursor: pointer;
-    transition: transform 0.2s, box-shadow 0.2s;
-}
-
-.marker-pin:hover {
-    transform: scale(1.3);
-    box-shadow: 0 2px 16px rgba(0, 0, 0, 0.5), 0 0 20px rgba(0, 0, 0, 0.3);
 }
 
 .marker-pin.search-pin  { background: #4fc3f7; border-color: #e1f5fe; width: 20px; height: 20px; box-shadow: 0 0 16px rgba(79,195,247,0.6); }
@@ -633,10 +622,6 @@ body {
     border: 2px solid rgba(255, 255, 255, 0.8);
     box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
     cursor: pointer;
-    transition: transform 0.2s;
-}
-.erdr-marker-pin:hover {
-    transform: scale(1.4);
 }
 
 /* Камеры на карте */
@@ -651,10 +636,6 @@ body {
     border: 2px solid rgba(255, 255, 255, 0.7);
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
     cursor: pointer;
-    transition: transform 0.2s;
-}
-.camera-marker-icon:hover {
-    transform: scale(1.3);
 }
 .camera-marker-icon svg {
     width: 12px;
@@ -674,10 +655,6 @@ body {
     border: 2px solid rgba(255, 255, 255, 0.8);
     box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
     cursor: pointer;
-    transition: transform 0.2s;
-}
-.police-marker-icon:hover {
-    transform: scale(1.2);
 }
 .police-marker-icon svg {
     width: 18px;
@@ -801,10 +778,7 @@ body {
     object-fit: cover;
     border-radius: 10px;
     cursor: pointer;
-    transition: transform 0.2s, opacity 0.2s;
 }
-
-#modal-gallery img:hover { transform: scale(1.03); opacity: 0.9; }
 
 #modal-description {
     font-size: 15px;
@@ -1019,7 +993,6 @@ body {
     font-size: 13px;
     border-radius: 8px;
     cursor: pointer;
-    transition: all 0.2s;
 }
 
 .cat-btn:hover { background: rgba(255, 255, 255, 0.08); }
@@ -1831,7 +1804,6 @@ body {
     font-size: 13px;
     font-weight: 600;
     cursor: pointer;
-    transition: all 0.2s;
 }
 
 .open-crime-panel-btn:hover {
@@ -1883,13 +1855,9 @@ body {
     border-radius: 12px;
     padding: 20px;
     cursor: pointer;
-    transition: all 0.2s;
 }
 .report-card:hover {
-    background: rgba(255,255,255,0.08);
-    border-color: rgba(52,152,219,0.3);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    background: rgba(255,255,255,0.07);
 }
 .report-card-icon {
     width: 56px;
@@ -1946,7 +1914,6 @@ body {
     font-weight: 600;
     border-radius: 6px;
     cursor: pointer;
-    transition: all 0.2s;
 }
 .av-period-btn.active {
     background: rgba(52, 152, 219, 0.25);
@@ -1999,7 +1966,6 @@ body {
     cursor: pointer;
     padding: 6px 12px;
     border-radius: 8px;
-    transition: all 0.2s;
     white-space: nowrap;
     flex-shrink: 0;
 }
@@ -2287,7 +2253,6 @@ body {
     font-weight: 600;
     border-radius: 6px;
     cursor: pointer;
-    transition: all 0.2s;
 }
 
 .crime-period-btn.active {
@@ -2364,7 +2329,6 @@ body {
     font-weight: 600;
     border-radius: 6px;
     cursor: pointer;
-    transition: all 0.2s;
 }
 
 .an-period-btn.active {
@@ -2400,7 +2364,6 @@ body {
     font-weight: 600;
     cursor: pointer;
     border-bottom: 2px solid transparent;
-    transition: all 0.2s;
 }
 
 .analytics-tab.active {
@@ -2433,7 +2396,6 @@ body {
     font-size: 13px;
     font-weight: 600;
     cursor: pointer;
-    transition: all 0.2s;
 }
 
 .open-analytics-btn:hover {
@@ -2673,7 +2635,6 @@ body {
     font-size: 13px;
     font-weight: 600;
     cursor: pointer;
-    transition: all 0.2s;
 }
 
 .an-action-btn:hover {

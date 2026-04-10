@@ -713,6 +713,11 @@
         showCrimePanel();
     });
 
+    document.getElementById("report-card-erdr-analytics").addEventListener("click", function () {
+        reportSelector.classList.add("hidden");
+        showAnalyticsPanel();
+    });
+
     document.getElementById("report-card-av").addEventListener("click", function () {
         reportSelector.classList.add("hidden");
         showAVPanel();
@@ -752,10 +757,11 @@
         map.invalidateSize();
     }
 
-    var openAnBtn = document.getElementById("open-analytics-btn");
-    if (openAnBtn) openAnBtn.addEventListener("click", showAnalyticsPanel);
     var closeAnBtn = document.getElementById("close-analytics");
-    if (closeAnBtn) closeAnBtn.addEventListener("click", hideAnalyticsPanel);
+    if (closeAnBtn) closeAnBtn.addEventListener("click", function () {
+        hideAnalyticsPanel();
+        showReportSelector();
+    });
 
     // Tabs
     document.querySelectorAll(".analytics-tab").forEach(function (tab) {
@@ -1333,6 +1339,7 @@
             updatePeriodHint("av-period-hint", avPeriod);
             updateAVStats();
             buildAVList();
+            renderAVAnalytics();
         });
     });
 
@@ -1379,6 +1386,7 @@
         updatePeriodHint("av-period-hint", "all");
         updateAVStats();
         buildAVList();
+        renderAVAnalytics();
     });
 
     // Analytics
