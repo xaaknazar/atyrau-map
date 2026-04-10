@@ -1150,27 +1150,12 @@
     );
 
     // ── Камеры на карте ────────────────────────────────────
-    // CCTV камера (камера видеонаблюдения)
+    // Уличная камера видеонаблюдения (CCTV)
     var CAMERA_ICON_SVG = '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">' +
-        '<path d="M18 10.48V6c0-1.1-.9-2-2-2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2v-4.48l4 3.98v-11l-4 3.98zm-2-.79V18H4V6h12v3.69z"/>' +
+        '<path d="M12 2a4 4 0 0 0-4 4v1H5a1 1 0 0 0-1 1v4a1 1 0 0 0 1 1h1v6a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-6h1a1 1 0 0 0 1-1V8a1 1 0 0 0-1-1h-3V6a4 4 0 0 0-4-4zm0 2a2 2 0 0 1 2 2v1h-4V6a2 2 0 0 1 2-2zm-2 8a1 1 0 1 1 0 2 1 1 0 0 1 0-2zm4 0a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/>' +
         '</svg>';
 
-    var cameraLayer = L.markerClusterGroup({
-        maxClusterRadius: 45,
-        spiderfyOnMaxZoom: true,
-        showCoverageOnHover: false,
-        iconCreateFunction: function (cluster) {
-            var count = cluster.getChildCount();
-            var size = count < 10 ? 30 : count < 50 ? 38 : 46;
-            return L.divIcon({
-                html: '<div style="background:rgba(46,204,113,0.85);width:' + size + 'px;height:' + size + 'px;' +
-                    'border-radius:50%;display:flex;align-items:center;justify-content:center;' +
-                    'color:#fff;font-weight:700;font-size:12px;border:2px solid rgba(255,255,255,0.6);">' + count + '</div>',
-                className: 'camera-cluster',
-                iconSize: L.point(size, size)
-            });
-        }
-    });
+    var cameraLayer = L.layerGroup();
     map.addLayer(cameraLayer);
 
     function buildCameraMarkers() {
