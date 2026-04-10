@@ -639,6 +639,29 @@ body {
     transform: scale(1.4);
 }
 
+/* Камеры на карте */
+.camera-marker-icon {
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(46, 204, 113, 0.9);
+    border-radius: 50%;
+    border: 2px solid rgba(255, 255, 255, 0.8);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+.camera-marker-icon:hover {
+    transform: scale(1.2);
+}
+.camera-marker-icon svg {
+    width: 16px;
+    height: 16px;
+    fill: #fff;
+}
+
 /* Category-colored clusters */
 .cat-cluster {
     background: transparent !important;

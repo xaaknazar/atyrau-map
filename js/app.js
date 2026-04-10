@@ -213,6 +213,9 @@
                     }
                 }
             });
+            // Restore cameras
+            var camCb = document.querySelector('[data-filter="cameras"]');
+            if (camCb && camCb.checked) map.addLayer(cameraLayer);
             heatmapActive = false;
             btn.classList.remove("active");
         } else {
@@ -221,6 +224,7 @@
                 map.removeLayer(layers[cat]);
             });
             map.removeLayer(crimeErdrLayer);
+            map.removeLayer(cameraLayer);
             addHeatLayers();
             heatmapActive = true;
             btn.classList.add("active");
@@ -348,7 +352,8 @@
         document.getElementById("count-blind-spots").textContent = counts["blind-spots"];
         document.getElementById("count-abandoned").textContent = counts["abandoned"];
         document.getElementById("count-unlit").textContent = counts["unlit"];
-        document.getElementById("count-total").textContent = crimeOnMap + counts["blind-spots"] + counts["abandoned"] + counts["unlit"];
+        document.getElementById("count-cameras").textContent = cameraPoints.length;
+        document.getElementById("count-total").textContent = crimeOnMap + counts["blind-spots"] + counts["abandoned"] + counts["unlit"] + cameraPoints.length;
     }
 
     // ── Filter checkboxes ───────────────────────────────────
@@ -359,6 +364,9 @@
             if (cat === "crime") {
                 if (this.checked) map.addLayer(crimeErdrLayer);
                 else map.removeLayer(crimeErdrLayer);
+            } else if (cat === "cameras") {
+                if (this.checked) map.addLayer(cameraLayer);
+                else map.removeLayer(cameraLayer);
             } else {
                 if (this.checked) map.addLayer(layers[cat]);
                 else map.removeLayer(layers[cat]);
@@ -1135,6 +1143,65 @@
             updateStats();
         }
     );
+
+    // ── Камеры на карте ────────────────────────────────────
+    var CAMERA_SVG = '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">' +
+        '<path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/>' +
+        '</svg>';
+    var CAMERA_ICON_SVG = '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">' +
+        '<path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z"/>' +
+        '</svg>';
+
+    var cameraLayer = L.markerClusterGroup({
+        maxClusterRadius: 45,
+        spiderfyOnMaxZoom: true,
+        showCoverageOnHover: false,
+        iconCreateFunction: function (cluster) {
+            var count = cluster.getChildCount();
+            var size = count < 10 ? 30 : count < 50 ? 38 : 46;
+            return L.divIcon({
+                html: '<div style="background:rgba(46,204,113,0.85);width:' + size + 'px;height:' + size + 'px;' +
+                    'border-radius:50%;display:flex;align-items:center;justify-content:center;' +
+                    'color:#fff;font-weight:700;font-size:12px;border:2px solid rgba(255,255,255,0.6);">' + count + '</div>',
+                className: 'camera-cluster',
+                iconSize: L.point(size, size)
+            });
+        }
+    });
+    map.addLayer(cameraLayer);
+
+    function buildCameraMarkers() {
+        cameraLayer.clearLayers();
+        cameraPoints.forEach(function (cam) {
+            var marker = L.marker([cam.lat, cam.lng], {
+                icon: L.divIcon({
+                    className: "camera-marker",
+                    html: '<div class="camera-marker-icon">' + CAMERA_ICON_SVG + '</div>',
+                    iconSize: [28, 28],
+                    iconAnchor: [14, 14]
+                })
+            });
+
+            var tooltipText = (cam.name || "Камера") + (cam.address ? " — " + cam.address : "");
+            marker.bindTooltip(tooltipText, {
+                direction: "top", offset: [0, -14], className: "marker-tooltip"
+            });
+
+            marker.bindPopup(
+                '<strong>' + (cam.name || "Камера") + '</strong><br>' +
+                (cam.type ? '<em>' + cam.type + '</em><br>' : '') +
+                (cam.address ? cam.address : '')
+            );
+
+            cameraLayer.addLayer(marker);
+        });
+        console.log("[map] Камер на карте: " + cameraPoints.length);
+    }
+
+    loadCameras(function () {
+        buildCameraMarkers();
+        updateStats();
+    });
 
     // ── Language switch ─────────────────────────────────────
     document.querySelectorAll(".lang-btn").forEach(function (btn) {
