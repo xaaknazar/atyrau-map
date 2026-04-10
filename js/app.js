@@ -679,11 +679,51 @@
         map.invalidateSize();
     }
 
-    var openBtn = document.getElementById("open-crime-panel-btn");
-    if (openBtn) openBtn.addEventListener("click", showCrimePanel);
+    // ── Отчет → Report Selector ─────────────────────────────
+    var reportSelector = document.getElementById("report-selector");
 
+    function showReportSelector() {
+        mapEl.classList.add("hidden");
+        if (searchBar) searchBar.classList.add("hidden");
+        if (mapControls) mapControls.classList.add("hidden");
+        reportSelector.classList.remove("hidden");
+        document.getElementById("report-count-erdr").textContent = crimeIncidents.length + " записей";
+        document.getElementById("report-count-av").textContent = adminViolations.length + " записей";
+        var sidebar = document.getElementById("sidebar");
+        if (sidebar) sidebar.classList.remove("open");
+        var ol = document.getElementById("sidebar-overlay");
+        if (ol) ol.classList.remove("active");
+    }
+
+    function hideReportSelector() {
+        reportSelector.classList.add("hidden");
+        mapEl.classList.remove("hidden");
+        if (searchBar) searchBar.classList.remove("hidden");
+        if (mapControls) mapControls.classList.remove("hidden");
+        map.invalidateSize();
+    }
+
+    var openBtn = document.getElementById("open-crime-panel-btn");
+    if (openBtn) openBtn.addEventListener("click", showReportSelector);
+
+    document.getElementById("close-report-selector").addEventListener("click", hideReportSelector);
+
+    document.getElementById("report-card-erdr").addEventListener("click", function () {
+        reportSelector.classList.add("hidden");
+        showCrimePanel();
+    });
+
+    document.getElementById("report-card-av").addEventListener("click", function () {
+        reportSelector.classList.add("hidden");
+        showAVPanel();
+    });
+
+    // Crime panel: back goes to report selector
     var closeBtn = document.getElementById("close-crime-panel");
-    if (closeBtn) closeBtn.addEventListener("click", hideCrimePanel);
+    if (closeBtn) closeBtn.addEventListener("click", function () {
+        hideCrimePanel();
+        showReportSelector();
+    });
 
     // ═══════════════════════════════════════════════════════
     //  ANALYTICS PANEL
@@ -1148,6 +1188,218 @@
             updateStats();
         }
     );
+
+    // ═══════════════════════════════════════════════════════
+    //  ADMIN VIOLATIONS PANEL
+    // ═══════════════════════════════════════════════════════
+    var avPanel = document.getElementById("av-panel");
+    var avPeriod = "all";
+    var avSearchQuery = "";
+    var avFilterArticle = "";
+    var avFilterUnit = "";
+    var avFilterAuthor = "";
+    var avSortMode = "date-desc";
+
+    function showAVPanel() {
+        mapEl.classList.add("hidden");
+        if (searchBar) searchBar.classList.add("hidden");
+        if (mapControls) mapControls.classList.add("hidden");
+        avPanel.classList.remove("hidden");
+        populateAVFilters();
+        updateAVStats();
+        buildAVList();
+    }
+
+    function hideAVPanel() {
+        avPanel.classList.add("hidden");
+        mapEl.classList.remove("hidden");
+        if (searchBar) searchBar.classList.remove("hidden");
+        if (mapControls) mapControls.classList.remove("hidden");
+        map.invalidateSize();
+    }
+
+    document.getElementById("close-av-panel").addEventListener("click", function () {
+        hideAVPanel();
+        showReportSelector();
+    });
+
+    // Tabs
+    document.querySelectorAll(".av-tab").forEach(function (tab) {
+        tab.addEventListener("click", function () {
+            document.querySelectorAll(".av-tab").forEach(function (t) { t.classList.remove("active"); });
+            this.classList.add("active");
+            var target = this.getAttribute("data-tab");
+            document.querySelectorAll(".av-tab-content").forEach(function (c) {
+                c.classList.remove("active");
+                c.style.display = "none";
+            });
+            var content = document.getElementById(target === "av-list-tab" ? "av-list-content" : "av-analytics-content");
+            if (content) {
+                content.classList.add("active");
+                content.style.display = "";
+            }
+            if (target === "av-analytics-tab") renderAVAnalytics();
+        });
+    });
+
+    function populateAVFilters() {
+        var articles = {}, units = {}, authors = {};
+        adminViolations.forEach(function (v) {
+            if (v.article) articles[v.article] = true;
+            if (v.podrazdelenie) units[v.podrazdelenie] = true;
+            if (v.authorFio) authors[v.authorFio] = true;
+        });
+        _fillSelect("av-filter-article", articles, "Все статьи");
+        _fillSelect("av-filter-unit", units, "Все");
+        _fillSelect("av-filter-author", authors, "Все");
+    }
+
+    function updateAVStats() {
+        var all = filterAVByPeriod(avPeriod);
+        var articleSet = {};
+        var authorSet = {};
+        all.forEach(function (v) {
+            if (v.article) articleSet[v.article] = true;
+            if (v.authorFio) authorSet[v.authorFio] = true;
+        });
+        _setText("av-total", all.length);
+        _setText("av-coords", all.filter(function (v) { return v.lat !== null; }).length);
+        _setText("av-articles", Object.keys(articleSet).length);
+        _setText("av-authors", Object.keys(authorSet).length);
+    }
+
+    function getFilteredAV() {
+        var list = filterAVByPeriod(avPeriod);
+        if (avFilterArticle) list = list.filter(function (v) { return v.article === avFilterArticle; });
+        if (avFilterUnit) list = list.filter(function (v) { return v.podrazdelenie === avFilterUnit; });
+        if (avFilterAuthor) list = list.filter(function (v) { return v.authorFio === avFilterAuthor; });
+        if (avSearchQuery) {
+            var q = avSearchQuery.toLowerCase();
+            list = list.filter(function (v) {
+                return (v.article || "").toLowerCase().indexOf(q) !== -1 ||
+                    (v.lastName || "").toLowerCase().indexOf(q) !== -1 ||
+                    (v.firstName || "").toLowerCase().indexOf(q) !== -1 ||
+                    (v.place || "").toLowerCase().indexOf(q) !== -1 ||
+                    (v.authorFio || "").toLowerCase().indexOf(q) !== -1 ||
+                    (v.fabula || "").toLowerCase().indexOf(q) !== -1 ||
+                    (v.materialNumber || "").toLowerCase().indexOf(q) !== -1;
+            });
+        }
+        list.sort(function (a, b) {
+            switch (avSortMode) {
+                case "date-asc": return (a.regDate || "").localeCompare(b.regDate || "");
+                case "article": return (a.article || "").localeCompare(b.article || "");
+                default: return (b.regDate || "").localeCompare(a.regDate || "");
+            }
+        });
+        return list;
+    }
+
+    function buildAVList() {
+        var container = document.getElementById("av-list-content");
+        var filtered = getFilteredAV();
+        container.innerHTML = "";
+
+        filtered.forEach(function (v) {
+            var item = document.createElement("div");
+            item.className = "crime-list-item";
+
+            var fio = [v.lastName, v.firstName, v.patronymic].filter(Boolean).join(" ") || "—";
+            var dateStr = v.regDate ? formatCrimeDate(v.regDate) : "—";
+
+            item.innerHTML =
+                '<div class="crime-list-item-header">' +
+                    '<span class="crime-list-article">' + (v.article || "—") + '</span>' +
+                    '<span class="crime-list-date">' + dateStr + '</span>' +
+                '</div>' +
+                '<div class="crime-list-erdr">Материал: ' + (v.materialNumber || "—") + '</div>' +
+                '<div class="crime-list-address">' + fio + '</div>' +
+                '<div class="crime-list-address">' + (v.place || "—") + '</div>' +
+                '<div class="crime-list-organ">' + (v.podrazdelenie || "") + '</div>' +
+                (v.authorFio ? '<div style="color:#5a6a8a;font-size:11px;margin-top:2px;">Инспектор: ' + v.authorFio + '</div>' : '');
+
+            container.appendChild(item);
+        });
+
+        _setText("av-count-value", filtered.length);
+    }
+
+    // Period buttons
+    document.querySelectorAll(".av-period-btn").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+            document.querySelectorAll(".av-period-btn").forEach(function (b) { b.classList.remove("active"); });
+            this.classList.add("active");
+            avPeriod = this.getAttribute("data-period");
+            updatePeriodHint("av-period-hint", avPeriod);
+            updateAVStats();
+            buildAVList();
+        });
+    });
+
+    // Sort
+    var avSortEl = document.getElementById("av-sort");
+    if (avSortEl) avSortEl.addEventListener("change", function () {
+        avSortMode = this.value;
+        buildAVList();
+    });
+
+    // Filters
+    ["av-filter-article", "av-filter-unit", "av-filter-author"].forEach(function (id) {
+        var el = document.getElementById(id);
+        if (!el) return;
+        el.addEventListener("change", function () {
+            if (id === "av-filter-article") avFilterArticle = this.value;
+            else if (id === "av-filter-unit") avFilterUnit = this.value;
+            else if (id === "av-filter-author") avFilterAuthor = this.value;
+            buildAVList();
+        });
+    });
+
+    // Search
+    var avSearchEl = document.getElementById("av-search-input");
+    if (avSearchEl) avSearchEl.addEventListener("input", function () {
+        avSearchQuery = this.value.trim();
+        buildAVList();
+    });
+
+    // Reset
+    var avResetBtn = document.getElementById("av-reset-filters");
+    if (avResetBtn) avResetBtn.addEventListener("click", function () {
+        avSearchQuery = ""; avFilterArticle = ""; avFilterUnit = ""; avFilterAuthor = "";
+        avSortMode = "date-desc"; avPeriod = "all";
+        if (avSearchEl) avSearchEl.value = "";
+        ["av-filter-article", "av-filter-unit", "av-filter-author"].forEach(function (id) {
+            var el = document.getElementById(id); if (el) el.value = "";
+        });
+        if (avSortEl) avSortEl.value = "date-desc";
+        document.querySelectorAll(".av-period-btn").forEach(function (b) {
+            b.classList.remove("active");
+            if (b.getAttribute("data-period") === "all") b.classList.add("active");
+        });
+        updatePeriodHint("av-period-hint", "all");
+        updateAVStats();
+        buildAVList();
+    });
+
+    // Analytics
+    function renderAVAnalytics() {
+        var filtered = filterAVByPeriod(avPeriod);
+        if (filtered.length === 0) return;
+        var a = analyzeAdminViolations(filtered);
+
+        renderBarChart("av-chart-authors", a.byAuthor.slice(0, 15), "blue");
+        renderBarChart("av-chart-units", a.byUnit.slice(0, 10), "teal");
+        renderBarChart("av-chart-articles", a.byArticle.slice(0, 15), "red");
+        renderBarChart("av-chart-raions", a.byRaion.slice(0, 10), "green");
+        renderBarChart("av-chart-state", a.byState, "orange");
+        renderBarChart("av-chart-age", a.byAge, "purple");
+        renderBarChart("av-chart-months", a.byMonth, "green");
+    }
+
+    // Загрузка данных
+    loadAdminViolations(function () {
+        console.log("[app] Админ. правонарушения: " + adminViolations.length);
+    });
 
     // ── Камеры на карте ────────────────────────────────────
     var CAMERA_ICON_SVG = '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">' +

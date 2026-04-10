@@ -150,6 +150,41 @@
 
     <div id="map"></div>
 
+    <!-- Report selector -->
+    <div id="report-selector" class="hidden">
+        <div class="report-selector-header">
+            <button id="close-report-selector" class="close-crime-panel-btn" aria-label="Назад">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="15 18 9 12 15 6"/>
+                </svg>
+                <span>Назад к карте</span>
+            </button>
+            <h2>Отчеты</h2>
+        </div>
+        <div class="report-selector-cards">
+            <div class="report-card" id="report-card-erdr">
+                <div class="report-card-icon" style="background:rgba(231,76,60,0.2);color:#e74c3c;">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm-1 7V3.5L18.5 9H13zM6 20V4h5v7h7v9H6z"/></svg>
+                </div>
+                <div class="report-card-body">
+                    <h3>Зарегистрированные правонарушения</h3>
+                    <p>ЕРДР — уголовные правонарушения</p>
+                    <span class="report-card-count" id="report-count-erdr">0 записей</span>
+                </div>
+            </div>
+            <div class="report-card" id="report-card-av">
+                <div class="report-card-icon" style="background:rgba(52,152,219,0.2);color:#3498db;">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm-1 7V3.5L18.5 9H13zM6 20V4h5v7h7v9H6z"/></svg>
+                </div>
+                <div class="report-card-body">
+                    <h3>Административные правонарушения</h3>
+                    <p>Группа отчетов об административных правонарушениях</p>
+                    <span class="report-card-count" id="report-count-av">0 записей</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Crime panel (ЕРДР) — replaces map when active -->
     <div id="crime-panel" class="hidden">
         <div class="crime-panel-header">
@@ -255,6 +290,131 @@
             </div>
         </div>
         <div id="crime-list" class="crime-list"></div>
+    </div>
+
+    <!-- Admin Violations panel -->
+    <div id="av-panel" class="hidden">
+        <div class="crime-panel-header">
+            <div class="crime-panel-top-row">
+                <button id="close-av-panel" class="close-crime-panel-btn" aria-label="Назад">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="15 18 9 12 15 6"/>
+                    </svg>
+                    <span>Назад</span>
+                </button>
+                <h2>Административные правонарушения</h2>
+            </div>
+
+            <!-- Статистика -->
+            <div class="crime-stats-cards">
+                <div class="crime-stat-card">
+                    <div class="crime-stat-value" id="av-total">0</div>
+                    <div class="crime-stat-label">Всего</div>
+                </div>
+                <div class="crime-stat-card" style="border-top-color:#3498db">
+                    <div class="crime-stat-value" id="av-coords">0</div>
+                    <div class="crime-stat-label">С координатами</div>
+                </div>
+                <div class="crime-stat-card" style="border-top-color:#9b59b6">
+                    <div class="crime-stat-value" id="av-articles">0</div>
+                    <div class="crime-stat-label">Уник. статей</div>
+                </div>
+                <div class="crime-stat-card" style="border-top-color:#2ecc71">
+                    <div class="crime-stat-value" id="av-authors">0</div>
+                    <div class="crime-stat-label">Инспекторов</div>
+                </div>
+            </div>
+
+            <!-- Фильтры -->
+            <div class="crime-panel-filters">
+                <div class="crime-filter-row">
+                    <div class="crime-filter-group-inline">
+                        <label>Период:</label>
+                        <div class="crime-filter-buttons">
+                            <button class="av-period-btn active" data-period="all">Все</button>
+                            <button class="av-period-btn" data-period="month">Месяц</button>
+                            <button class="av-period-btn" data-period="week">Неделя</button>
+                            <button class="av-period-btn" data-period="day">День</button>
+                        </div>
+                        <span id="av-period-hint" class="period-hint"></span>
+                    </div>
+                    <div class="crime-filter-group-inline">
+                        <label>Сортировка:</label>
+                        <select id="av-sort" class="crime-select">
+                            <option value="date-desc">Сначала новые</option>
+                            <option value="date-asc">Сначала старые</option>
+                            <option value="article">По статье</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="crime-filter-row">
+                    <div class="crime-filter-group-inline">
+                        <label>Статья:</label>
+                        <select id="av-filter-article" class="crime-select"><option value="">Все статьи</option></select>
+                    </div>
+                    <div class="crime-filter-group-inline">
+                        <label>Подразделение:</label>
+                        <select id="av-filter-unit" class="crime-select"><option value="">Все</option></select>
+                    </div>
+                    <div class="crime-filter-group-inline">
+                        <label>Инспектор:</label>
+                        <select id="av-filter-author" class="crime-select"><option value="">Все</option></select>
+                    </div>
+                </div>
+                <div class="crime-search-wrapper">
+                    <svg class="crime-search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                    </svg>
+                    <input type="text" id="av-search-input" placeholder="Поиск по ФИО, статье, адресу..." autocomplete="off" />
+                </div>
+            </div>
+
+            <div class="crime-panel-results-bar">
+                <span>Показано: <strong id="av-count-value">0</strong></span>
+                <button id="av-reset-filters" class="crime-reset-btn">Сбросить фильтры</button>
+            </div>
+
+            <!-- Табы: Список / Аналитика -->
+            <div class="analytics-tabs" style="padding:0 16px 8px;">
+                <button class="analytics-tab av-tab active" data-tab="av-list-tab">Список</button>
+                <button class="analytics-tab av-tab" data-tab="av-analytics-tab">Аналитика</button>
+            </div>
+        </div>
+
+        <!-- Список -->
+        <div id="av-list-content" class="crime-list av-tab-content active" data-tab="av-list-tab"></div>
+
+        <!-- Аналитика -->
+        <div id="av-analytics-content" class="av-tab-content" data-tab="av-analytics-tab" style="display:none;overflow-y:auto;flex:1;padding:16px;">
+            <div class="an-section">
+                <h3 class="an-section-title">Топ инспекторов по количеству протоколов</h3>
+                <div id="av-chart-authors" class="an-bar-container"></div>
+            </div>
+            <div class="an-section">
+                <h3 class="an-section-title">По подразделениям</h3>
+                <div id="av-chart-units" class="an-bar-container"></div>
+            </div>
+            <div class="an-section">
+                <h3 class="an-section-title">Топ статей</h3>
+                <div id="av-chart-articles" class="an-bar-container"></div>
+            </div>
+            <div class="an-section">
+                <h3 class="an-section-title">По районам</h3>
+                <div id="av-chart-raions" class="an-bar-container"></div>
+            </div>
+            <div class="an-section">
+                <h3 class="an-section-title">Состояние нарушителя</h3>
+                <div id="av-chart-state" class="an-bar-container"></div>
+            </div>
+            <div class="an-section">
+                <h3 class="an-section-title">По возрасту</h3>
+                <div id="av-chart-age" class="an-bar-container"></div>
+            </div>
+            <div class="an-section">
+                <h3 class="an-section-title">По месяцам</h3>
+                <div id="av-chart-months" class="an-bar-container"></div>
+            </div>
+        </div>
     </div>
 
     <!-- Analytics panel -->
@@ -667,6 +827,7 @@
     <script src="js/crimes.js"></script>
     <script src="js/cameras.js"></script>
     <script src="js/police.js"></script>
+    <script src="js/admin-violations.js"></script>
     <script src="js/analytics.js"></script>
     <script src="js/data.js"></script>
     <script src="js/app.js"></script>
