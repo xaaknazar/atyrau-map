@@ -2571,6 +2571,28 @@ body {
 .an-bar-fill.purple { background: linear-gradient(90deg, #8e44ad, #9b59b6); }
 .an-bar-fill.teal { background: linear-gradient(90deg, #16a085, #1abc9c); }
 
+/* Expandable chart toggle */
+.an-expand-bars {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+.an-expand-btn {
+    display: block;
+    margin-top: 10px;
+    padding: 6px 14px;
+    border: 1px solid rgba(93, 173, 226, 0.3);
+    border-radius: 6px;
+    background: rgba(93, 173, 226, 0.1);
+    color: #5dade2;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+}
+.an-expand-btn:hover {
+    background: rgba(93, 173, 226, 0.2);
+}
+
 /* Danger time cards */
 .an-insight-cards {
     display: grid;

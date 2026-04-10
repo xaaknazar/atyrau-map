@@ -888,6 +888,51 @@
         }).join("");
     }
 
+    function _renderBars(items, color) {
+        if (items.length === 0) return "";
+        var max = items[0].count || 1;
+        return items.map(function (item) {
+            var pct = Math.max(1, Math.round(item.count / max * 100));
+            return '<div class="an-bar-row">' +
+                '<span class="an-bar-label" title="' + item.label + '">' + item.label + '</span>' +
+                '<div class="an-bar-track"><div class="an-bar-fill ' + color + '" style="width:' + pct + '%"></div></div>' +
+                '<span class="an-bar-value">' + item.count + '</span>' +
+                '</div>';
+        }).join("");
+    }
+
+    function renderExpandableChart(containerId, allItems, initialCount, color) {
+        var el = document.getElementById(containerId);
+        if (!el || allItems.length === 0) { if (el) el.innerHTML = ""; return; }
+
+        var showAll = allItems.length > initialCount;
+        var visibleItems = showAll ? allItems.slice(0, initialCount) : allItems;
+
+        el.innerHTML = _renderBars(visibleItems, color);
+
+        if (showAll) {
+            var toggleBtn = document.createElement("button");
+            toggleBtn.className = "an-expand-btn";
+            toggleBtn.textContent = "Показать все (" + allItems.length + ")";
+            var expanded = false;
+            toggleBtn.addEventListener("click", function () {
+                expanded = !expanded;
+                var barsHtml = _renderBars(expanded ? allItems : allItems.slice(0, initialCount), color);
+                // Replace bars but keep button
+                var barsContainer = el.querySelector(".an-expand-bars");
+                if (barsContainer) barsContainer.innerHTML = barsHtml;
+                toggleBtn.textContent = expanded ? "Свернуть" : "Показать все (" + allItems.length + ")";
+            });
+            // Wrap bars in a container for easy replacement
+            var wrapper = document.createElement("div");
+            wrapper.className = "an-expand-bars";
+            wrapper.innerHTML = el.innerHTML;
+            el.innerHTML = "";
+            el.appendChild(wrapper);
+            el.appendChild(toggleBtn);
+        }
+    }
+
     function renderMonthsChart(byMonth) {
         var items = byMonth.labels.map(function (l, i) {
             return { label: l, count: byMonth.counts[i] };
@@ -1446,13 +1491,13 @@
                 _statCard(a.uniqueAuthors, "Инспекторов");
         }
 
-        renderBarChart("av-chart-authors", a.byAuthor.slice(0, 15), "blue");
-        renderBarChart("av-chart-units", a.byUnit.slice(0, 10), "teal");
-        renderBarChart("av-chart-articles", a.byArticle.slice(0, 15), "red");
-        renderBarChart("av-chart-raions", a.byRaion.slice(0, 10), "green");
-        renderBarChart("av-chart-state", a.byState, "orange");
-        renderBarChart("av-chart-age", a.byAge, "purple");
-        renderBarChart("av-chart-months", a.byMonth, "green");
+        renderExpandableChart("av-chart-authors", a.byAuthor, 15, "blue");
+        renderExpandableChart("av-chart-units", a.byUnit, 10, "teal");
+        renderExpandableChart("av-chart-articles", a.byArticle, 15, "red");
+        renderExpandableChart("av-chart-raions", a.byRaion, 10, "green");
+        renderExpandableChart("av-chart-state", a.byState, 10, "orange");
+        renderExpandableChart("av-chart-age", a.byAge, 10, "purple");
+        renderExpandableChart("av-chart-months", a.byMonth, 12, "green");
     }
 
     // Загрузка данных
