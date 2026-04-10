@@ -1670,6 +1670,7 @@
         var added = 0;
         adminViolations.forEach(function (v) {
             if (v.lat === null || v.lng === null) return;
+            if (_isHiddenArticle(v.article)) return;
             avLayer.addLayer(_createAVCircle(v));
             added++;
         });
@@ -1711,6 +1712,7 @@
         }) : adminViolations;
         avFiltered.forEach(function (v) {
             if (v.lat === null || v.lng === null) return;
+            if (_isHiddenArticle(v.article)) return;
             avLayer.addLayer(_createAVCircle(v));
         });
 
