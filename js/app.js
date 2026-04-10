@@ -1557,7 +1557,7 @@
     });
 
     // ── Камеры на карте ────────────────────────────────────
-    var CAMERA_ICON_SVG = '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">' +
+    var CAMERA_ICON_SVG = '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="#2ecc71">' +
         '<path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z"/>' +
         '</svg>';
 
@@ -1567,12 +1567,13 @@
     function buildCameraMarkers() {
         cameraLayer.clearLayers();
         cameraPoints.forEach(function (cam) {
-            var marker = L.circleMarker([cam.lat, cam.lng], {
-                radius: 5,
-                color: "#fff",
-                weight: 1.5,
-                fillColor: "#2ecc71",
-                fillOpacity: 0.9
+            var marker = L.marker([cam.lat, cam.lng], {
+                icon: L.divIcon({
+                    className: "camera-marker",
+                    html: '<div class="camera-marker-icon">' + CAMERA_ICON_SVG + '</div>',
+                    iconSize: [18, 18],
+                    iconAnchor: [9, 9]
+                })
             });
 
             var tooltipText = (cam.name || "Камера") + (cam.address ? " — " + cam.address : "");
