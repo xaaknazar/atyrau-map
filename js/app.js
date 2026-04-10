@@ -70,7 +70,8 @@
         maxZoom: 18,
         minZoom: 11,
         maxBounds: ATYRAU_BOUNDS,
-        maxBoundsViscosity: 1.0
+        maxBoundsViscosity: 1.0,
+        preferCanvas: true
     });
 
     L.control.zoom({ position: "bottomright" }).addTo(map);
@@ -1220,13 +1221,12 @@
             if (typeof c.lat !== "number" || typeof c.lng !== "number") return;
             if (isNaN(c.lat) || isNaN(c.lng)) return;
 
-            var marker = L.marker([c.lat, c.lng], {
-                icon: L.divIcon({
-                    className: "erdr-marker",
-                    html: '<div class="erdr-marker-pin"></div>',
-                    iconSize: [12, 12],
-                    iconAnchor: [6, 6]
-                })
+            var marker = L.circleMarker([c.lat, c.lng], {
+                radius: 5,
+                color: "rgba(255,255,255,0.8)",
+                weight: 1.5,
+                fillColor: "#e74c3c",
+                fillOpacity: 0.9
             });
 
             var tooltipText = (c.article || "—") + " | " + (c.street ? "ул. " + c.street : "");
@@ -1514,18 +1514,17 @@
     function buildCameraMarkers() {
         cameraLayer.clearLayers();
         cameraPoints.forEach(function (cam) {
-            var marker = L.marker([cam.lat, cam.lng], {
-                icon: L.divIcon({
-                    className: "camera-marker",
-                    html: '<div class="camera-marker-icon">' + CAMERA_ICON_SVG + '</div>',
-                    iconSize: [20, 20],
-                    iconAnchor: [10, 10]
-                })
+            var marker = L.circleMarker([cam.lat, cam.lng], {
+                radius: 5,
+                color: "#fff",
+                weight: 1.5,
+                fillColor: "#2ecc71",
+                fillOpacity: 0.9
             });
 
             var tooltipText = (cam.name || "Камера") + (cam.address ? " — " + cam.address : "");
             marker.bindTooltip(tooltipText, {
-                direction: "top", offset: [0, -14], className: "marker-tooltip"
+                direction: "top", offset: [0, -8], className: "marker-tooltip"
             });
 
             marker.bindPopup(
@@ -1584,36 +1583,34 @@
     var avLayer = L.layerGroup();
     map.addLayer(avLayer);
 
+    function _createAVCircle(v) {
+        var marker = L.circleMarker([v.lat, v.lng], {
+            radius: 5,
+            color: "#fff",
+            weight: 1.5,
+            fillColor: "#e67e22",
+            fillOpacity: 0.9
+        });
+        var fio = [v.lastName, v.firstName, v.patronymic].filter(Boolean).join(" ") || "";
+        marker.bindTooltip((v.article || "—") + (fio ? " | " + fio : ""), {
+            direction: "top", offset: [0, -8], className: "marker-tooltip"
+        });
+        marker.bindPopup(
+            '<strong>' + (v.article || "—") + '</strong><br>' +
+            (fio ? fio + '<br>' : '') +
+            (v.place ? v.place + '<br>' : '') +
+            (v.regDate ? 'Дата: ' + v.regDate + '<br>' : '') +
+            (v.podrazdelenie ? v.podrazdelenie : '')
+        );
+        return marker;
+    }
+
     function buildAVMarkers() {
         avLayer.clearLayers();
         var added = 0;
         adminViolations.forEach(function (v) {
             if (v.lat === null || v.lng === null) return;
-
-            var marker = L.marker([v.lat, v.lng], {
-                icon: L.divIcon({
-                    className: "av-marker",
-                    html: '<div class="av-marker-pin"></div>',
-                    iconSize: [12, 12],
-                    iconAnchor: [6, 6]
-                })
-            });
-
-            var fio = [v.lastName, v.firstName, v.patronymic].filter(Boolean).join(" ") || "";
-            var tooltipText = (v.article || "—") + (fio ? " | " + fio : "") + (v.place ? " | " + v.place : "");
-            marker.bindTooltip(tooltipText, {
-                direction: "top", offset: [0, -8], className: "marker-tooltip"
-            });
-
-            marker.bindPopup(
-                '<strong>' + (v.article || "—") + '</strong><br>' +
-                (fio ? fio + '<br>' : '') +
-                (v.place ? v.place + '<br>' : '') +
-                (v.regDate ? 'Дата: ' + v.regDate + '<br>' : '') +
-                (v.podrazdelenie ? v.podrazdelenie : '')
-            );
-
-            avLayer.addLayer(marker);
+            avLayer.addLayer(_createAVCircle(v));
             added++;
         });
         console.log("[map] АП маркеров на карте: " + added);
@@ -1632,13 +1629,12 @@
         }) : crimeIncidents;
         crimeFiltered.forEach(function (c) {
             if (typeof c.lat !== "number" || isNaN(c.lat)) return;
-            var marker = L.marker([c.lat, c.lng], {
-                icon: L.divIcon({
-                    className: "erdr-marker",
-                    html: '<div class="erdr-marker-pin"></div>',
-                    iconSize: [12, 12],
-                    iconAnchor: [6, 6]
-                })
+            var marker = L.circleMarker([c.lat, c.lng], {
+                radius: 5,
+                color: "rgba(255,255,255,0.8)",
+                weight: 1.5,
+                fillColor: "#e74c3c",
+                fillOpacity: 0.9
             });
             marker.bindTooltip((c.article || "—") + " | " + (c.street ? "ул. " + c.street : ""), {
                 direction: "top", offset: [0, -8], className: "marker-tooltip"
@@ -1654,25 +1650,7 @@
         }) : adminViolations;
         avFiltered.forEach(function (v) {
             if (v.lat === null || v.lng === null) return;
-            var marker = L.marker([v.lat, v.lng], {
-                icon: L.divIcon({
-                    className: "av-marker",
-                    html: '<div class="av-marker-pin"></div>',
-                    iconSize: [12, 12],
-                    iconAnchor: [6, 6]
-                })
-            });
-            var fio = [v.lastName, v.firstName, v.patronymic].filter(Boolean).join(" ") || "";
-            marker.bindTooltip((v.article || "—") + (fio ? " | " + fio : ""), {
-                direction: "top", offset: [0, -8], className: "marker-tooltip"
-            });
-            marker.bindPopup(
-                '<strong>' + (v.article || "—") + '</strong><br>' +
-                (fio ? fio + '<br>' : '') +
-                (v.place ? v.place + '<br>' : '') +
-                (v.regDate ? 'Дата: ' + v.regDate : '')
-            );
-            avLayer.addLayer(marker);
+            avLayer.addLayer(_createAVCircle(v));
         });
 
         // Update sidebar counts
