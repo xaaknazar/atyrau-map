@@ -874,31 +874,25 @@
         return '<div class="an-stat-card"><div class="an-stat-val">' + val + '</div><div class="an-stat-lbl">' + label + '</div></div>';
     }
 
-    function renderBarChart(containerId, items, color) {
-        var el = document.getElementById(containerId);
-        if (!el || items.length === 0) return;
-        var max = items[0].count || 1;
-        el.innerHTML = items.map(function (item) {
-            var pct = Math.max(1, Math.round(item.count / max * 100));
-            return '<div class="an-bar-row">' +
-                '<span class="an-bar-label" title="' + item.label + '">' + item.label + '</span>' +
-                '<div class="an-bar-track"><div class="an-bar-fill ' + color + '" style="width:' + pct + '%"></div></div>' +
-                '<span class="an-bar-value">' + item.count + '</span>' +
-                '</div>';
-        }).join("");
-    }
-
     function _renderBars(items, color) {
         if (items.length === 0) return "";
         var max = items[0].count || 1;
         return items.map(function (item) {
             var pct = Math.max(1, Math.round(item.count / max * 100));
             return '<div class="an-bar-row">' +
-                '<span class="an-bar-label" title="' + item.label + '">' + item.label + '</span>' +
+                '<div class="an-bar-top">' +
+                    '<span class="an-bar-label">' + item.label + '</span>' +
+                    '<span class="an-bar-value">' + item.count + '</span>' +
+                '</div>' +
                 '<div class="an-bar-track"><div class="an-bar-fill ' + color + '" style="width:' + pct + '%"></div></div>' +
-                '<span class="an-bar-value">' + item.count + '</span>' +
                 '</div>';
         }).join("");
+    }
+
+    function renderBarChart(containerId, items, color) {
+        var el = document.getElementById(containerId);
+        if (!el || items.length === 0) return;
+        el.innerHTML = _renderBars(items, color);
     }
 
     function renderExpandableChart(containerId, allItems, initialCount, color) {
@@ -963,9 +957,11 @@
             var pct = Math.max(1, Math.round(item.count / max * 100));
             var color = item.count > max * 0.7 ? "red" : item.count > max * 0.4 ? "orange" : "blue";
             return '<div class="an-bar-row">' +
-                '<span class="an-bar-label">' + item.label + '</span>' +
+                '<div class="an-bar-top">' +
+                    '<span class="an-bar-label">' + item.label + '</span>' +
+                    '<span class="an-bar-value">' + item.count + '</span>' +
+                '</div>' +
                 '<div class="an-bar-track"><div class="an-bar-fill ' + color + '" style="width:' + pct + '%"></div></div>' +
-                '<span class="an-bar-value">' + item.count + '</span>' +
                 '</div>';
         }).join("");
     }

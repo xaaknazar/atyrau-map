@@ -2520,47 +2520,44 @@ body {
 
 .an-bar-row {
     display: flex;
-    align-items: center;
-    gap: 10px;
+    flex-direction: column;
+    gap: 2px;
+    padding: 4px 0;
+}
+
+.an-bar-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
 }
 
 .an-bar-label {
-    min-width: 140px;
     font-size: 12px;
     color: #c0c8e0;
-    text-align: right;
-    flex-shrink: 0;
     word-break: break-word;
-    white-space: normal;
+}
+
+.an-bar-value {
+    font-size: 12px;
+    font-weight: 700;
+    color: #8892b0;
+    flex-shrink: 0;
+    margin-left: 10px;
 }
 
 .an-bar-track {
-    flex: 1;
-    height: 22px;
+    width: 100%;
+    height: 20px;
     background: rgba(255, 255, 255, 0.04);
     border-radius: 4px;
     overflow: hidden;
-    position: relative;
 }
 
 .an-bar-fill {
     height: 100%;
     border-radius: 4px;
-    transition: width 0.6s ease;
     min-width: 2px;
 }
-
-.an-bar-value {
-    width: 40px;
-    font-size: 12px;
-    font-weight: 700;
-    color: #8892b0;
-    text-align: right;
-    flex-shrink: 0;
-}
-
-/* Hours chart — horizontal bars */
-.an-hours .an-bar-label { width: 50px; }
 
 /* Colors for different charts */
 .an-bar-fill.red { background: linear-gradient(90deg, #e74c3c, #ff6b6b); }
@@ -2818,7 +2815,7 @@ body {
 
 @media (max-width: 900px) {
     .analytics-body { padding: 16px; }
-    .an-bar-label { width: 100px; font-size: 11px; }
+    .an-bar-label { font-size: 11px; }
     .an-ai-key-row { flex-direction: column; }
     .analytics-tabs { overflow-x: auto; flex-wrap: nowrap; }
 }
