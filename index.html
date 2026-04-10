@@ -78,6 +78,11 @@
                 <span class="legend-dot" style="background: #2ecc71;"></span>
                 <span>Камеры</span>
             </label>
+            <label class="legend-item">
+                <input type="checkbox" checked data-filter="police" />
+                <span class="legend-dot" style="background: #1abc9c;"></span>
+                <span>Участковые пункты</span>
+            </label>
         </div>
 
         <!-- Crime incidents (ЕРДР) — кнопка переключения на панель -->
@@ -110,6 +115,10 @@
             <div class="stat-row">
                 <span class="stat-label">Камеры:</span>
                 <span class="stat-value" id="count-cameras">0</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">Участковые пункты:</span>
+                <span class="stat-value" id="count-police">0</span>
             </div>
             <div class="stat-row total">
                 <span class="stat-label" data-i18n="stat_total">Всего точек:</span>
@@ -657,6 +666,7 @@
     <script src="js/photos.js"></script>
     <script src="js/crimes.js"></script>
     <script src="js/cameras.js"></script>
+    <script src="js/police.js"></script>
     <script src="js/analytics.js"></script>
     <script src="js/data.js"></script>
     <script src="js/app.js"></script>

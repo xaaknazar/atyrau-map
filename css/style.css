@@ -662,6 +662,29 @@ body {
     fill: #fff;
 }
 
+/* Участковые пункты на карте */
+.police-marker-icon {
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(26, 188, 156, 0.9);
+    border-radius: 50%;
+    border: 2px solid rgba(255, 255, 255, 0.8);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+.police-marker-icon:hover {
+    transform: scale(1.2);
+}
+.police-marker-icon svg {
+    width: 18px;
+    height: 18px;
+    fill: #fff;
+}
+
 /* Category-colored clusters */
 .cat-cluster {
     background: transparent !important;

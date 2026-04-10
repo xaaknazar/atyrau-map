@@ -213,9 +213,11 @@
                     }
                 }
             });
-            // Restore cameras
+            // Restore cameras & police
             var camCb = document.querySelector('[data-filter="cameras"]');
             if (camCb && camCb.checked) map.addLayer(cameraLayer);
+            var polCb = document.querySelector('[data-filter="police"]');
+            if (polCb && polCb.checked) map.addLayer(policeLayer);
             heatmapActive = false;
             btn.classList.remove("active");
         } else {
@@ -225,6 +227,7 @@
             });
             map.removeLayer(crimeErdrLayer);
             map.removeLayer(cameraLayer);
+            map.removeLayer(policeLayer);
             addHeatLayers();
             heatmapActive = true;
             btn.classList.add("active");
@@ -353,7 +356,8 @@
         document.getElementById("count-abandoned").textContent = counts["abandoned"];
         document.getElementById("count-unlit").textContent = counts["unlit"];
         document.getElementById("count-cameras").textContent = cameraPoints.length;
-        document.getElementById("count-total").textContent = crimeOnMap + counts["blind-spots"] + counts["abandoned"] + counts["unlit"] + cameraPoints.length;
+        document.getElementById("count-police").textContent = policePoints.length;
+        document.getElementById("count-total").textContent = crimeOnMap + counts["blind-spots"] + counts["abandoned"] + counts["unlit"] + cameraPoints.length + policePoints.length;
     }
 
     // ── Filter checkboxes ───────────────────────────────────
@@ -367,6 +371,9 @@
             } else if (cat === "cameras") {
                 if (this.checked) map.addLayer(cameraLayer);
                 else map.removeLayer(cameraLayer);
+            } else if (cat === "police") {
+                if (this.checked) map.addLayer(policeLayer);
+                else map.removeLayer(policeLayer);
             } else {
                 if (this.checked) map.addLayer(layers[cat]);
                 else map.removeLayer(layers[cat]);
@@ -1198,6 +1205,46 @@
 
     loadCameras(function () {
         buildCameraMarkers();
+        updateStats();
+    });
+
+    // ── Участковые пункты на карте ──────────────────────────
+    var POLICE_ICON_SVG = '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">' +
+        '<path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 4l3.5 2H15v2h-2v1h2v2h-2v3h-2v-3H9v-2h2v-1H9V9h2.5L12 5z"/>' +
+        '</svg>';
+
+    var policeLayer = L.layerGroup();
+    map.addLayer(policeLayer);
+
+    function buildPoliceMarkers() {
+        policeLayer.clearLayers();
+        policePoints.forEach(function (p) {
+            var marker = L.marker([p.lat, p.lng], {
+                icon: L.divIcon({
+                    className: "police-marker",
+                    html: '<div class="police-marker-icon">' + POLICE_ICON_SVG + '</div>',
+                    iconSize: [30, 30],
+                    iconAnchor: [15, 15]
+                })
+            });
+
+            marker.bindTooltip(p.name + (p.address ? " — " + p.address : ""), {
+                direction: "top", offset: [0, -15], className: "marker-tooltip"
+            });
+
+            marker.bindPopup(
+                '<strong>' + p.name + '</strong><br>' +
+                (p.address ? p.address + '<br>' : '') +
+                'Сотрудников: ' + p.staff
+            );
+
+            policeLayer.addLayer(marker);
+        });
+        console.log("[map] Участковых пунктов на карте: " + policePoints.length);
+    }
+
+    loadPoliceStations(function () {
+        buildPoliceMarkers();
         updateStats();
     });
 
