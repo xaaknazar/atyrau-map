@@ -189,10 +189,10 @@ function analyzeAdminViolations(items) {
     });
     var unitList = Object.values(byUnit).sort(function (a, b) { return b.count - a.count; });
 
-    // По статьям
+    // По статьям (группировка по номеру статьи, без частей)
     var byArticle = {};
     items.forEach(function (v) {
-        var key = v.article || "Не указана";
+        var key = extractArticleNumber(v.article);
         if (!byArticle[key]) byArticle[key] = { label: key, count: 0 };
         byArticle[key].count++;
     });
