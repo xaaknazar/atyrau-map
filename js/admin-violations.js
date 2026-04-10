@@ -165,10 +165,20 @@ function analyzeAdminViolations(items) {
     var byAuthor = {};
     items.forEach(function (v) {
         var key = v.authorFio || "Не указан";
-        if (!byAuthor[key]) byAuthor[key] = { label: key, count: 0, position: v.authorPosition };
+        if (!byAuthor[key]) byAuthor[key] = { label: key, count: 0, position: v.authorPosition, unit: v.podrazdelenie || "" };
         byAuthor[key].count++;
     });
     var authorList = Object.values(byAuthor).sort(function (a, b) { return b.count - a.count; });
+
+    // Инспекторы сгруппированные по подразделениям
+    var authorsByUnit = {};
+    authorList.forEach(function (a) {
+        var u = a.unit || "Не указано";
+        if (!authorsByUnit[u]) authorsByUnit[u] = { label: u, authors: [], total: 0 };
+        authorsByUnit[u].authors.push(a);
+        authorsByUnit[u].total += a.count;
+    });
+    var authorsByUnitList = Object.values(authorsByUnit).sort(function (a, b) { return b.total - a.total; });
 
     // По подразделениям
     var byUnit = {};
@@ -233,6 +243,7 @@ function analyzeAdminViolations(items) {
         uniqueArticles: articleList.length,
         uniqueAuthors: authorList.length,
         byAuthor: authorList,
+        byAuthorGrouped: authorsByUnitList,
         byUnit: unitList,
         byArticle: articleList,
         byRaion: raionList,

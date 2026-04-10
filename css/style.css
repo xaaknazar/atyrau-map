@@ -2589,6 +2589,36 @@ body {
     background: rgba(93, 173, 226, 0.2);
 }
 
+/* Grouped authors by unit */
+.av-author-group {
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+.av-author-group:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+}
+.av-author-group-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+    padding: 6px 10px;
+    background: rgba(255, 255, 255, 0.04);
+    border-radius: 6px;
+}
+.av-author-group-name {
+    font-size: 13px;
+    font-weight: 700;
+    color: #5dade2;
+}
+.av-author-group-total {
+    font-size: 13px;
+    font-weight: 700;
+    color: #8892b0;
+}
+
 /* Danger time cards */
 .an-insight-cards {
     display: grid;

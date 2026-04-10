@@ -928,6 +928,38 @@
         }
     }
 
+    function renderGroupedAuthorsChart(containerId, groups) {
+        var el = document.getElementById(containerId);
+        if (!el || groups.length === 0) { if (el) el.innerHTML = ""; return; }
+
+        // Find global max for consistent bar widths
+        var globalMax = 1;
+        groups.forEach(function (g) {
+            g.authors.forEach(function (a) { if (a.count > globalMax) globalMax = a.count; });
+        });
+
+        var html = "";
+        groups.forEach(function (g) {
+            html += '<div class="av-author-group">';
+            html += '<div class="av-author-group-header">' +
+                '<span class="av-author-group-name">' + g.label + '</span>' +
+                '<span class="av-author-group-total">' + g.total + '</span>' +
+                '</div>';
+            g.authors.forEach(function (a) {
+                var pct = Math.max(1, Math.round(a.count / globalMax * 100));
+                html += '<div class="an-bar-row">' +
+                    '<div class="an-bar-top">' +
+                        '<span class="an-bar-label">' + a.label + '</span>' +
+                        '<span class="an-bar-value">' + a.count + '</span>' +
+                    '</div>' +
+                    '<div class="an-bar-track"><div class="an-bar-fill blue" style="width:' + pct + '%"></div></div>' +
+                    '</div>';
+            });
+            html += '</div>';
+        });
+        el.innerHTML = html;
+    }
+
     function renderMonthsChart(byMonth) {
         var items = byMonth.labels.map(function (l, i) {
             return { label: l, count: byMonth.counts[i] };
@@ -1487,7 +1519,7 @@
                 _statCard(a.uniqueAuthors, "Инспекторов");
         }
 
-        renderExpandableChart("av-chart-authors", a.byAuthor, 15, "blue");
+        renderGroupedAuthorsChart("av-chart-authors", a.byAuthorGrouped);
         renderExpandableChart("av-chart-units", a.byUnit, 10, "teal");
         renderExpandableChart("av-chart-articles", a.byArticle, 15, "red");
         renderExpandableChart("av-chart-raions", a.byRaion, 10, "green");
