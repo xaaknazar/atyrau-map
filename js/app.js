@@ -1269,6 +1269,7 @@
         crimeIncidents.forEach(function (c) {
             if (typeof c.lat !== "number" || typeof c.lng !== "number") return;
             if (isNaN(c.lat) || isNaN(c.lng)) return;
+            if (extractArticleNumber(c.article) === "ст. 590") return;
 
             var marker = L.circleMarker([c.lat, c.lng], {
                 radius: 5,
@@ -1678,6 +1679,7 @@
         }) : crimeIncidents;
         crimeFiltered.forEach(function (c) {
             if (typeof c.lat !== "number" || isNaN(c.lat)) return;
+            if (extractArticleNumber(c.article) === "ст. 590") return;
             var marker = L.circleMarker([c.lat, c.lng], {
                 radius: 5,
                 color: "rgba(255,255,255,0.8)",
