@@ -932,22 +932,31 @@
         var el = document.getElementById(containerId);
         if (!el || groups.length === 0) { if (el) el.innerHTML = ""; return; }
 
-        // Find global max for consistent bar widths
         var globalMax = 1;
         groups.forEach(function (g) {
             g.authors.forEach(function (a) { if (a.count > globalMax) globalMax = a.count; });
         });
 
-        var html = "";
+        el.innerHTML = "";
         groups.forEach(function (g) {
-            html += '<div class="av-author-group">';
-            html += '<div class="av-author-group-header">' +
-                '<span class="av-author-group-name">' + g.label + '</span>' +
-                '<span class="av-author-group-total">' + g.total + '</span>' +
-                '</div>';
+            var group = document.createElement("div");
+            group.className = "av-author-group";
+
+            var header = document.createElement("div");
+            header.className = "av-author-group-header";
+            header.innerHTML =
+                '<span class="av-author-group-name">' +
+                    '<svg class="av-group-arrow" width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>' +
+                    g.label +
+                '</span>' +
+                '<span class="av-author-group-total">' + g.total + '</span>';
+
+            var body = document.createElement("div");
+            body.className = "av-author-group-body";
+            body.style.display = "none";
             g.authors.forEach(function (a) {
                 var pct = Math.max(1, Math.round(a.count / globalMax * 100));
-                html += '<div class="an-bar-row">' +
+                body.innerHTML += '<div class="an-bar-row">' +
                     '<div class="an-bar-top">' +
                         '<span class="an-bar-label">' + a.label + '</span>' +
                         '<span class="an-bar-value">' + a.count + '</span>' +
@@ -955,9 +964,17 @@
                     '<div class="an-bar-track"><div class="an-bar-fill blue" style="width:' + pct + '%"></div></div>' +
                     '</div>';
             });
-            html += '</div>';
+
+            header.addEventListener("click", function () {
+                var open = body.style.display !== "none";
+                body.style.display = open ? "none" : "";
+                group.classList.toggle("open", !open);
+            });
+
+            group.appendChild(header);
+            group.appendChild(body);
+            el.appendChild(group);
         });
-        el.innerHTML = html;
     }
 
     function renderMonthsChart(byMonth) {
