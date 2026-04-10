@@ -57,6 +57,9 @@
 
     // ── Map init ────────────────────────────────────────────
     // Atyrau center + ~50 km bounding box
+    // Статьи, скрытые с карты (но остаются в списке и аналитике)
+    var HIDDEN_MAP_ARTICLES = {"ст. 590":1,"ст. 593":1,"ст. 230":1,"ст. 610":1,"ст. 615":1,"ст. 591":1,"ст. 601":1,"ст. 437":1,"ст. 597":1};
+
     var ATYRAU_CENTER = [47.1067, 51.9203];
     var ATYRAU_BOUNDS = L.latLngBounds(
         [46.65, 51.30],   // юго-запад (~50 км)
@@ -1269,7 +1272,7 @@
         crimeIncidents.forEach(function (c) {
             if (typeof c.lat !== "number" || typeof c.lng !== "number") return;
             if (isNaN(c.lat) || isNaN(c.lng)) return;
-            if (extractArticleNumber(c.article) === "ст. 590") return;
+            if (HIDDEN_MAP_ARTICLES[extractArticleNumber(c.article)]) return;
 
             var marker = L.circleMarker([c.lat, c.lng], {
                 radius: 5,
@@ -1679,7 +1682,7 @@
         }) : crimeIncidents;
         crimeFiltered.forEach(function (c) {
             if (typeof c.lat !== "number" || isNaN(c.lat)) return;
-            if (extractArticleNumber(c.article) === "ст. 590") return;
+            if (HIDDEN_MAP_ARTICLES[extractArticleNumber(c.article)]) return;
             var marker = L.circleMarker([c.lat, c.lng], {
                 radius: 5,
                 color: "rgba(255,255,255,0.8)",
