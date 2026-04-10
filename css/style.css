@@ -641,14 +641,14 @@ body {
 
 /* Камеры на карте */
 .camera-marker-icon {
-    width: 20px;
-    height: 20px;
+    width: 24px;
+    height: 24px;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgba(46, 204, 113, 0.9);
-    border-radius: 50%;
-    border: 2px solid rgba(255, 255, 255, 0.7);
+    background: rgba(46, 204, 113, 0.85);
+    border-radius: 6px;
+    border: 1.5px solid rgba(255, 255, 255, 0.7);
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
     cursor: pointer;
     transition: transform 0.2s;
@@ -657,9 +657,8 @@ body {
     transform: scale(1.3);
 }
 .camera-marker-icon svg {
-    width: 12px;
-    height: 12px;
-    fill: #fff;
+    width: 18px;
+    height: 18px;
 }
 
 /* Участковые пункты на карте */

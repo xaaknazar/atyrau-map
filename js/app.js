@@ -1150,9 +1150,14 @@
     );
 
     // ── Камеры на карте ────────────────────────────────────
-    // Уличная камера видеонаблюдения (CCTV)
-    var CAMERA_ICON_SVG = '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">' +
-        '<path d="M12 2a4 4 0 0 0-4 4v1H5a1 1 0 0 0-1 1v4a1 1 0 0 0 1 1h1v6a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-6h1a1 1 0 0 0 1-1V8a1 1 0 0 0-1-1h-3V6a4 4 0 0 0-4-4zm0 2a2 2 0 0 1 2 2v1h-4V6a2 2 0 0 1 2-2zm-2 8a1 1 0 1 1 0 2 1 1 0 0 1 0-2zm4 0a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/>' +
+    // Уличная камера видеонаблюдения (CCTV на кронштейне)
+    var CAMERA_ICON_SVG = '<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" fill="white">' +
+        '<rect x="2" y="14" width="4" height="16" rx="1"/>' +
+        '<rect x="4" y="6" width="3" height="10" rx="1"/>' +
+        '<rect x="7" y="4" width="16" height="12" rx="2"/>' +
+        '<polygon points="23,6 29,3 29,17 23,14"/>' +
+        '<circle cx="15" cy="10" r="3.5" fill="rgba(46,204,113,0.9)"/>' +
+        '<circle cx="15" cy="10" r="1.8" fill="white"/>' +
         '</svg>';
 
     var cameraLayer = L.layerGroup();
@@ -1165,8 +1170,8 @@
                 icon: L.divIcon({
                     className: "camera-marker",
                     html: '<div class="camera-marker-icon">' + CAMERA_ICON_SVG + '</div>',
-                    iconSize: [20, 20],
-                    iconAnchor: [10, 10]
+                    iconSize: [24, 24],
+                    iconAnchor: [12, 12]
                 })
             });
 
