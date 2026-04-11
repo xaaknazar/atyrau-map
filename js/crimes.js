@@ -602,7 +602,8 @@ function getPeriodCutoff(period) {
     var now = new Date();
     switch (period) {
         case "day":
-            return new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            // Вчерашний день (если сегодня 11-е, показываем данные за 10-е)
+            return new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1);
         case "week":
             // Понедельник текущей недели
             var day = now.getDay(); // 0=Sun..6=Sat

@@ -582,7 +582,8 @@
         if (period === "all") return "";
         var now = new Date();
         if (period === "day") {
-            return _fmtDate(now);
+            var yesterday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1);
+            return _fmtDate(yesterday);
         }
         if (period === "week") {
             var day = now.getDay();
