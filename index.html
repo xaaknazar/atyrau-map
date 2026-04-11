@@ -150,7 +150,7 @@
 
         <!-- Staff login button (only for guests) -->
         <div class="staff-login-section guest-only">
-            <button id="staff-login-btn">Вход для Сотрудников органа Прокуратуры</button>
+            <button id="staff-login-btn" data-i18n="staff_login_btn">Вход для Сотрудников органа Прокуратуры</button>
         </div>
 
         <!-- Admin toggle (only for staff) -->
@@ -160,7 +160,7 @@
 
         <!-- Staff logout (only for staff) -->
         <div class="staff-logout-section staff-only">
-            <button id="staff-logout-btn">Выйти из режима сотрудника</button>
+            <button id="staff-logout-btn" data-i18n="staff_logout_btn">Выйти из режима сотрудника</button>
         </div>
 
         <div class="sidebar-footer">
@@ -798,13 +798,13 @@
         <div id="staff-login-modal">
             <button id="staff-login-close" aria-label="Закрыть">&times;</button>
             <img src="images/placeholders/logos.jpeg" alt="Логотип прокуратуры" class="auth-logo" />
-            <h2>Вход для сотрудников</h2>
-            <p>Цифровая карта прокуратуры г. Атырау</p>
+            <h2 data-i18n="staff_login_title">Вход для сотрудников</h2>
+            <p data-i18n="staff_login_desc">Цифровая карта прокуратуры г. Атырау</p>
             <div class="login-form">
-                <label>Пароль:</label>
+                <label data-i18n="staff_login_password">Пароль:</label>
                 <input type="password" id="staff-password" placeholder="Введите пароль" autocomplete="off" />
-                <button id="staff-login-submit">Войти</button>
-                <p id="staff-login-error" class="hidden" style="color:#e74c3c;font-size:14px;margin-top:10px;">Неверный пароль</p>
+                <button id="staff-login-submit" data-i18n="staff_login_submit">Войти</button>
+                <p id="staff-login-error" class="hidden" data-i18n="staff_login_error" style="color:#e74c3c;font-size:14px;margin-top:10px;">Неверный пароль</p>
             </div>
         </div>
     </div>

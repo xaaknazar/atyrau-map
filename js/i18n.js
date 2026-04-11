@@ -42,6 +42,15 @@ var I18N = {
         // Admin
         admin_login: "Вход для админа",
         admin_login_title: "Вход администратора",
+
+        // Staff
+        staff_login_btn: "Вход для Сотрудников органа Прокуратуры",
+        staff_login_title: "Вход для сотрудников",
+        staff_login_desc: "Цифровая карта прокуратуры г. Атырау",
+        staff_login_password: "Пароль:",
+        staff_login_submit: "Войти",
+        staff_login_error: "Неверный пароль",
+        staff_logout_btn: "Выйти из режима сотрудника",
         admin_password_label: "Пароль:",
         admin_login_btn: "Войти",
         admin_wrong_password: "Неверный пароль",
@@ -164,6 +173,15 @@ var I18N = {
         // Admin
         admin_login: "Әкімші кіру",
         admin_login_title: "Әкімші кіру",
+
+        // Staff
+        staff_login_btn: "Прокуратура органы қызметкерлеріне кіру",
+        staff_login_title: "Қызметкерлерге кіру",
+        staff_login_desc: "Атырау қаласы прокуратурасының цифрлік картасы",
+        staff_login_password: "Құпия сөз:",
+        staff_login_submit: "Кіру",
+        staff_login_error: "Құпия сөз қате",
+        staff_logout_btn: "Қызметкер режимінен шығу",
         admin_password_label: "Құпия сөз:",
         admin_login_btn: "Кіру",
         admin_wrong_password: "Құпия сөз қате",
