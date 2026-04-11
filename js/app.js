@@ -40,6 +40,7 @@
 
     // ── Config ──────────────────────────────────────────────
     var ADMIN_PASSWORD = "prokuratura2025";
+    var STAFF_PASSWORD = "1345";
 
     var CATEGORIES = {
         "crime":       { color: "#e74c3c", badgeKey: "badge_crime" },
@@ -49,6 +50,7 @@
     };
 
     var isAdmin = false;
+    var isStaff = false;
 
     // ── Helper: localized field ─────────────────────────────
     function loc(point, field) {
@@ -217,7 +219,7 @@
                 var cb = document.querySelector('[data-filter="' + cat + '"]');
                 if (cb && cb.checked) {
                     if (cat === "crime") {
-                        map.addLayer(crimeErdrLayer);
+                        if (isStaff) map.addLayer(crimeErdrLayer);
                     } else {
                         map.addLayer(layers[cat]);
                     }
@@ -225,7 +227,7 @@
             });
             // Restore cameras, police, AV
             var avCb = document.querySelector('[data-filter="admin-violations"]');
-            if (avCb && avCb.checked) map.addLayer(avLayer);
+            if (avCb && avCb.checked && isStaff) map.addLayer(avLayer);
             var camCb = document.querySelector('[data-filter="cameras"]');
             if (camCb && camCb.checked) map.addLayer(cameraLayer);
             var polCb = document.querySelector('[data-filter="police"]');
@@ -1270,7 +1272,7 @@
             });
         }
     });
-    map.addLayer(crimeErdrLayer);
+    if (isStaff) map.addLayer(crimeErdrLayer);
 
     function buildCrimeMarkers() {
         crimeErdrLayer.clearLayers();
@@ -1641,7 +1643,7 @@
 
     // ── Административные правонарушения на карте ───────────
     var avLayer = L.layerGroup();
-    map.addLayer(avLayer);
+    if (isStaff) map.addLayer(avLayer);
 
     function _createAVCircle(v) {
         var marker = L.circleMarker([v.lat, v.lng], {
@@ -2068,6 +2070,69 @@
 
     window.addEventListener("resize", function () {
         setTimeout(function () { map.invalidateSize(); }, 100);
+    });
+
+    // ═══════════════════════════════════════════════════════
+    //  STAFF / GUEST MODE
+    // ═══════════════════════════════════════════════════════
+    function applyMode() {
+        var staffEls = document.querySelectorAll(".staff-only");
+        var guestEls = document.querySelectorAll(".guest-only");
+        staffEls.forEach(function (el) {
+            el.style.display = isStaff ? "" : "none";
+        });
+        guestEls.forEach(function (el) {
+            el.style.display = isStaff ? "none" : "";
+        });
+
+        if (isStaff) {
+            map.addLayer(crimeErdrLayer);
+            map.addLayer(avLayer);
+        } else {
+            map.removeLayer(crimeErdrLayer);
+            map.removeLayer(avLayer);
+        }
+    }
+
+    // Apply guest mode on load
+    applyMode();
+
+    // Staff login modal
+    var staffLoginOverlay = document.getElementById("staff-login-overlay");
+
+    document.getElementById("staff-login-btn").addEventListener("click", function () {
+        document.getElementById("staff-password").value = "";
+        document.getElementById("staff-login-error").classList.add("hidden");
+        staffLoginOverlay.classList.remove("hidden");
+    });
+
+    document.getElementById("staff-login-close").addEventListener("click", function () {
+        staffLoginOverlay.classList.add("hidden");
+    });
+    staffLoginOverlay.addEventListener("click", function (e) {
+        if (e.target === staffLoginOverlay) staffLoginOverlay.classList.add("hidden");
+    });
+
+    function tryStaffLogin() {
+        var pwd = document.getElementById("staff-password").value;
+        if (pwd === STAFF_PASSWORD) {
+            isStaff = true;
+            staffLoginOverlay.classList.add("hidden");
+            applyMode();
+        } else {
+            document.getElementById("staff-login-error").classList.remove("hidden");
+        }
+    }
+
+    document.getElementById("staff-login-submit").addEventListener("click", tryStaffLogin);
+    document.getElementById("staff-password").addEventListener("keydown", function (e) {
+        if (e.key === "Enter") tryStaffLogin();
+    });
+
+    document.getElementById("staff-logout-btn").addEventListener("click", function () {
+        isStaff = false;
+        if (isAdmin) exitAdmin();
+        applyMode();
     });
 
     // ═══════════════════════════════════════════════════════
