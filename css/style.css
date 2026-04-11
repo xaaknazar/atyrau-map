@@ -715,6 +715,23 @@ body {
     height: 18px;
 }
 
+/* Школы на карте */
+.school-marker-icon {
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #fff;
+    border-radius: 50%;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+    cursor: pointer;
+}
+.school-marker-icon svg {
+    width: 16px;
+    height: 16px;
+}
+
 /* Участковые пункты на карте */
 .police-marker-icon {
     width: 30px;

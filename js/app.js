@@ -232,6 +232,8 @@
             if (camCb && camCb.checked) map.addLayer(cameraLayer);
             var polCb = document.querySelector('[data-filter="police"]');
             if (polCb && polCb.checked) map.addLayer(policeLayer);
+            var schCb = document.querySelector('[data-filter="schools"]');
+            if (schCb && schCb.checked) map.addLayer(schoolLayer);
             heatmapActive = false;
             btn.classList.remove("active");
         } else {
@@ -243,6 +245,7 @@
             map.removeLayer(avLayer);
             map.removeLayer(cameraLayer);
             map.removeLayer(policeLayer);
+            map.removeLayer(schoolLayer);
             addHeatLayers();
             heatmapActive = true;
             btn.classList.add("active");
@@ -374,7 +377,8 @@
         document.getElementById("count-av").textContent = avOnMap;
         document.getElementById("count-cameras").textContent = cameraPoints.length;
         document.getElementById("count-police").textContent = policePoints.length;
-        document.getElementById("count-total").textContent = crimeOnMap + avOnMap + counts["blind-spots"] + counts["abandoned"] + counts["unlit"] + cameraPoints.length + policePoints.length;
+        document.getElementById("count-schools").textContent = schoolPoints.length;
+        document.getElementById("count-total").textContent = crimeOnMap + avOnMap + counts["blind-spots"] + counts["abandoned"] + counts["unlit"] + cameraPoints.length + policePoints.length + schoolPoints.length;
     }
 
     // ── Filter checkboxes ───────────────────────────────────
@@ -394,6 +398,9 @@
             } else if (cat === "police") {
                 if (this.checked) map.addLayer(policeLayer);
                 else map.removeLayer(policeLayer);
+            } else if (cat === "schools") {
+                if (this.checked) map.addLayer(schoolLayer);
+                else map.removeLayer(schoolLayer);
             } else {
                 if (this.checked) map.addLayer(layers[cat]);
                 else map.removeLayer(layers[cat]);
@@ -1642,6 +1649,54 @@
         updateStats();
     });
 
+    // ── Школы на карте ─────────────────────────────────────
+    var SCHOOL_ICON_SVG = '<svg viewBox="0 0 24 24" width="16" height="16" fill="#ff6b9d"><path d="M12 3L1 9l4 2.18v6L12 21l7-3.82v-6l2-1.09V17h2V9L12 3zm6.82 6L12 12.72 5.18 9 12 5.28 18.82 9zM17 15.99l-5 2.73-5-2.73v-3.72L12 15l5-2.73v3.72z"/></svg>';
+    var schoolLayer = L.layerGroup();
+    map.addLayer(schoolLayer);
+
+    function buildSchoolMarkers() {
+        schoolLayer.clearLayers();
+        schoolPoints.forEach(function (s) {
+            var marker = L.marker([s.lat, s.lng], {
+                icon: L.divIcon({
+                    className: "school-marker",
+                    html: '<div class="school-marker-icon">' + SCHOOL_ICON_SVG + '</div>',
+                    iconSize: [24, 24],
+                    iconAnchor: [12, 12]
+                })
+            });
+
+            marker.bindTooltip(s.name + (s.address ? " — " + s.address : ""), {
+                direction: "top", offset: [0, -10], className: "marker-tooltip"
+            });
+
+            // Popup: гостевой — только название и адрес; сотрудник — полная информация
+            var popupContent;
+            if (isStaff) {
+                var phones = s.schoolPhones.length ? s.schoolPhones.join(", ") : "—";
+                popupContent =
+                    '<strong>' + s.name + '</strong><br>' +
+                    (s.address ? '<span style="color:#8899b0">📍 ' + s.address + '</span><br>' : '') +
+                    '<br><b>Директор:</b> ' + (s.director || "—") + '<br>' +
+                    '<b>Тел. школы:</b> ' + phones + '<br>' +
+                    '<b>Тел. директора:</b> ' + (s.directorPhone || "—");
+            } else {
+                popupContent =
+                    '<strong>' + s.name + '</strong><br>' +
+                    (s.address ? s.address : '');
+            }
+            marker.bindPopup(popupContent);
+
+            schoolLayer.addLayer(marker);
+        });
+        console.log("[map] Школ на карте: " + schoolPoints.length);
+    }
+
+    loadSchools(function () {
+        buildSchoolMarkers();
+        updateStats();
+    });
+
     // ── Административные правонарушения на карте ───────────
     var avLayer = L.layerGroup();
     if (isStaff) map.addLayer(avLayer);
@@ -2093,6 +2148,9 @@
             map.removeLayer(crimeErdrLayer);
             map.removeLayer(avLayer);
         }
+
+        // Перестроить попапы школ (разный контент для гостя/сотрудника)
+        if (schoolPoints.length > 0) buildSchoolMarkers();
     }
 
     // Apply guest mode on load

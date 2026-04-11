@@ -79,6 +79,11 @@
                 <span class="legend-dot" style="background: #1abc9c;"></span>
                 <span>Участковые пункты</span>
             </label>
+            <label class="legend-item">
+                <input type="checkbox" checked data-filter="schools" />
+                <span class="legend-dot" style="background: #ff6b9d;"></span>
+                <span>Школы</span>
+            </label>
         </div>
 
         <!-- Период для карты -->
@@ -132,6 +137,10 @@
             <div class="stat-row">
                 <span class="stat-label">Участковые пункты:</span>
                 <span class="stat-value" id="count-police">0</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">Школы:</span>
+                <span class="stat-value" id="count-schools">0</span>
             </div>
             <div class="stat-row total staff-only">
                 <span class="stat-label" data-i18n="stat_total">Всего точек:</span>
@@ -902,6 +911,7 @@
     <script src="js/cameras.js?v=2"></script>
     <script src="js/police.js?v=2"></script>
     <script src="js/admin-violations.js?v=2"></script>
+    <script src="js/schools.js?v=1"></script>
     <script src="js/analytics.js?v=2"></script>
     <script src="js/data.js?v=2"></script>
     <script src="js/app.js?v=3"></script>
