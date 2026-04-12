@@ -1111,61 +1111,154 @@
         });
     }
 
+    var zonesActive = false;
+
+    function _zoneColorByCount(count, maxCount) {
+        var ratio = count / maxCount;
+        if (ratio >= 0.8) return "#8e0000";   // очень высокая
+        if (ratio >= 0.6) return "#e74c3c";   // критическая
+        if (ratio >= 0.4) return "#e67e22";   // высокая
+        if (ratio >= 0.2) return "#f39c12";   // средняя
+        return "#27ae60";                       // низкая
+    }
+
+    function _zoneLabelText(count, maxCount) {
+        var ratio = count / maxCount;
+        if (ratio >= 0.8) return "очень высокая";
+        if (ratio >= 0.6) return "критическая";
+        if (ratio >= 0.4) return "высокая";
+        if (ratio >= 0.2) return "средняя";
+        return "низкая";
+    }
+
     function showZonesOnMap() {
         clearZonesFromMap();
         if (crimeIncidents.length === 0) return;
-        var zones = findProblemZones(crimeIncidents).filter(function (z) { return z.count <= 30; });
+
+        // Фильтруем преступления: только с координатами и не скрытые статьи
+        var validCrimes = crimeIncidents.filter(function (c) {
+            if (typeof c.lat !== "number" || typeof c.lng !== "number") return false;
+            if (isNaN(c.lat) || isNaN(c.lng)) return false;
+            if (_isHiddenArticle(c.article)) return false;
+            return true;
+        });
+        if (validCrimes.length === 0) return;
+
+        // Кластеризация: крупная сетка для более крупных "очагов"
+        var zones = findProblemZones(validCrimes, 0.008).filter(function (z) { return z.count >= 2; });
         if (zones.length === 0) return;
 
         var maxCount = zones[0].count || 1;
 
-        zones.slice(0, 20).forEach(function (z) {
-            var radius = Math.max(150, Math.min(600, z.count / maxCount * 600));
-            var color = z.dangerLevel >= 4 ? "#e74c3c" : z.dangerLevel >= 3 ? "#e67e22" : z.dangerLevel >= 2 ? "#f39c12" : "#27ae60";
-            var opacity = 0.15 + (z.count / maxCount * 0.25);
+        zones.slice(0, 25).forEach(function (z) {
+            // Радиус пропорционален количеству (250м-900м)
+            var radius = Math.max(250, Math.min(900, 250 + (z.count / maxCount) * 650));
+            var color = _zoneColorByCount(z.count, maxCount);
+            var levelText = _zoneLabelText(z.count, maxCount);
 
             var circle = L.circle([z.lat, z.lng], {
                 radius: radius,
                 color: color,
-                weight: 2,
+                weight: 2.5,
                 fillColor: color,
-                fillOpacity: opacity
+                fillOpacity: 0.22,
+                className: "zone-problem-circle"
             }).addTo(map);
 
+            // Центральный маркер с числом и уровнем
             var label = L.marker([z.lat, z.lng], {
                 icon: L.divIcon({
                     className: "zone-circle-label",
-                    html: z.count,
-                    iconSize: [32, 32],
-                    iconAnchor: [16, 16]
-                })
+                    html: '<div class="zone-label-inner" style="border-color:' + color + ';color:' + color + '">' +
+                          '<div class="zone-label-count">' + z.count + '</div>' +
+                          '<div class="zone-label-unit">случаев</div>' +
+                          '</div>',
+                    iconSize: [64, 64],
+                    iconAnchor: [32, 32]
+                }),
+                interactive: false
             }).addTo(map);
 
-            var peakTime = z.peakHour !== undefined ? ("0" + z.peakHour).slice(-2) + ":00" : "—";
-            var topArts = Object.keys(z.articles).sort(function (a, b) { return z.articles[b] - z.articles[a]; }).slice(0, 3).join(", ");
+            // Топ статьи
+            var sortedArts = Object.keys(z.articles).sort(function (a, b) {
+                return z.articles[b] - z.articles[a];
+            }).slice(0, 3);
+            var topArtsHtml = sortedArts.map(function (a) {
+                return '<li><b>' + a + '</b> — ' + z.articles[a] + '</li>';
+            }).join("");
 
-            circle.bindPopup(
-                '<strong>' + z.count + ' правонарушений</strong><br>' +
-                'Основные статьи: ' + topArts + '<br>' +
-                'Пик: ' + peakTime + '<br>' +
-                'В общ. местах: ' + z.publicCount,
-                { maxWidth: 250 }
-            );
+            // Топ улицы
+            var streetMap = {};
+            z.crimes.forEach(function (c) {
+                if (c.street) streetMap[c.street] = (streetMap[c.street] || 0) + 1;
+            });
+            var topStreets = Object.keys(streetMap).sort(function (a, b) {
+                return streetMap[b] - streetMap[a];
+            }).slice(0, 3);
+            var topStreetsHtml = topStreets.length
+                ? topStreets.map(function (s) { return '<li>ул. ' + s + ' (' + streetMap[s] + ')</li>'; }).join("")
+                : '<li style="color:#8899b0">нет данных</li>';
+
+            var peakTime = z.peakHour !== undefined ? ("0" + z.peakHour).slice(-2) + ":00" : "—";
+            var publicPct = Math.round((z.publicCount / z.count) * 100);
+
+            var popupHtml =
+                '<div class="zone-popup">' +
+                    '<div class="zone-popup-header" style="background:' + color + '">' +
+                        '<div class="zone-popup-count">' + z.count + '</div>' +
+                        '<div class="zone-popup-level">уровень: ' + levelText + '</div>' +
+                    '</div>' +
+                    '<div class="zone-popup-body">' +
+                        '<div class="zone-popup-section">' +
+                            '<div class="zone-popup-title">Основные статьи</div>' +
+                            '<ul class="zone-popup-list">' + topArtsHtml + '</ul>' +
+                        '</div>' +
+                        '<div class="zone-popup-section">' +
+                            '<div class="zone-popup-title">Топ улиц</div>' +
+                            '<ul class="zone-popup-list">' + topStreetsHtml + '</ul>' +
+                        '</div>' +
+                        '<div class="zone-popup-stats">' +
+                            '<div class="zone-popup-stat"><span>⏰</span> Пик: <b>' + peakTime + '</b></div>' +
+                            '<div class="zone-popup-stat"><span>🏛️</span> В общ. местах: <b>' + publicPct + '%</b> (' + z.publicCount + ')</div>' +
+                            '<div class="zone-popup-stat"><span>📍</span> Радиус: <b>~' + Math.round(radius) + 'м</b></div>' +
+                        '</div>' +
+                    '</div>' +
+                '</div>';
+
+            circle.bindPopup(popupHtml, { maxWidth: 300, className: "zone-popup-wrapper" });
 
             zoneCircles.push(circle);
             zoneCircles.push(label);
         });
 
-        // Zoom to fit zones
-        if (zoneCircles.length > 0) {
-            var group = L.featureGroup(zoneCircles);
-            map.fitBounds(group.getBounds().pad(0.1));
-        }
+        // Показать легенду
+        document.getElementById("zones-legend").classList.remove("hidden");
+        document.getElementById("zones-toggle").classList.add("active");
+        zonesActive = true;
     }
 
     function clearZonesFromMap() {
         zoneCircles.forEach(function (c) { map.removeLayer(c); });
         zoneCircles = [];
+        document.getElementById("zones-legend").classList.add("hidden");
+        var btn = document.getElementById("zones-toggle");
+        if (btn) btn.classList.remove("active");
+        zonesActive = false;
+    }
+
+    function toggleZonesOnMap() {
+        if (zonesActive) clearZonesFromMap();
+        else showZonesOnMap();
+    }
+
+    // Кнопка на панели карты
+    var zonesToggleBtn = document.getElementById("zones-toggle");
+    if (zonesToggleBtn) {
+        zonesToggleBtn.addEventListener("click", toggleZonesOnMap);
+    }
+    var zonesLegendClose = document.getElementById("zones-legend-close");
+    if (zonesLegendClose) {
+        zonesLegendClose.addEventListener("click", clearZonesFromMap);
     }
 
     // AI Analysis

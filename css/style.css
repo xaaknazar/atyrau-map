@@ -2933,13 +2933,190 @@ body {
 
 /* Problem zone circles on map */
 .zone-circle-label {
-    background: rgba(231, 76, 60, 0.85);
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    pointer-events: none;
+}
+.zone-label-inner {
+    width: 64px;
+    height: 64px;
     border-radius: 50%;
-    color: #fff;
+    background: rgba(255, 255, 255, 0.96);
+    border: 3px solid #e74c3c;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.35), 0 0 0 4px rgba(255,255,255,0.3);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+.zone-label-count {
+    font-size: 20px;
     font-weight: 800;
+    line-height: 1;
+    letter-spacing: -0.5px;
+}
+.zone-label-unit {
+    font-size: 9px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    opacity: 0.85;
+    margin-top: 2px;
+}
+
+/* Zone popup styling */
+.zone-popup-wrapper .leaflet-popup-content-wrapper {
+    padding: 0;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+}
+.zone-popup-wrapper .leaflet-popup-content {
+    margin: 0;
+    width: 280px !important;
+}
+.zone-popup { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+.zone-popup-header {
+    padding: 14px 16px;
+    color: #fff;
     text-align: center;
-    border: 2px solid #fff;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+}
+.zone-popup-count {
+    font-size: 32px;
+    font-weight: 800;
+    line-height: 1;
+    text-shadow: 0 2px 6px rgba(0,0,0,0.2);
+}
+.zone-popup-level {
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    opacity: 0.95;
+    margin-top: 4px;
+}
+.zone-popup-body {
+    padding: 14px 16px;
+    background: #fff;
+    color: #1e2a47;
+}
+.zone-popup-section { margin-bottom: 12px; }
+.zone-popup-title {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #5a6a8a;
+    margin-bottom: 6px;
+}
+.zone-popup-list {
+    margin: 0;
+    padding-left: 18px;
+    font-size: 13px;
+    line-height: 1.5;
+    color: #2c3e50;
+}
+.zone-popup-list li { margin-bottom: 2px; }
+.zone-popup-stats {
+    border-top: 1px solid #e4e8f0;
+    padding-top: 10px;
+    margin-top: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.zone-popup-stat {
+    font-size: 13px;
+    color: #2c3e50;
+}
+.zone-popup-stat span { margin-right: 4px; }
+
+/* Zones legend */
+#zones-legend {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    background: rgba(30, 42, 71, 0.96);
+    backdrop-filter: blur(8px);
+    color: #fff;
+    border-radius: 12px;
+    padding: 12px 14px;
+    z-index: 900;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.35);
+    width: 240px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    animation: slideUp 0.25s ease;
+}
+.zones-legend-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+}
+.zones-legend-title {
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+#zones-legend-close {
+    background: rgba(255,255,255,0.1);
+    border: none;
+    color: #fff;
+    width: 24px;
+    height: 24px;
+    border-radius: 6px;
+    font-size: 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+}
+#zones-legend-close:hover { background: rgba(255,255,255,0.2); }
+.zones-legend-scale {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4px 8px;
+    margin-bottom: 8px;
+}
+.zones-legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+}
+.zones-dot {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 1.5px solid rgba(255,255,255,0.6);
+}
+.zones-legend-hint {
+    font-size: 11px;
+    color: #a0aac0;
+    line-height: 1.4;
+    padding-top: 6px;
+    border-top: 1px solid rgba(255,255,255,0.08);
+}
+
+/* Zones toggle button active state */
+#zones-toggle.active {
+    background: #e74c3c !important;
+    color: #fff !important;
+    border-color: #e74c3c !important;
+}
+
+@media (max-width: 768px) {
+    #zones-legend {
+        bottom: 12px;
+        right: 12px;
+        left: 12px;
+        width: auto;
+    }
 }
 
 @media (max-width: 900px) {
