@@ -44,6 +44,9 @@ var I18N = {
         admin_login_title: "Вход администратора",
 
         // Staff
+        login_back: "← Вернуться на карту (гостевой режим)",
+        akimat_page_title: "Заявки жителей — Акимат г. Атырау",
+        akimat_back_to_map: "← На карту",
         staff_login_btn: "Вход для Сотрудников органа Прокуратуры",
         staff_login_title: "Вход для сотрудников",
         staff_login_desc: "Цифровая карта прокуратуры г. Атырау",
@@ -236,6 +239,9 @@ var I18N = {
         admin_login_title: "Әкімші кіру",
 
         // Staff
+        login_back: "← Картаға оралу (қонақ режимі)",
+        akimat_page_title: "Тұрғындардың өтінімдері — Атырау қ. Әкімдігі",
+        akimat_back_to_map: "← Картаға",
         staff_login_btn: "Прокуратура органы қызметкерлеріне кіру",
         staff_login_title: "Қызметкерлерге кіру",
         staff_login_desc: "Атырау қаласы прокуратурасының цифрлік картасы",

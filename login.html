@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+    <title>Вход — Карта прокуратуры г. Атырау</title>
+    <link rel="stylesheet" href="css/style.css?v=5" />
+    <link rel="manifest" href="manifest.json" />
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            background: linear-gradient(135deg, #0f1624 0%, #1a202e 100%);
+            color: #e0e6f0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+        .login-page {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            box-sizing: border-box;
+        }
+        .login-page-header {
+            text-align: center;
+            margin-bottom: 28px;
+        }
+        .login-page-header h1 {
+            margin: 8px 0 4px;
+            font-size: 22px;
+            color: #e0e6f0;
+        }
+        .login-page-header p {
+            margin: 0;
+            color: #8892b0;
+            font-size: 14px;
+        }
+        .login-page-header img {
+            width: 72px;
+            height: 72px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+        .login-lang {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            display: flex;
+            gap: 4px;
+        }
+        .login-lang button {
+            padding: 6px 12px;
+            background: rgba(255,255,255,0.05);
+            color: #8892b0;
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .login-lang button.active {
+            background: #3498db;
+            color: #fff;
+            border-color: #3498db;
+        }
+        .login-cards {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 18px;
+            max-width: 760px;
+            width: 100%;
+        }
+        @media (max-width: 640px) {
+            .login-cards { grid-template-columns: 1fr; }
+        }
+        .login-card {
+            background: #1a202e;
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 12px;
+            padding: 24px 22px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .login-card-icon {
+            font-size: 48px;
+            line-height: 1;
+            margin-bottom: 4px;
+        }
+        .login-card h2 {
+            margin: 0;
+            font-size: 16px;
+            color: #e0e6f0;
+        }
+        .login-card p {
+            margin: 0;
+            color: #8892b0;
+            font-size: 13px;
+            min-height: 36px;
+        }
+        .login-card input[type="password"] {
+            width: 100%;
+            padding: 11px 14px;
+            background: #0f1624;
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 8px;
+            color: #fff;
+            font-size: 14px;
+            box-sizing: border-box;
+            text-align: center;
+            letter-spacing: 2px;
+        }
+        .login-card input[type="password"]:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+        .login-card button.login-submit {
+            padding: 12px;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .login-card.staff button.login-submit {
+            background: linear-gradient(135deg, #1abc9c, #16a085);
+        }
+        .login-card.staff button.login-submit:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 14px rgba(26,188,156,0.35);
+        }
+        .login-card.akimat button.login-submit {
+            background: linear-gradient(135deg, #f39c12, #e67e22);
+        }
+        .login-card.akimat button.login-submit:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 14px rgba(243,156,18,0.35);
+        }
+        .login-card .login-error {
+            color: #e74c3c;
+            font-size: 13px;
+            min-height: 18px;
+        }
+        .login-back {
+            margin-top: 24px;
+            color: #8892b0;
+            text-decoration: none;
+            font-size: 13px;
+        }
+        .login-back:hover { color: #e0e6f0; }
+    </style>
+</head>
+<body>
+    <div class="login-lang">
+        <button class="lang-btn" data-lang="ru">RU</button>
+        <button class="lang-btn" data-lang="kz">KZ</button>
+    </div>
+    <div class="login-page">
+        <div class="login-page-header">
+            <img src="images/placeholders/logos.jpeg" alt="Логотип" />
+            <h1 data-i18n="title">Цифровая карта прокуратуры города Атырау</h1>
+            <p data-i18n="subtitle">Мониторинг безопасности городской среды</p>
+        </div>
+
+        <div class="login-cards">
+            <!-- Staff (Prosecutor) login -->
+            <div class="login-card staff">
+                <div class="login-card-icon">⚖️</div>
+                <h2 data-i18n="staff_login_title">Вход для сотрудников</h2>
+                <p data-i18n="staff_login_desc">Цифровая карта прокуратуры г. Атырау</p>
+                <input type="password" id="staff-pwd" placeholder="••••" autocomplete="off" />
+                <button class="login-submit" id="staff-submit" data-i18n="staff_login_submit">Войти</button>
+                <div class="login-error" id="staff-err"></div>
+            </div>
+
+            <!-- Akimat login -->
+            <div class="login-card akimat">
+                <div class="login-card-icon">🏛️</div>
+                <h2 data-i18n="akimat_login_title">Вход для Акимата</h2>
+                <p data-i18n="akimat_login_desc">Обработка заявок жителей г. Атырау</p>
+                <input type="password" id="akimat-pwd" placeholder="••••" autocomplete="off" />
+                <button class="login-submit" id="akimat-submit" data-i18n="akimat_login_submit">Войти</button>
+                <div class="login-error" id="akimat-err"></div>
+            </div>
+        </div>
+
+        <a href="/" class="login-back" data-i18n="login_back">← Вернуться на карту (гостевой режим)</a>
+    </div>
+
+    <script src="js/i18n.js?v=2"></script>
+    <script>
+        // Language init
+        (function () {
+            var saved = localStorage.getItem("atyrau-map-lang") || "ru";
+            setLanguage(saved);
+        })();
+        document.querySelectorAll(".lang-btn").forEach(function (btn) {
+            btn.addEventListener("click", function () {
+                setLanguage(this.getAttribute("data-lang"));
+            });
+        });
+
+        var STAFF_PASSWORD = "1345";
+        var AKIMAT_PASSWORD = "aa123";
+
+        function tryStaff() {
+            var pwd = document.getElementById("staff-pwd").value;
+            if (pwd === STAFF_PASSWORD) {
+                localStorage.setItem("atyrau-auth-role", "staff");
+                window.location.href = "/";
+            } else {
+                document.getElementById("staff-err").textContent = I18N[currentLang].staff_login_error || "Неверный пароль";
+            }
+        }
+        function tryAkimat() {
+            var pwd = document.getElementById("akimat-pwd").value;
+            if (pwd === AKIMAT_PASSWORD) {
+                localStorage.setItem("atyrau-auth-role", "akimat");
+                window.location.href = "/akimat";
+            } else {
+                document.getElementById("akimat-err").textContent = I18N[currentLang].akimat_login_error || "Неверный пароль";
+            }
+        }
+
+        document.getElementById("staff-submit").addEventListener("click", tryStaff);
+        document.getElementById("akimat-submit").addEventListener("click", tryAkimat);
+        document.getElementById("staff-pwd").addEventListener("keydown", function (e) {
+            if (e.key === "Enter") tryStaff();
+        });
+        document.getElementById("akimat-pwd").addEventListener("keydown", function (e) {
+            if (e.key === "Enter") tryAkimat();
+        });
+    </script>
+</body>
+</html>

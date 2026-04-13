@@ -157,24 +157,14 @@
             <button id="suggest-btn" data-i18n="suggest_btn">Предложить точку</button>
         </div>
 
-        <!-- Staff login button (only for guests) -->
-        <div class="staff-login-section guest-only">
-            <button id="staff-login-btn" data-i18n="staff_login_btn">Вход для Сотрудников органа Прокуратуры</button>
-        </div>
-
-        <!-- Akimat login button (only for guests) -->
-        <div class="akimat-login-section guest-only">
-            <button id="akimat-login-btn" data-i18n="akimat_login_btn">Вход для Акимата г. Атырау</button>
-        </div>
-
         <!-- Prosecutor: monitoring panel (only for staff) -->
         <div class="prok-monitor-section staff-only">
             <button id="prok-monitor-btn" data-i18n="prok_monitor_btn">Контроль заявок</button>
         </div>
 
-        <!-- Akimat: panel button (only for akimat) -->
+        <!-- Akimat: panel link (only for akimat) -->
         <div class="akimat-panel-section akimat-only">
-            <button id="akimat-panel-btn" data-i18n="akimat_panel_btn">Заявки жителей</button>
+            <a id="akimat-panel-btn" href="/akimat" data-i18n="akimat_panel_btn">Заявки жителей</a>
         </div>
 
         <!-- Admin toggle (only for staff) -->
@@ -852,86 +842,6 @@
         </div>
     </div>
 
-    <!-- Staff login modal -->
-    <div id="staff-login-overlay" class="hidden">
-        <div id="staff-login-modal">
-            <button id="staff-login-close" aria-label="Закрыть">&times;</button>
-            <img src="images/placeholders/logos.jpeg" alt="Логотип прокуратуры" class="auth-logo" />
-            <h2 data-i18n="staff_login_title">Вход для сотрудников</h2>
-            <p data-i18n="staff_login_desc">Цифровая карта прокуратуры г. Атырау</p>
-            <div class="login-form">
-                <label data-i18n="staff_login_password">Пароль:</label>
-                <input type="password" id="staff-password" placeholder="Введите пароль" autocomplete="off" />
-                <button id="staff-login-submit" data-i18n="staff_login_submit">Войти</button>
-                <p id="staff-login-error" class="hidden" data-i18n="staff_login_error" style="color:#e74c3c;font-size:14px;margin-top:10px;">Неверный пароль</p>
-            </div>
-        </div>
-    </div>
-
-    <!-- Akimat login modal -->
-    <div id="akimat-login-overlay" class="hidden">
-        <div id="akimat-login-modal">
-            <button id="akimat-login-close" aria-label="Закрыть">&times;</button>
-            <div class="akimat-login-icon">🏛️</div>
-            <h2 data-i18n="akimat_login_title">Вход для Акимата</h2>
-            <p data-i18n="akimat_login_desc">Обработка заявок жителей г. Атырау</p>
-            <div class="login-form">
-                <label data-i18n="akimat_login_password">Пароль:</label>
-                <input type="password" id="akimat-password" placeholder="••••" autocomplete="off" />
-                <button id="akimat-login-submit" data-i18n="akimat_login_submit">Войти</button>
-                <p id="akimat-login-error" class="hidden" data-i18n="akimat_login_error" style="color:#e74c3c;font-size:14px;margin-top:10px;">Неверный пароль</p>
-            </div>
-        </div>
-    </div>
-
-    <!-- Akimat panel (applications processing) -->
-    <div id="akimat-panel-overlay" class="hidden">
-        <div id="akimat-panel">
-            <div class="akimat-panel-header">
-                <h2 data-i18n="akimat_panel_title">Заявки жителей — Акимат г. Атырау</h2>
-                <button id="akimat-panel-close" aria-label="Закрыть">&times;</button>
-            </div>
-            <div class="akimat-tabs">
-                <button class="akimat-tab active" data-tab="new" data-i18n="akimat_tab_new">Новые</button>
-                <button class="akimat-tab" data-tab="inprogress" data-i18n="akimat_tab_inprogress">В работе</button>
-                <button class="akimat-tab" data-tab="archive" data-i18n="akimat_tab_archive">Архив</button>
-            </div>
-            <div id="akimat-panel-body" class="akimat-panel-body"></div>
-        </div>
-    </div>
-
-    <!-- Akimat: accept dialog -->
-    <div id="akimat-accept-overlay" class="hidden">
-        <div id="akimat-accept-modal">
-            <button id="akimat-accept-close" aria-label="Закрыть">&times;</button>
-            <h2 data-i18n="akimat_accept_title">Принять заявку в работу</h2>
-            <div class="login-form">
-                <label data-i18n="akimat_accept_days_label">За сколько дней устраните проблему?</label>
-                <input type="number" id="akimat-accept-days" min="1" max="365" value="30" />
-                <div class="akimat-modal-actions">
-                    <button id="akimat-accept-cancel" class="btn-secondary" data-i18n="akimat_cancel">Отмена</button>
-                    <button id="akimat-accept-submit" class="btn-primary" data-i18n="akimat_accept_confirm">Подтвердить</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Akimat: reject dialog -->
-    <div id="akimat-reject-overlay" class="hidden">
-        <div id="akimat-reject-modal">
-            <button id="akimat-reject-close" aria-label="Закрыть">&times;</button>
-            <h2 data-i18n="akimat_reject_title">Отклонить заявку</h2>
-            <div class="login-form">
-                <label data-i18n="akimat_reject_reason_label">Причина отклонения:</label>
-                <textarea id="akimat-reject-reason" rows="4" placeholder="..."></textarea>
-                <div class="akimat-modal-actions">
-                    <button id="akimat-reject-cancel" class="btn-secondary" data-i18n="akimat_cancel">Отмена</button>
-                    <button id="akimat-reject-submit" class="btn-danger" data-i18n="akimat_reject_confirm">Отклонить</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <!-- Prosecutor monitoring panel -->
     <div id="prok-monitor-overlay" class="hidden">
         <div id="prok-monitor-panel">
@@ -1049,6 +959,6 @@
     <script src="js/schools.js?v=1"></script>
     <script src="js/analytics.js?v=2"></script>
     <script src="js/data.js?v=2"></script>
-    <script src="js/app.js?v=7"></script>
+    <script src="js/app.js?v=8"></script>
 </body>
 </html>

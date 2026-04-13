@@ -2289,83 +2289,29 @@
         }
     }
 
-    // Apply guest mode on load
+    // ═══════════════════════════════════════════════════════
+    //  AUTH: read role from localStorage (set on /login page)
+    // ═══════════════════════════════════════════════════════
+    var authRole = localStorage.getItem("atyrau-auth-role");
+    if (authRole === "staff") isStaff = true;
+    else if (authRole === "akimat") isAkimat = true;
+
+    // Apply mode on load
     applyMode();
 
-    // Staff login modal
-    var staffLoginOverlay = document.getElementById("staff-login-overlay");
-
-    document.getElementById("staff-login-btn").addEventListener("click", function () {
-        document.getElementById("staff-password").value = "";
-        document.getElementById("staff-login-error").classList.add("hidden");
-        staffLoginOverlay.classList.remove("hidden");
-    });
-
-    document.getElementById("staff-login-close").addEventListener("click", function () {
-        staffLoginOverlay.classList.add("hidden");
-    });
-    staffLoginOverlay.addEventListener("click", function (e) {
-        if (e.target === staffLoginOverlay) staffLoginOverlay.classList.add("hidden");
-    });
-
-    function tryStaffLogin() {
-        var pwd = document.getElementById("staff-password").value;
-        if (pwd === STAFF_PASSWORD) {
-            isStaff = true;
-            isAkimat = false;
-            staffLoginOverlay.classList.add("hidden");
-            applyMode();
-        } else {
-            document.getElementById("staff-login-error").classList.remove("hidden");
-        }
-    }
-
-    document.getElementById("staff-login-submit").addEventListener("click", tryStaffLogin);
-    document.getElementById("staff-password").addEventListener("keydown", function (e) {
-        if (e.key === "Enter") tryStaffLogin();
-    });
-
+    // Staff logout → clear auth + reload
     document.getElementById("staff-logout-btn").addEventListener("click", function () {
+        localStorage.removeItem("atyrau-auth-role");
         isStaff = false;
         if (isAdmin) exitAdmin();
-        applyMode();
+        window.location.href = "/";
     });
 
-    // ═══════════════════════════════════════════════════════
-    //  AKIMAT: LOGIN / LOGOUT
-    // ═══════════════════════════════════════════════════════
-    var akimatLoginOverlay = document.getElementById("akimat-login-overlay");
-
-    document.getElementById("akimat-login-btn").addEventListener("click", function () {
-        document.getElementById("akimat-password").value = "";
-        document.getElementById("akimat-login-error").classList.add("hidden");
-        akimatLoginOverlay.classList.remove("hidden");
-    });
-    document.getElementById("akimat-login-close").addEventListener("click", function () {
-        akimatLoginOverlay.classList.add("hidden");
-    });
-    akimatLoginOverlay.addEventListener("click", function (e) {
-        if (e.target === akimatLoginOverlay) akimatLoginOverlay.classList.add("hidden");
-    });
-
-    function tryAkimatLogin() {
-        var pwd = document.getElementById("akimat-password").value;
-        if (pwd === AKIMAT_PASSWORD) {
-            isAkimat = true;
-            isStaff = false;
-            akimatLoginOverlay.classList.add("hidden");
-            applyMode();
-        } else {
-            document.getElementById("akimat-login-error").classList.remove("hidden");
-        }
-    }
-    document.getElementById("akimat-login-submit").addEventListener("click", tryAkimatLogin);
-    document.getElementById("akimat-password").addEventListener("keydown", function (e) {
-        if (e.key === "Enter") tryAkimatLogin();
-    });
+    // Akimat logout → clear auth + reload
     document.getElementById("akimat-logout-btn").addEventListener("click", function () {
+        localStorage.removeItem("atyrau-auth-role");
         isAkimat = false;
-        applyMode();
+        window.location.href = "/";
     });
 
     // ═══════════════════════════════════════════════════════
@@ -3187,185 +3133,6 @@
     }
 
     // ══════════════════════════════════════════════════════
-    //  Akimat Panel
-    // ══════════════════════════════════════════════════════
-    var akimatPanelOverlay = document.getElementById("akimat-panel-overlay");
-    var akimatPanelBody    = document.getElementById("akimat-panel-body");
-    var currentAkimatTab   = "new";
-    var currentAkimatAppId = null;
-
-    document.getElementById("akimat-panel-btn").addEventListener("click", function () {
-        currentAkimatTab = "new";
-        document.querySelectorAll(".akimat-tab").forEach(function (b) {
-            b.classList.toggle("active", b.getAttribute("data-tab") === "new");
-        });
-        renderAkimatPanel();
-        akimatPanelOverlay.classList.remove("hidden");
-    });
-    document.getElementById("akimat-panel-close").addEventListener("click", function () {
-        akimatPanelOverlay.classList.add("hidden");
-    });
-    akimatPanelOverlay.addEventListener("click", function (e) {
-        if (e.target === akimatPanelOverlay) akimatPanelOverlay.classList.add("hidden");
-    });
-
-    document.querySelectorAll(".akimat-tab").forEach(function (tab) {
-        tab.addEventListener("click", function () {
-            currentAkimatTab = this.getAttribute("data-tab");
-            document.querySelectorAll(".akimat-tab").forEach(function (b) { b.classList.remove("active"); });
-            this.classList.add("active");
-            renderAkimatPanel();
-        });
-    });
-
-    function _filterForTab(tab) {
-        return mapSuggestions.filter(function (s) {
-            var st = s.status || "pending";
-            if (tab === "new") return st === "pending";
-            if (tab === "inprogress") return st === "accepted";
-            if (tab === "archive") return st === "rejected" || st === "resolved";
-            return false;
-        }).sort(function (a, b) {
-            return new Date(b.created) - new Date(a.created);
-        });
-    }
-
-    function renderAkimatPanel() {
-        if (!akimatPanelBody) return;
-        var items = _filterForTab(currentAkimatTab);
-        if (items.length === 0) {
-            var emptyKey = "akimat_no_new";
-            if (currentAkimatTab === "inprogress") emptyKey = "akimat_no_inprogress";
-            else if (currentAkimatTab === "archive") emptyKey = "akimat_no_archive";
-            akimatPanelBody.innerHTML = '<p class="akimat-empty">' + escHtml(t(emptyKey)) + '</p>';
-            return;
-        }
-        var html = items.map(_renderAkimatCard).join("");
-        akimatPanelBody.innerHTML = html;
-
-        // Attach handlers
-        akimatPanelBody.querySelectorAll("[data-action]").forEach(function (btn) {
-            btn.addEventListener("click", function () {
-                var action = this.getAttribute("data-action");
-                var id = parseInt(this.getAttribute("data-id"), 10);
-                if (action === "accept") openAcceptDialog(id);
-                else if (action === "reject") openRejectDialog(id);
-                else if (action === "resolve") resolveApp(id);
-                else if (action === "show-on-map") {
-                    var s = mapSuggestions.find(function (x) { return x.id === id; });
-                    if (s) {
-                        akimatPanelOverlay.classList.add("hidden");
-                        map.setView([s.lat, s.lng], 17);
-                    }
-                }
-            });
-        });
-    }
-
-    function _renderAkimatCard(s) {
-        var status = s.status || "pending";
-        var photoHtml = s.photo ? '<div class="akimat-card-photo"><img src="' + s.photo + '" alt="фото" /></div>' : '';
-        var slaOrPromised = '';
-        if (status === "pending") {
-            slaOrPromised = _slaBadgeHtml(s);
-        } else if (status === "accepted") {
-            slaOrPromised = '<span class="status-badge" style="background:#3498db;">' + t("akimat_promised") + " " + escHtml(s.promisedDays || "—") + " " + t("akimat_days_short") + '</span>';
-        }
-
-        var responseHtml = '';
-        if (status === "accepted") {
-            responseHtml = '<div class="akimat-card-response"><strong>' + t("akimat_accepted_on") + '</strong> ' + _fmtDMY(s.akimatResponseAt) +
-                ' · <strong>' + t("akimat_promised") + '</strong> ' + escHtml(s.promisedDays) + ' ' + t("akimat_days_short") + '</div>';
-        } else if (status === "rejected") {
-            responseHtml = '<div class="akimat-card-response"><strong>' + t("akimat_rejected_on") + '</strong> ' + _fmtDMY(s.akimatResponseAt) +
-                '<br><strong>' + t("akimat_reason") + '</strong> ' + escHtml(s.rejectReason || "") + '</div>';
-        } else if (status === "resolved") {
-            responseHtml = '<div class="akimat-card-response"><strong>' + t("akimat_resolved_on") + '</strong> ' + _fmtDMY(s.resolvedAt) + '</div>';
-        }
-
-        var actions = '';
-        if (status === "pending") {
-            actions = '<button class="btn-primary" data-action="accept" data-id="' + s.id + '">' + t("akimat_accept") + '</button>' +
-                      '<button class="btn-danger" data-action="reject" data-id="' + s.id + '">' + t("akimat_reject") + '</button>';
-        } else if (status === "accepted") {
-            actions = '<button class="btn-success" data-action="resolve" data-id="' + s.id + '">' + t("akimat_resolve") + '</button>';
-        }
-        actions += '<button class="btn-secondary" data-action="show-on-map" data-id="' + s.id + '">' + t("suggest_show_on_map") + '</button>';
-
-        return '<div class="akimat-card status-' + status + '">' +
-            '<div class="akimat-card-top">' +
-                '<div class="akimat-card-meta">' +
-                    _catBadge(s.category) + ' ' + _statusBadge(status) + ' ' + slaOrPromised +
-                '</div>' +
-                '<div class="akimat-card-date">' + t("prok_submitted_on") + ' ' + _fmtDMY(s.created) + '</div>' +
-            '</div>' +
-            photoHtml +
-            '<div class="akimat-card-body">' +
-                '<div class="akimat-card-field"><strong>' + t("suggest_from") + '</strong> ' + escHtml(s.name) + '</div>' +
-                '<div class="akimat-card-field"><strong>' + t("suggest_contact_label") + '</strong> <a href="tel:' + escHtml(s.contact) + '">' + escHtml(s.contact) + '</a></div>' +
-                '<div class="akimat-card-field"><strong>' + t("crime_address") + ':</strong> ' + s.lat.toFixed(4) + ', ' + s.lng.toFixed(4) + '</div>' +
-                '<div class="akimat-card-desc">' + escHtml(s.description) + '</div>' +
-            '</div>' +
-            responseHtml +
-            '<div class="akimat-card-actions">' + actions + '</div>' +
-        '</div>';
-    }
-
-    // ── Accept dialog ──
-    var acceptOverlay = document.getElementById("akimat-accept-overlay");
-    var rejectOverlay = document.getElementById("akimat-reject-overlay");
-
-    function openAcceptDialog(id) {
-        currentAkimatAppId = id;
-        document.getElementById("akimat-accept-days").value = 30;
-        acceptOverlay.classList.remove("hidden");
-    }
-    function openRejectDialog(id) {
-        currentAkimatAppId = id;
-        document.getElementById("akimat-reject-reason").value = "";
-        rejectOverlay.classList.remove("hidden");
-    }
-    document.getElementById("akimat-accept-close").addEventListener("click", function () { acceptOverlay.classList.add("hidden"); });
-    document.getElementById("akimat-accept-cancel").addEventListener("click", function () { acceptOverlay.classList.add("hidden"); });
-    acceptOverlay.addEventListener("click", function (e) { if (e.target === acceptOverlay) acceptOverlay.classList.add("hidden"); });
-
-    document.getElementById("akimat-reject-close").addEventListener("click", function () { rejectOverlay.classList.add("hidden"); });
-    document.getElementById("akimat-reject-cancel").addEventListener("click", function () { rejectOverlay.classList.add("hidden"); });
-    rejectOverlay.addEventListener("click", function (e) { if (e.target === rejectOverlay) rejectOverlay.classList.add("hidden"); });
-
-    document.getElementById("akimat-accept-submit").addEventListener("click", function () {
-        var days = parseInt(document.getElementById("akimat-accept-days").value, 10);
-        if (!days || days < 1) { document.getElementById("akimat-accept-days").focus(); return; }
-        var s = mapSuggestions.find(function (x) { return x.id === currentAkimatAppId; });
-        if (!s) return;
-        s.status = "accepted";
-        s.promisedDays = days;
-        s.akimatResponseAt = new Date().toISOString();
-        saveSuggestion(s);
-        acceptOverlay.classList.add("hidden");
-    });
-    document.getElementById("akimat-reject-submit").addEventListener("click", function () {
-        var reason = document.getElementById("akimat-reject-reason").value.trim();
-        if (!reason) { document.getElementById("akimat-reject-reason").focus(); return; }
-        var s = mapSuggestions.find(function (x) { return x.id === currentAkimatAppId; });
-        if (!s) return;
-        s.status = "rejected";
-        s.rejectReason = reason;
-        s.akimatResponseAt = new Date().toISOString();
-        saveSuggestion(s);
-        rejectOverlay.classList.add("hidden");
-    });
-
-    function resolveApp(id) {
-        if (!confirm(t("akimat_resolve_confirm") + "?")) return;
-        var s = mapSuggestions.find(function (x) { return x.id === id; });
-        if (!s) return;
-        s.status = "resolved";
-        s.resolvedAt = new Date().toISOString();
-        saveSuggestion(s);
-    }
-
-    // ══════════════════════════════════════════════════════
     //  Accepted applications on map (as category markers)
     // ══════════════════════════════════════════════════════
     var acceptedAppsLayer = L.layerGroup();
@@ -3508,7 +3275,6 @@
     onSuggestionsChanged(function () {
         rebuildAcceptedSuggestionsLayer();
         _updatePendingCount();
-        if (!akimatPanelOverlay.classList.contains("hidden")) renderAkimatPanel();
         if (!prokOverlay.classList.contains("hidden")) renderProkMonitor();
     });
 
