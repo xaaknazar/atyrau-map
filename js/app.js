@@ -219,7 +219,7 @@
                 var cb = document.querySelector('[data-filter="' + cat + '"]');
                 if (cb && cb.checked) {
                     if (cat === "crime") {
-                        if (isStaff) map.addLayer(crimeErdrLayer);
+                        map.addLayer(crimeErdrLayer);
                     } else {
                         map.addLayer(layers[cat]);
                     }
@@ -1363,7 +1363,7 @@
         showCoverageOnHover: false,
         iconCreateFunction: function (cluster) {
             var count = cluster.getChildCount();
-            var size = count < 10 ? 30 : count < 50 ? 38 : 46;
+            var size = count < 10 ? 26 : count < 50 ? 32 : 40;
             return L.divIcon({
                 html: '<div style="background:rgba(231,76,60,0.85);width:' + size + 'px;height:' + size + 'px;' +
                     'border-radius:50%;display:flex;align-items:center;justify-content:center;' +
@@ -1373,7 +1373,25 @@
             });
         }
     });
-    if (isStaff) map.addLayer(crimeErdrLayer);
+    map.addLayer(crimeErdrLayer);
+
+    function _crimeGuestPopup(c) {
+        return '<div style="padding:8px 4px;font-size:13px;min-width:140px;text-align:center;">' +
+               '<div style="font-size:11px;color:#888;margin-bottom:4px;">Статья</div>' +
+               '<div style="font-size:16px;font-weight:700;color:#e74c3c;">' + (c.article || "—") + '</div>' +
+               '</div>';
+    }
+
+    function _attachCrimeHandler(marker, c) {
+        marker.on("click", function () {
+            marker.unbindPopup();
+            if (isStaff) {
+                openCrimeModal(c);
+            } else {
+                marker.bindPopup(_crimeGuestPopup(c), { closeButton: true }).openPopup();
+            }
+        });
+    }
 
     function buildCrimeMarkers() {
         crimeErdrLayer.clearLayers();
@@ -1384,19 +1402,25 @@
             if (_isHiddenArticle(c.article)) return;
 
             var marker = L.circleMarker([c.lat, c.lng], {
-                radius: 5,
+                radius: 3.5,
                 color: "rgba(255,255,255,0.8)",
-                weight: 1.5,
+                weight: 1,
                 fillColor: "#e74c3c",
                 fillOpacity: 0.9
             });
 
-            var tooltipText = (c.article || "—") + " | " + (c.street ? "ул. " + c.street : "");
-            marker.bindTooltip(tooltipText, {
-                direction: "top", offset: [0, -8], className: "marker-tooltip"
-            });
+            if (isStaff) {
+                var tooltipText = (c.article || "—") + " | " + (c.street ? "ул. " + c.street : "");
+                marker.bindTooltip(tooltipText, {
+                    direction: "top", offset: [0, -8], className: "marker-tooltip"
+                });
+            } else {
+                marker.bindTooltip("Ст. " + (c.article || "—"), {
+                    direction: "top", offset: [0, -8], className: "marker-tooltip"
+                });
+            }
 
-            marker.on("click", function () { openCrimeModal(c); });
+            _attachCrimeHandler(marker, c);
             crimeErdrLayer.addLayer(marker);
             added++;
         });
@@ -1843,16 +1867,22 @@
             if (typeof c.lat !== "number" || isNaN(c.lat)) return;
             if (_isHiddenArticle(c.article)) return;
             var marker = L.circleMarker([c.lat, c.lng], {
-                radius: 5,
+                radius: 3.5,
                 color: "rgba(255,255,255,0.8)",
-                weight: 1.5,
+                weight: 1,
                 fillColor: "#e74c3c",
                 fillOpacity: 0.9
             });
-            marker.bindTooltip((c.article || "—") + " | " + (c.street ? "ул. " + c.street : ""), {
-                direction: "top", offset: [0, -8], className: "marker-tooltip"
-            });
-            marker.on("click", function () { openCrimeModal(c); });
+            if (isStaff) {
+                marker.bindTooltip((c.article || "—") + " | " + (c.street ? "ул. " + c.street : ""), {
+                    direction: "top", offset: [0, -8], className: "marker-tooltip"
+                });
+            } else {
+                marker.bindTooltip("Ст. " + (c.article || "—"), {
+                    direction: "top", offset: [0, -8], className: "marker-tooltip"
+                });
+            }
+            _attachCrimeHandler(marker, c);
             crimeErdrLayer.addLayer(marker);
         });
 
@@ -2234,13 +2264,14 @@
             el.style.display = isStaff ? "none" : "";
         });
 
+        var crimeCb = document.querySelector('[data-filter="crime"]');
+        if (!crimeCb || crimeCb.checked) map.addLayer(crimeErdrLayer);
+
         if (isStaff) {
-            map.addLayer(crimeErdrLayer);
             map.addLayer(avLayer);
             var camCb = document.querySelector('[data-filter="cameras"]');
             if (!camCb || camCb.checked) map.addLayer(cameraLayer);
         } else {
-            map.removeLayer(crimeErdrLayer);
             map.removeLayer(avLayer);
             map.removeLayer(cameraLayer);
         }
