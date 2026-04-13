@@ -229,7 +229,7 @@
             var avCb = document.querySelector('[data-filter="admin-violations"]');
             if (avCb && avCb.checked && isStaff) map.addLayer(avLayer);
             var camCb = document.querySelector('[data-filter="cameras"]');
-            if (camCb && camCb.checked) map.addLayer(cameraLayer);
+            if (camCb && camCb.checked && isStaff) map.addLayer(cameraLayer);
             var polCb = document.querySelector('[data-filter="police"]');
             if (polCb && polCb.checked) map.addLayer(policeLayer);
             var schCb = document.querySelector('[data-filter="schools"]');
@@ -2237,9 +2237,12 @@
         if (isStaff) {
             map.addLayer(crimeErdrLayer);
             map.addLayer(avLayer);
+            var camCb = document.querySelector('[data-filter="cameras"]');
+            if (!camCb || camCb.checked) map.addLayer(cameraLayer);
         } else {
             map.removeLayer(crimeErdrLayer);
             map.removeLayer(avLayer);
+            map.removeLayer(cameraLayer);
         }
 
         // Перестроить попапы школ (разный контент для гостя/сотрудника)
