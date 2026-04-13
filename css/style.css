@@ -3296,3 +3296,630 @@ body {
     0%, 100% { opacity: 1; }
     50% { opacity: 0.4; }
 }
+
+/* ══════════════════════════════════════════════════════════════
+   AKIMAT / APPLICATIONS WORKFLOW
+   ══════════════════════════════════════════════════════════════ */
+
+/* --- Suggest photo input --- */
+.suggest-photo-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+.suggest-photo-btn {
+    display: inline-block;
+    padding: 10px 14px;
+    background: #3498db;
+    color: #fff;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 14px;
+    text-align: center;
+    transition: background 0.2s;
+}
+.suggest-photo-btn:hover { background: #2980b9; }
+.suggest-photo-preview {
+    position: relative;
+    display: inline-block;
+    max-width: 200px;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 2px solid #3498db;
+}
+.suggest-photo-preview.hidden { display: none; }
+.suggest-photo-preview img {
+    display: block;
+    width: 100%;
+    height: auto;
+}
+.suggest-photo-remove {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: rgba(0,0,0,0.7);
+    color: #fff;
+    border: none;
+    font-size: 18px;
+    line-height: 1;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* --- Akimat login button (in sidebar) --- */
+.akimat-login-section {
+    padding: 12px 16px;
+    border-top: 1px solid rgba(255,255,255,0.06);
+}
+#akimat-login-btn {
+    width: 100%;
+    padding: 12px;
+    background: linear-gradient(135deg, #f39c12, #e67e22);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+#akimat-login-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(243, 156, 18, 0.35); }
+
+.akimat-logout-section {
+    padding: 12px 16px;
+    border-top: 1px solid rgba(255,255,255,0.06);
+}
+#akimat-logout-btn {
+    width: 100%;
+    padding: 10px;
+    background: #c0392b;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.akimat-panel-section, .prok-monitor-section {
+    padding: 12px 16px;
+    border-top: 1px solid rgba(255,255,255,0.06);
+}
+#akimat-panel-btn, #prok-monitor-btn {
+    width: 100%;
+    padding: 12px;
+    background: linear-gradient(135deg, #1abc9c, #16a085);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+#akimat-panel-btn:hover, #prok-monitor-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(26, 188, 156, 0.35);
+}
+
+/* --- Akimat login modal --- */
+#akimat-login-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+#akimat-login-overlay.hidden { display: none; }
+#akimat-login-modal {
+    background: #1a202e;
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 12px;
+    padding: 32px 24px 24px;
+    width: 100%;
+    max-width: 380px;
+    position: relative;
+    text-align: center;
+    color: #e0e6f0;
+}
+#akimat-login-close {
+    position: absolute;
+    top: 10px;
+    right: 14px;
+    background: none;
+    border: none;
+    color: #8892b0;
+    font-size: 28px;
+    cursor: pointer;
+}
+.akimat-login-icon {
+    font-size: 48px;
+    margin-bottom: 8px;
+}
+#akimat-login-modal h2 {
+    margin: 8px 0 4px;
+    color: #f39c12;
+}
+#akimat-login-modal p {
+    color: #8892b0;
+    font-size: 13px;
+    margin-bottom: 20px;
+}
+#akimat-login-modal .login-form { text-align: left; }
+#akimat-login-modal label {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 13px;
+    color: #a0aec0;
+}
+#akimat-login-modal input[type="password"] {
+    width: 100%;
+    padding: 10px 12px;
+    background: #0f1624;
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 8px;
+    color: #fff;
+    font-size: 14px;
+    margin-bottom: 14px;
+}
+#akimat-login-submit {
+    width: 100%;
+    padding: 12px;
+    background: linear-gradient(135deg, #f39c12, #e67e22);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+/* --- Akimat / Prosecutor panels (full-screen overlays) --- */
+#akimat-panel-overlay, #prok-monitor-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.75);
+    z-index: 9500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+#akimat-panel-overlay.hidden, #prok-monitor-overlay.hidden { display: none; }
+
+#akimat-panel, #prok-monitor-panel {
+    width: 100%;
+    max-width: 900px;
+    max-height: 90vh;
+    background: #0f1624;
+    border-radius: 14px;
+    border: 1px solid rgba(255,255,255,0.08);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    color: #e0e6f0;
+}
+
+.akimat-panel-header, .prok-monitor-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 18px 22px;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    background: linear-gradient(135deg, #1a202e, #0f1624);
+}
+.akimat-panel-header h2, .prok-monitor-header h2 {
+    margin: 0;
+    font-size: 18px;
+    color: #f39c12;
+}
+.prok-monitor-header h2 { color: #1abc9c; }
+
+#akimat-panel-close, #prok-monitor-close {
+    background: none;
+    border: none;
+    color: #8892b0;
+    font-size: 28px;
+    cursor: pointer;
+    padding: 0;
+    width: 32px;
+    height: 32px;
+}
+
+.akimat-tabs {
+    display: flex;
+    gap: 4px;
+    padding: 10px 22px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+.akimat-tab {
+    padding: 10px 18px;
+    background: transparent;
+    color: #8892b0;
+    border: none;
+    border-bottom: 3px solid transparent;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.2s;
+}
+.akimat-tab:hover { color: #e0e6f0; }
+.akimat-tab.active {
+    color: #f39c12;
+    border-bottom-color: #f39c12;
+}
+
+.akimat-panel-body, .prok-monitor-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px 22px;
+}
+
+.akimat-empty {
+    text-align: center;
+    color: #8892b0;
+    padding: 40px 20px;
+    font-size: 15px;
+}
+
+/* --- Application card (akimat view) --- */
+.akimat-card {
+    background: #1a202e;
+    border: 1px solid rgba(255,255,255,0.06);
+    border-left: 4px solid #8892b0;
+    border-radius: 10px;
+    padding: 14px 16px;
+    margin-bottom: 12px;
+}
+.akimat-card.status-pending { border-left-color: #e67e22; }
+.akimat-card.status-accepted { border-left-color: #3498db; }
+.akimat-card.status-rejected { border-left-color: #e74c3c; }
+.akimat-card.status-resolved { border-left-color: #27ae60; }
+
+.akimat-card-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 10px;
+}
+.akimat-card-meta {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+.akimat-card-date { font-size: 12px; color: #8892b0; }
+
+.akimat-cat-badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 10px;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 600;
+}
+.status-badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 10px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #fff;
+    background: #8892b0;
+}
+.status-badge.status-pending { background: #e67e22; }
+.status-badge.status-accepted { background: #3498db; }
+.status-badge.status-rejected { background: #e74c3c; }
+.status-badge.status-resolved { background: #27ae60; }
+
+.sla-badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 10px;
+    font-size: 12px;
+    font-weight: 700;
+    color: #fff;
+}
+
+.akimat-card-photo {
+    margin: 8px 0;
+    border-radius: 8px;
+    overflow: hidden;
+    max-height: 240px;
+}
+.akimat-card-photo img {
+    width: 100%;
+    height: auto;
+    display: block;
+    object-fit: cover;
+    max-height: 240px;
+}
+
+.akimat-card-body { padding: 4px 0 10px; }
+.akimat-card-field {
+    font-size: 13px;
+    color: #a0aec0;
+    margin-bottom: 4px;
+}
+.akimat-card-field strong { color: #e0e6f0; margin-right: 4px; }
+.akimat-card-field a { color: #3498db; text-decoration: none; }
+.akimat-card-desc {
+    font-size: 14px;
+    color: #e0e6f0;
+    margin-top: 8px;
+    padding: 8px 10px;
+    background: rgba(255,255,255,0.03);
+    border-radius: 6px;
+    line-height: 1.4;
+}
+
+.akimat-card-response {
+    margin-top: 10px;
+    padding: 8px 10px;
+    background: rgba(52, 152, 219, 0.08);
+    border-left: 3px solid #3498db;
+    border-radius: 0 6px 6px 0;
+    font-size: 13px;
+    color: #a0aec0;
+}
+.akimat-card-response strong { color: #e0e6f0; }
+
+.akimat-card-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 12px;
+}
+.akimat-card-actions button {
+    padding: 8px 14px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    transition: all 0.2s;
+}
+.btn-primary { background: #3498db; color: #fff; }
+.btn-primary:hover { background: #2980b9; }
+.btn-danger { background: #e74c3c; color: #fff; }
+.btn-danger:hover { background: #c0392b; }
+.btn-success { background: #27ae60; color: #fff; }
+.btn-success:hover { background: #229954; }
+.btn-secondary { background: rgba(255,255,255,0.08); color: #e0e6f0; }
+.btn-secondary:hover { background: rgba(255,255,255,0.15); }
+
+/* --- Accept / Reject dialogs --- */
+#akimat-accept-overlay, #akimat-reject-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.75);
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+#akimat-accept-overlay.hidden, #akimat-reject-overlay.hidden { display: none; }
+#akimat-accept-modal, #akimat-reject-modal {
+    background: #1a202e;
+    border-radius: 12px;
+    padding: 24px;
+    width: 100%;
+    max-width: 440px;
+    position: relative;
+    color: #e0e6f0;
+}
+#akimat-accept-close, #akimat-reject-close {
+    position: absolute;
+    top: 8px;
+    right: 12px;
+    background: none;
+    border: none;
+    color: #8892b0;
+    font-size: 26px;
+    cursor: pointer;
+}
+#akimat-accept-modal h2, #akimat-reject-modal h2 {
+    margin: 0 0 16px;
+    font-size: 17px;
+}
+#akimat-accept-modal label, #akimat-reject-modal label {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 13px;
+    color: #a0aec0;
+}
+#akimat-accept-days, #akimat-reject-reason {
+    width: 100%;
+    padding: 10px 12px;
+    background: #0f1624;
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 8px;
+    color: #fff;
+    font-size: 14px;
+    margin-bottom: 14px;
+    box-sizing: border-box;
+    font-family: inherit;
+}
+#akimat-reject-reason { resize: vertical; min-height: 100px; }
+.akimat-modal-actions {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+}
+.akimat-modal-actions button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+/* --- In-progress markers on map --- */
+.in-progress-marker-wrap { background: transparent; border: none; }
+.in-progress-marker {
+    position: relative;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 3px solid #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+}
+.in-progress-icon {
+    color: #fff;
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 1;
+}
+.in-progress-pulse {
+    position: absolute;
+    inset: -3px;
+    border-radius: 50%;
+    opacity: 0.6;
+    animation: inprogress-pulse 2s infinite;
+}
+@keyframes inprogress-pulse {
+    0% { transform: scale(1); opacity: 0.6; }
+    70% { transform: scale(1.8); opacity: 0; }
+    100% { transform: scale(1); opacity: 0; }
+}
+
+.in-progress-popup {
+    font-size: 13px;
+    line-height: 1.5;
+}
+.in-progress-popup .popup-header {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-bottom: 8px;
+}
+.in-progress-popup .popup-photo {
+    margin: 6px 0;
+    border-radius: 6px;
+    overflow: hidden;
+}
+.in-progress-popup .popup-photo img {
+    width: 100%;
+    height: auto;
+    display: block;
+    max-height: 180px;
+    object-fit: cover;
+}
+.in-progress-popup .popup-row { margin-bottom: 4px; }
+
+/* --- Prosecutor monitor list --- */
+.prok-row {
+    display: flex;
+    gap: 14px;
+    align-items: stretch;
+    background: #1a202e;
+    border: 1px solid rgba(255,255,255,0.06);
+    border-left: 4px solid #8892b0;
+    border-radius: 10px;
+    padding: 12px 14px;
+    margin-bottom: 10px;
+}
+.prok-row.status-pending { border-left-color: #e67e22; }
+.prok-row.status-accepted { border-left-color: #3498db; }
+.prok-row.status-rejected { border-left-color: #e74c3c; }
+.prok-row.status-resolved { border-left-color: #27ae60; }
+
+.prok-row-photo {
+    flex-shrink: 0;
+    width: 90px;
+    height: 90px;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #0f1624;
+}
+.prok-row-photo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+.prok-row-photo.empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #4a5568;
+    font-size: 24px;
+}
+.prok-row-main { flex: 1; min-width: 0; }
+.prok-row-head {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-bottom: 6px;
+}
+.prok-row-desc {
+    font-size: 14px;
+    color: #e0e6f0;
+    margin-bottom: 6px;
+    line-height: 1.4;
+}
+.prok-row-meta, .prok-row-response {
+    font-size: 12px;
+    color: #8892b0;
+    margin-bottom: 4px;
+    line-height: 1.4;
+}
+.prok-row-meta strong, .prok-row-response strong { color: #a0aec0; }
+.prok-row-show {
+    flex-shrink: 0;
+    align-self: center;
+    padding: 8px 12px;
+    font-size: 12px;
+}
+
+.prok-monitor-filters {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 22px;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    background: rgba(255,255,255,0.02);
+}
+.prok-monitor-filters label {
+    color: #a0aec0;
+    font-size: 13px;
+    margin: 0;
+}
+#prok-filter-status {
+    padding: 6px 10px;
+    background: #0f1624;
+    border: 1px solid rgba(255,255,255,0.1);
+    color: #e0e6f0;
+    border-radius: 6px;
+    font-size: 13px;
+}
+
+/* --- Mobile --- */
+@media (max-width: 720px) {
+    #akimat-panel, #prok-monitor-panel {
+        max-height: 95vh;
+        border-radius: 8px;
+    }
+    .akimat-panel-header, .prok-monitor-header { padding: 14px 16px; }
+    .akimat-panel-header h2, .prok-monitor-header h2 { font-size: 15px; }
+    .akimat-panel-body, .prok-monitor-body { padding: 12px; }
+    .akimat-tabs { padding: 8px 12px 0; }
+    .akimat-tab { padding: 8px 12px; font-size: 13px; }
+    .prok-row { flex-direction: column; }
+    .prok-row-photo { width: 100%; height: 160px; }
+    .prok-row-show { align-self: stretch; }
+}
