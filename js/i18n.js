@@ -21,6 +21,10 @@ var I18N = {
         stat_blind: "Слепые зоны:",
         stat_abandoned: "Заброшенные здания:",
         stat_unlit: "Неосвещённые улицы:",
+        stat_police: "Участковые пункты:",
+        stat_schools: "Школы:",
+        legend_police: "Участковые пункты",
+        legend_schools: "Школы",
         stat_total: "Всего точек:",
 
         // Footer
@@ -216,6 +220,10 @@ var I18N = {
         stat_blind: "Соқыр аймақтар:",
         stat_abandoned: "Тастанды ғимараттар:",
         stat_unlit: "Жарықтандырылмаған көшелер:",
+        stat_police: "Учаскелік пункттер:",
+        stat_schools: "Мектептер:",
+        legend_police: "Учаскелік пункттер",
+        legend_schools: "Мектептер",
         stat_total: "Барлық нүктелер:",
 
         // Footer
