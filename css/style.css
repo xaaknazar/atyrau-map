@@ -3925,9 +3925,9 @@ body {
 }
 
 /* ═══════════════════════════════════════════════════════════
-   OFFICIAL LIGHT THEME — Reports & Analytics panels
-   Overrides dark theme with white/gray/navy palette
-   matching login.html design.
+   OFFICIAL DARK THEME — Reports & Analytics panels
+   Matches sidebar palette: bg #16213e, header gradient,
+   white text, light blue accent.
    ═══════════════════════════════════════════════════════════ */
 
 #report-selector,
@@ -3935,22 +3935,22 @@ body {
 #av-panel,
 #analytics-panel,
 #av-analytics-panel {
-    background: #f4f6f9 !important;
-    color: #1f2937 !important;
+    background: #16213e !important;
+    color: #ffffff !important;
 }
 
 /* Headers */
 .report-selector-header,
 .crime-panel-header,
 .analytics-header {
-    background: #ffffff !important;
-    border-bottom: 1px solid #e5e7eb !important;
-    box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+    background: linear-gradient(135deg, #0f3460, #16213e) !important;
+    border-bottom: 1px solid rgba(255,255,255,0.08) !important;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.2);
 }
 .report-selector-header h2,
 .crime-panel-header h2,
 .analytics-header h2 {
-    color: #1e3a5f !important;
+    color: #ffffff !important;
     font-weight: 600 !important;
     letter-spacing: 0.2px;
 }
@@ -3961,9 +3961,9 @@ body {
 .close-av-panel-btn,
 .close-av-analytics-btn,
 .close-report-selector-btn {
-    background: #ffffff !important;
-    border: 1px solid #d1d5db !important;
-    color: #374151 !important;
+    background: rgba(255,255,255,0.06) !important;
+    border: 1px solid rgba(255,255,255,0.15) !important;
+    color: #ffffff !important;
     border-radius: 6px !important;
     font-weight: 500;
 }
@@ -3972,169 +3972,167 @@ body {
 .close-av-panel-btn:hover,
 .close-av-analytics-btn:hover,
 .close-report-selector-btn:hover {
-    background: #f3f4f6 !important;
-    color: #111827 !important;
-    border-color: #9ca3af !important;
+    background: rgba(255,255,255,0.12) !important;
+    border-color: rgba(255,255,255,0.3) !important;
 }
 
 /* Report selector cards */
 .report-card {
-    background: #ffffff !important;
-    border: 1px solid #e5e7eb !important;
+    background: #1e2c4f !important;
+    border: 1px solid rgba(255,255,255,0.08) !important;
     border-radius: 8px !important;
-    transition: border-color 0.15s, box-shadow 0.15s !important;
+    transition: border-color 0.15s, background 0.15s !important;
 }
 .report-card:hover {
-    background: #ffffff !important;
-    border-color: #1e3a5f !important;
-    box-shadow: 0 2px 8px rgba(30,58,95,0.08) !important;
+    background: #243763 !important;
+    border-color: #4a90e2 !important;
 }
 .report-card-body h3 {
-    color: #111827 !important;
+    color: #ffffff !important;
     font-weight: 600 !important;
 }
 .report-card-body p {
-    color: #6b7280 !important;
+    color: #c5d0e6 !important;
 }
 .report-card-count {
-    color: #1e3a5f !important;
+    color: #4a90e2 !important;
     font-weight: 600 !important;
 }
 .report-card-icon {
-    background: #f3f4f6 !important;
-    border: 1px solid #e5e7eb !important;
+    background: rgba(74,144,226,0.15) !important;
+    border: 1px solid rgba(74,144,226,0.3) !important;
 }
 
 /* Stat cards (crime panel) */
 .crime-stat-card {
-    background: #ffffff !important;
-    border: 1px solid #e5e7eb !important;
+    background: #1e2c4f !important;
+    border: 1px solid rgba(255,255,255,0.08) !important;
     border-radius: 6px !important;
 }
-.crime-stat-value { color: #1e3a5f !important; }
-.crime-stat-public .crime-stat-value { color: #c2410c !important; }
-.crime-stat-with-coords .crime-stat-value { color: #047857 !important; }
-.crime-stat-articles .crime-stat-value { color: #1e3a5f !important; }
-.crime-stat-label { color: #6b7280 !important; }
+.crime-stat-value { color: #ffffff !important; }
+.crime-stat-public .crime-stat-value { color: #f39c12 !important; }
+.crime-stat-with-coords .crime-stat-value { color: #2ecc71 !important; }
+.crime-stat-articles .crime-stat-value { color: #4a90e2 !important; }
+.crime-stat-label { color: #c5d0e6 !important; }
 
 /* Filters */
 .crime-filter-group-inline label,
 .analytics-period-label,
 .crime-filter-label {
-    color: #374151 !important;
+    color: #ffffff !important;
 }
 .crime-select,
 .crime-search-wrapper input {
-    background: #ffffff !important;
-    border: 1px solid #d1d5db !important;
-    color: #111827 !important;
+    background: #1e2c4f !important;
+    border: 1px solid rgba(255,255,255,0.15) !important;
+    color: #ffffff !important;
     border-radius: 6px !important;
 }
 .crime-select:focus,
 .crime-search-wrapper input:focus {
-    border-color: #1e3a5f !important;
-    box-shadow: 0 0 0 3px rgba(30,58,95,0.1);
+    border-color: #4a90e2 !important;
+    box-shadow: 0 0 0 3px rgba(74,144,226,0.15);
 }
-.crime-search-wrapper input::placeholder { color: #9ca3af !important; }
-.crime-search-icon { color: #9ca3af !important; }
-.crime-select option { background: #ffffff !important; color: #111827 !important; }
+.crime-search-wrapper input::placeholder { color: #8896b3 !important; }
+.crime-search-icon { color: #8896b3 !important; }
+.crime-select option { background: #16213e !important; color: #ffffff !important; }
 
 /* Period buttons */
 .crime-filter-buttons,
 .analytics-period-row .crime-period-buttons {
-    background: #f3f4f6 !important;
-    border: 1px solid #e5e7eb;
+    background: rgba(255,255,255,0.04) !important;
+    border: 1px solid rgba(255,255,255,0.08);
     border-radius: 6px !important;
 }
 .crime-period-btn,
 .an-period-btn,
 .av-an-period-btn,
 .av-period-btn {
-    color: #6b7280 !important;
+    color: #c5d0e6 !important;
     background: transparent !important;
 }
 .crime-period-btn.active,
 .an-period-btn.active,
 .av-an-period-btn.active,
 .av-period-btn.active {
-    background: #1e3a5f !important;
+    background: #4a90e2 !important;
     color: #ffffff !important;
 }
 .crime-period-btn:hover:not(.active),
 .an-period-btn:hover:not(.active),
 .av-an-period-btn:hover:not(.active),
 .av-period-btn:hover:not(.active) {
-    background: #e5e7eb !important;
-    color: #111827 !important;
+    background: rgba(255,255,255,0.08) !important;
+    color: #ffffff !important;
 }
 
 /* Results bar */
 .crime-panel-results-bar {
-    color: #6b7280 !important;
-    border-top: 1px solid #e5e7eb;
+    color: #c5d0e6 !important;
+    border-top: 1px solid rgba(255,255,255,0.08);
     padding-top: 10px !important;
 }
-.crime-panel-results-bar strong { color: #1e3a5f !important; }
-.crime-reset-btn { color: #6b7280 !important; }
-.crime-reset-btn:hover { color: #1e3a5f !important; }
+.crime-panel-results-bar strong { color: #ffffff !important; }
+.crime-reset-btn { color: #c5d0e6 !important; }
+.crime-reset-btn:hover { color: #4a90e2 !important; }
 
 /* Crime list items */
 .crime-list-item {
-    background: #ffffff !important;
-    border: 1px solid #e5e7eb !important;
-    border-left: 3px solid #1e3a5f !important;
+    background: #1e2c4f !important;
+    border: 1px solid rgba(255,255,255,0.08) !important;
+    border-left: 3px solid #4a90e2 !important;
     border-radius: 6px !important;
 }
 .crime-list-item:hover {
-    background: #f9fafb !important;
-    border-color: #1e3a5f !important;
+    background: #243763 !important;
+    border-color: #4a90e2 !important;
 }
 .crime-list-article {
-    color: #1e3a5f !important;
-    background: #eef2f7 !important;
-    border: 1px solid #dbe2ec;
+    color: #ffffff !important;
+    background: rgba(74,144,226,0.2) !important;
+    border: 1px solid rgba(74,144,226,0.4);
     font-weight: 600 !important;
 }
-.crime-list-date { color: #6b7280 !important; }
-.crime-list-erdr { color: #9ca3af !important; }
-.crime-list-address { color: #111827 !important; }
-.crime-list-organ { color: #6b7280 !important; }
-.crime-list-description { color: #4b5563 !important; }
-.crime-list-empty { color: #9ca3af !important; }
+.crime-list-date { color: #c5d0e6 !important; }
+.crime-list-erdr { color: #8896b3 !important; }
+.crime-list-address { color: #ffffff !important; }
+.crime-list-organ { color: #c5d0e6 !important; }
+.crime-list-description { color: #d6dcec !important; }
+.crime-list-empty { color: #8896b3 !important; }
 .crime-list-place-badge {
-    background: #f3f4f6 !important;
-    color: #6b7280 !important;
-    border: 1px solid #e5e7eb;
+    background: rgba(255,255,255,0.06) !important;
+    color: #c5d0e6 !important;
+    border: 1px solid rgba(255,255,255,0.1);
 }
 .crime-list-place-badge.public {
-    background: #fef3c7 !important;
-    color: #92400e !important;
-    border-color: #fde68a;
+    background: rgba(243,156,18,0.18) !important;
+    color: #f39c12 !important;
+    border-color: rgba(243,156,18,0.35);
 }
 
 /* Analytics tabs */
 .analytics-tab {
-    color: #6b7280 !important;
+    color: #c5d0e6 !important;
     border-bottom: 2px solid transparent !important;
 }
 .analytics-tab.active {
-    color: #1e3a5f !important;
-    border-bottom-color: #1e3a5f !important;
+    color: #ffffff !important;
+    border-bottom-color: #4a90e2 !important;
 }
-.analytics-tab:hover:not(.active) { color: #111827 !important; }
+.analytics-tab:hover:not(.active) { color: #ffffff !important; }
 
 .analytics-body {
-    background: #f4f6f9 !important;
-    color: #1f2937 !important;
+    background: #16213e !important;
+    color: #ffffff !important;
 }
 
 /* Period hint */
-.period-hint { color: #9ca3af !important; }
+.period-hint { color: #8896b3 !important; }
 
-/* Generic analytics cards/blocks (if any) */
+/* Generic analytics cards/blocks */
 .analytics-body .stat-card,
-.analytics-body .chart-card,
-.analytics-body > div > div {
-    background: #ffffff;
-    border: 1px solid #e5e7eb;
+.analytics-body .chart-card {
+    background: #1e2c4f;
+    border: 1px solid rgba(255,255,255,0.08);
+    color: #ffffff;
 }
