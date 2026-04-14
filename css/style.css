@@ -4357,3 +4357,9 @@ body {
     .assistant-table { font-size: 12px; }
     .assistant-table th, .assistant-table td { padding: 6px 8px; }
 }
+.assistant-trend-detail {
+    margin-top: 8px;
+    font-size: 13px;
+    color: #c5d0e6;
+}
+.assistant-trend-detail strong { color: #ffffff; }

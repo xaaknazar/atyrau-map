@@ -631,7 +631,6 @@ function buildProsecutorBriefing(analysis, allCrimes, lang) {
     html += '<div class="assistant-section-title">📊 ' + tr("assistant_summary", "Краткое резюме") + '</div>';
     html += '<div class="assistant-summary-grid">';
     html += '<div class="assistant-stat"><div class="assistant-stat-value">' + analysis.total + '</div><div class="assistant-stat-label">' + tr("assistant_total", "Всего правонарушений") + '</div></div>';
-    html += '<div class="assistant-stat"><div class="assistant-stat-value">' + publicPct + '%</div><div class="assistant-stat-label">' + tr("assistant_public", "В общественных местах") + '</div></div>';
     html += '<div class="assistant-stat"><div class="assistant-stat-value">' + analysis.byArticle.length + '</div><div class="assistant-stat-label">' + tr("assistant_articles_count", "Различных статей") + '</div></div>';
     html += '<div class="assistant-stat"><div class="assistant-stat-value">' + analysis.problemZones.length + '</div><div class="assistant-stat-label">' + tr("assistant_zones", "Проблемных зон") + '</div></div>';
     html += '</div></div>';
@@ -731,20 +730,28 @@ function buildProsecutorBriefing(analysis, allCrimes, lang) {
     html += '<div><strong>' + tr("assistant_peak_day", "Самый опасный день") + ':</strong><br>' + escH(dayPeaks[0].d) + ' (' + dayPeaks[0].c + ' ' + tr("assistant_cases", "случаев") + ')</div>';
     html += '</div></div>';
 
-    // ── Тренд (последний месяц vs предыдущий) ─────────────────
-    if (analysis.byMonth && analysis.byMonth.counts && analysis.byMonth.counts.length >= 2) {
+    // ── Тренд (прошлый завершённый месяц vs позапрошлый) ──────
+    // Текущий месяц (c.length-1) пропускаем, т.к. он ещё не завершён
+    if (analysis.byMonth && analysis.byMonth.counts && analysis.byMonth.counts.length >= 3) {
         var c = analysis.byMonth.counts;
-        var last = c[c.length - 1];
-        var prev = c[c.length - 2];
-        var diff = last - prev;
-        var diffPct = prev > 0 ? Math.round(diff / prev * 100) : 0;
+        var lab = analysis.byMonth.labels || [];
+        var prev = c[c.length - 2];          // прошлый завершённый
+        var prevPrev = c[c.length - 3];      // позапрошлый
+        var prevLabel = lab[lab.length - 2] || "";
+        var prevPrevLabel = lab[lab.length - 3] || "";
+        var diff = prev - prevPrev;
+        var diffPct = prevPrev > 0 ? Math.round(diff / prevPrev * 100) : 0;
         var trendIcon = diff > 0 ? "↑" : (diff < 0 ? "↓" : "→");
         var trendCls = diff > 0 ? "trend-up" : (diff < 0 ? "trend-down" : "trend-flat");
         html += '<div class="assistant-section">';
-        html += '<div class="assistant-section-title">📈 ' + tr("assistant_trend", "Тренд за последний месяц") + '</div>';
+        html += '<div class="assistant-section-title">📈 ' + tr("assistant_trend", "Тренд между завершёнными месяцами") + '</div>';
         html += '<div class="assistant-trend ' + trendCls + '">';
-        html += trendIcon + ' ' + (diff >= 0 ? "+" : "") + diff + ' ' + tr("assistant_cases", "случаев") + ' (' + (diffPct >= 0 ? "+" : "") + diffPct + '%) ' + tr("assistant_vs_prev", "к прошлому месяцу");
-        html += '</div></div>';
+        html += trendIcon + ' ' + (diff >= 0 ? "+" : "") + diff + ' ' + tr("assistant_cases", "случаев") + ' (' + (diffPct >= 0 ? "+" : "") + diffPct + '%)';
+        html += '</div>';
+        if (prevLabel && prevPrevLabel) {
+            html += '<div class="assistant-trend-detail">' + escH(prevLabel) + ': <strong>' + prev + '</strong> ' + tr("assistant_vs", "против") + ' ' + escH(prevPrevLabel) + ': <strong>' + prevPrev + '</strong></div>';
+        }
+        html += '</div>';
     }
 
     // ── Демография нарушителей ────────────────────────────────
