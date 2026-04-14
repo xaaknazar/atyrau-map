@@ -2267,15 +2267,34 @@
         document.querySelectorAll(".akimat-only").forEach(function (el) {
             el.style.display = isAkimat ? "" : "none";
         });
+        document.querySelectorAll(".no-akimat").forEach(function (el) {
+            el.style.display = isAkimat ? "none" : "";
+        });
+        // For akimat: also hide crime stat row + remove crime layer
+        if (isAkimat) {
+            var crimeRow = document.querySelector('#count-crime');
+            if (crimeRow && crimeRow.closest('.stat-row')) crimeRow.closest('.stat-row').style.display = "none";
+            if (typeof crimeErdrLayer !== "undefined" && map.hasLayer(crimeErdrLayer)) map.removeLayer(crimeErdrLayer);
+        }
 
-        var crimeCb = document.querySelector('[data-filter="crime"]');
-        if (!crimeCb || crimeCb.checked) map.addLayer(crimeErdrLayer);
-
-        if (isStaff) {
-            map.addLayer(avLayer);
-            var camCb = document.querySelector('[data-filter="cameras"]');
-            if (!camCb || camCb.checked) map.addLayer(cameraLayer);
-        } else {
+        // Staff (Прокуратура): all category layers OFF by default — user enables manually
+        if (isStaff && !window._staffInitDone) {
+            window._staffInitDone = true;
+            document.querySelectorAll('[data-filter]').forEach(function (cb) {
+                cb.checked = false;
+            });
+            // Remove all category layers from the map
+            Object.keys(layers).forEach(function (cat) {
+                if (map.hasLayer(layers[cat])) map.removeLayer(layers[cat]);
+            });
+            if (map.hasLayer(crimeErdrLayer)) map.removeLayer(crimeErdrLayer);
+            if (typeof avLayer !== "undefined" && map.hasLayer(avLayer)) map.removeLayer(avLayer);
+            if (typeof cameraLayer !== "undefined" && map.hasLayer(cameraLayer)) map.removeLayer(cameraLayer);
+            if (typeof policeLayer !== "undefined" && map.hasLayer(policeLayer)) map.removeLayer(policeLayer);
+            if (typeof schoolLayer !== "undefined" && map.hasLayer(schoolLayer)) map.removeLayer(schoolLayer);
+        } else if (!isStaff) {
+            var crimeCb = document.querySelector('[data-filter="crime"]');
+            if (!crimeCb || crimeCb.checked) map.addLayer(crimeErdrLayer);
             map.removeLayer(avLayer);
             map.removeLayer(cameraLayer);
         }
