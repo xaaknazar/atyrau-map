@@ -16,7 +16,7 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.heat/0.2.0/leaflet-heat.css" />
-    <link rel="stylesheet" href="css/style.css?v=7" />
+    <link rel="stylesheet" href="css/style.css?v=8" />
 </head>
 <body>
 
@@ -519,18 +519,39 @@
             </div>
             <!-- Табы -->
             <div class="analytics-tabs">
-                <button class="analytics-tab active" data-tab="overview">Обзор</button>
-                <button class="analytics-tab" data-tab="time">Время</button>
-                <button class="analytics-tab" data-tab="places">Улицы</button>
-                <button class="analytics-tab" data-tab="people">Лица</button>
-                <button class="analytics-tab" data-tab="zones">Зоны</button>
-                <button class="analytics-tab" data-tab="ai">AI-анализ</button>
+                <button class="analytics-tab active" data-tab="assistant" data-i18n="an_tab_assistant">ИИ Помощник</button>
+                <button class="analytics-tab" data-tab="overview" data-i18n="an_tab_overview">Обзор</button>
+                <button class="analytics-tab" data-tab="time" data-i18n="an_tab_time">Время</button>
+                <button class="analytics-tab" data-tab="places" data-i18n="an_tab_places">Улицы</button>
+                <button class="analytics-tab" data-tab="people" data-i18n="an_tab_people">Лица</button>
+                <button class="analytics-tab" data-tab="zones" data-i18n="an_tab_zones">Зоны</button>
+                <button class="analytics-tab" data-tab="ai" data-i18n="an_tab_ai">AI-анализ</button>
             </div>
         </div>
         <div class="analytics-body">
 
+            <!-- Таб: ИИ Помощник Прокурора -->
+            <div class="analytics-tab-content active" data-tab="assistant">
+                <div class="assistant-card">
+                    <div class="assistant-header">
+                        <div class="assistant-avatar">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M12 2a4 4 0 0 1 4 4v3h1a3 3 0 0 1 3 3v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-8a3 3 0 0 1 3-3h1V6a4 4 0 0 1 4-4z"/>
+                                <circle cx="9" cy="14" r="1"/><circle cx="15" cy="14" r="1"/>
+                                <line x1="9" y1="18" x2="15" y2="18"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 data-i18n="assistant_title">ИИ Помощник Прокурора</h3>
+                            <p data-i18n="assistant_subtitle">Аналитический брифинг по криминогенной обстановке</p>
+                        </div>
+                    </div>
+                    <div id="assistant-body" class="assistant-body"></div>
+                </div>
+            </div>
+
             <!-- Таб: Обзор -->
-            <div class="analytics-tab-content active" data-tab="overview">
+            <div class="analytics-tab-content" data-tab="overview">
                 <div class="an-stats-grid" id="an-overview-stats"></div>
                 <div class="an-section">
                     <h3>Топ статьи</h3>
@@ -950,15 +971,15 @@
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
     <script src="js/firebase-config.js?v=2"></script>
-    <script src="js/i18n.js?v=2"></script>
+    <script src="js/i18n.js?v=3"></script>
     <script src="js/photos.js?v=2"></script>
     <script src="js/crimes.js?v=2"></script>
     <script src="js/cameras.js?v=2"></script>
     <script src="js/police.js?v=2"></script>
     <script src="js/admin-violations.js?v=2"></script>
     <script src="js/schools.js?v=1"></script>
-    <script src="js/analytics.js?v=2"></script>
+    <script src="js/analytics.js?v=3"></script>
     <script src="js/data.js?v=2"></script>
-    <script src="js/app.js?v=9"></script>
+    <script src="js/app.js?v=10"></script>
 </body>
 </html>

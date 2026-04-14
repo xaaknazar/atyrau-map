@@ -864,6 +864,12 @@
 
         // Store for AI
         window._lastAnalysis = analysis;
+
+        // ── ИИ Помощник Прокурора (offline brief) ──
+        var assistantBody = document.getElementById("assistant-body");
+        if (assistantBody && typeof buildProsecutorBriefing === "function") {
+            assistantBody.innerHTML = buildProsecutorBriefing(analysis, filtered, currentLang || "ru");
+        }
     }
 
     function renderOverviewStats(a, filtered) {

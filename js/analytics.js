@@ -601,3 +601,205 @@ function requestAIAnalysis(summaryText, apiKey, callback) {
         callback(err, null);
     });
 }
+
+// ══════════════════════════════════════════════════════════════
+//  7. ИИ ПОМОЩНИК ПРОКУРОРА (offline rule-based briefing)
+// ══════════════════════════════════════════════════════════════
+
+/**
+ * Generate a structured analytical briefing for the Prosecutor.
+ * Pure function — no external API.
+ * Returns HTML string ready to inject.
+ */
+function buildProsecutorBriefing(analysis, allCrimes, lang) {
+    lang = lang || "ru";
+    var T = (typeof I18N !== "undefined" && I18N[lang]) ? I18N[lang] : {};
+    function tr(key, ru) { return T[key] || ru; }
+    function pct(n, total) { return total > 0 ? Math.round(n / total * 100) : 0; }
+    function escH(s) { var d = document.createElement("div"); d.textContent = s == null ? "" : String(s); return d.innerHTML; }
+
+    if (!analysis || analysis.total === 0) {
+        return '<div class="assistant-empty">' + tr("assistant_no_data", "Нет данных за выбранный период.") + '</div>';
+    }
+
+    var html = "";
+
+    // ── Краткое резюме ─────────────────────────────────────────
+    var publicPct = pct(analysis.publicCount, analysis.total);
+    var coordsPct = pct(analysis.withCoords, analysis.total);
+    html += '<div class="assistant-section">';
+    html += '<div class="assistant-section-title">📊 ' + tr("assistant_summary", "Краткое резюме") + '</div>';
+    html += '<div class="assistant-summary-grid">';
+    html += '<div class="assistant-stat"><div class="assistant-stat-value">' + analysis.total + '</div><div class="assistant-stat-label">' + tr("assistant_total", "Всего правонарушений") + '</div></div>';
+    html += '<div class="assistant-stat"><div class="assistant-stat-value">' + publicPct + '%</div><div class="assistant-stat-label">' + tr("assistant_public", "В общественных местах") + '</div></div>';
+    html += '<div class="assistant-stat"><div class="assistant-stat-value">' + analysis.byArticle.length + '</div><div class="assistant-stat-label">' + tr("assistant_articles_count", "Различных статей") + '</div></div>';
+    html += '<div class="assistant-stat"><div class="assistant-stat-value">' + analysis.problemZones.length + '</div><div class="assistant-stat-label">' + tr("assistant_zones", "Проблемных зон") + '</div></div>';
+    html += '</div></div>';
+
+    // ── Топ статей с распределением по местам ──────────────────
+    html += '<div class="assistant-section">';
+    html += '<div class="assistant-section-title">⚖️ ' + tr("assistant_top_articles", "Топ статей УК — структура преступности") + '</div>';
+    html += '<table class="assistant-table"><thead><tr>';
+    html += '<th>#</th><th>' + tr("assistant_article", "Статья") + '</th>';
+    html += '<th>' + tr("assistant_count", "Кол-во") + '</th>';
+    html += '<th>' + tr("assistant_share", "Доля") + '</th>';
+    html += '<th>' + tr("assistant_main_street", "Основная улица") + '</th>';
+    html += '</tr></thead><tbody>';
+    var topArt = analysis.byArticle.slice(0, 10);
+    topArt.forEach(function (a, i) {
+        var streetCounter = {};
+        allCrimes.forEach(function (c) {
+            if (c.article === a.label && c.street) {
+                streetCounter[c.street] = (streetCounter[c.street] || 0) + 1;
+            }
+        });
+        var topStreet = Object.keys(streetCounter).sort(function (x, y) { return streetCounter[y] - streetCounter[x]; })[0];
+        var streetText = topStreet ? (topStreet + " (" + streetCounter[topStreet] + ")") : "—";
+        html += '<tr>';
+        html += '<td>' + (i + 1) + '</td>';
+        html += '<td><strong>' + escH(a.label) + '</strong></td>';
+        html += '<td>' + a.count + '</td>';
+        html += '<td>' + pct(a.count, analysis.total) + '%</td>';
+        html += '<td class="muted">' + escH(streetText) + '</td>';
+        html += '</tr>';
+    });
+    html += '</tbody></table></div>';
+
+    // ── Топ улиц по преступности (с радиусом / горячими точками) ─
+    html += '<div class="assistant-section">';
+    html += '<div class="assistant-section-title">📍 ' + tr("assistant_top_streets", "Топ улиц с концентрацией преступлений") + '</div>';
+    html += '<div class="assistant-hint">' + tr("assistant_streets_hint", "Улицы, требующие усиленного прокурорского надзора и патрулирования") + '</div>';
+    html += '<table class="assistant-table"><thead><tr>';
+    html += '<th>#</th><th>' + tr("assistant_street", "Улица") + '</th>';
+    html += '<th>' + tr("assistant_count", "Кол-во") + '</th>';
+    html += '<th>' + tr("assistant_top_arts", "Топ-3 статьи") + '</th>';
+    html += '</tr></thead><tbody>';
+    var topStreets = analysis.byStreet.slice(0, 10);
+    topStreets.forEach(function (s, i) {
+        var artCount = {};
+        allCrimes.forEach(function (c) {
+            if (c.street === s.label && c.article) {
+                artCount[c.article] = (artCount[c.article] || 0) + 1;
+            }
+        });
+        var topArtsStr = Object.keys(artCount).sort(function (x, y) { return artCount[y] - artCount[x]; })
+            .slice(0, 3).map(function (a) { return a + " (" + artCount[a] + ")"; }).join(", ");
+        html += '<tr>';
+        html += '<td>' + (i + 1) + '</td>';
+        html += '<td><strong>' + escH(s.label) + '</strong></td>';
+        html += '<td>' + s.count + '</td>';
+        html += '<td class="muted">' + escH(topArtsStr || "—") + '</td>';
+        html += '</tr>';
+    });
+    html += '</tbody></table></div>';
+
+    // ── Горячие зоны (радиус ~500м) ────────────────────────────
+    var validZones = (analysis.problemZones || []).filter(function (z) { return z.count <= 50; });
+    if (validZones.length > 0) {
+        html += '<div class="assistant-section">';
+        html += '<div class="assistant-section-title">🔥 ' + tr("assistant_hot_zones", "Горячие зоны (радиус ~500 м)") + '</div>';
+        html += '<div class="assistant-hint">' + tr("assistant_zones_hint", "Кластеры преступности — приоритетные участки для оперативного реагирования") + '</div>';
+        validZones.slice(0, 5).forEach(function (z, i) {
+            var dangerCls = z.dangerLevel >= 3 ? "danger-high" : (z.dangerLevel >= 2 ? "danger-mid" : "danger-low");
+            html += '<div class="assistant-zone ' + dangerCls + '">';
+            html += '<div class="assistant-zone-head">';
+            html += '<span class="assistant-zone-num">#' + (i + 1) + '</span>';
+            html += '<span class="assistant-zone-count">' + z.count + ' ' + tr("assistant_cases", "случаев") + '</span>';
+            html += '<span class="assistant-zone-coords">' + z.lat.toFixed(4) + ', ' + z.lng.toFixed(4) + '</span>';
+            html += '</div>';
+            html += '<div class="assistant-zone-body">';
+            if (z.topArticle) html += '<div><strong>' + tr("assistant_main_article", "Основная статья") + ':</strong> ' + escH(z.topArticle) + '</div>';
+            if (typeof z.peakHour === "number") html += '<div><strong>' + tr("assistant_peak_hour", "Пиковый час") + ':</strong> ' + ("0" + z.peakHour).slice(-2) + ':00</div>';
+            html += '</div>';
+            html += '</div>';
+        });
+        html += '</div>';
+    }
+
+    // ── Время повышенного риска ───────────────────────────────
+    var hourPeaks = [];
+    analysis.byHour.forEach(function (count, h) { hourPeaks.push({ h: h, c: count }); });
+    hourPeaks.sort(function (a, b) { return b.c - a.c; });
+    var top3Hours = hourPeaks.slice(0, 3).filter(function (x) { return x.c > 0; });
+    var dayPeaks = analysis.byDayOfWeek.labels.map(function (d, i) { return { d: d, c: analysis.byDayOfWeek.counts[i] }; })
+        .sort(function (a, b) { return b.c - a.c; });
+    html += '<div class="assistant-section">';
+    html += '<div class="assistant-section-title">⏰ ' + tr("assistant_time_pattern", "Опасное время") + '</div>';
+    html += '<div class="assistant-time-grid">';
+    html += '<div><strong>' + tr("assistant_peak_hours", "Пиковые часы") + ':</strong><br>';
+    html += top3Hours.map(function (x) { return ("0" + x.h).slice(-2) + ':00 (' + x.c + ')'; }).join(" · ") + '</div>';
+    html += '<div><strong>' + tr("assistant_peak_day", "Самый опасный день") + ':</strong><br>' + escH(dayPeaks[0].d) + ' (' + dayPeaks[0].c + ' ' + tr("assistant_cases", "случаев") + ')</div>';
+    html += '</div></div>';
+
+    // ── Тренд (последний месяц vs предыдущий) ─────────────────
+    if (analysis.byMonth && analysis.byMonth.counts && analysis.byMonth.counts.length >= 2) {
+        var c = analysis.byMonth.counts;
+        var last = c[c.length - 1];
+        var prev = c[c.length - 2];
+        var diff = last - prev;
+        var diffPct = prev > 0 ? Math.round(diff / prev * 100) : 0;
+        var trendIcon = diff > 0 ? "↑" : (diff < 0 ? "↓" : "→");
+        var trendCls = diff > 0 ? "trend-up" : (diff < 0 ? "trend-down" : "trend-flat");
+        html += '<div class="assistant-section">';
+        html += '<div class="assistant-section-title">📈 ' + tr("assistant_trend", "Тренд за последний месяц") + '</div>';
+        html += '<div class="assistant-trend ' + trendCls + '">';
+        html += trendIcon + ' ' + (diff >= 0 ? "+" : "") + diff + ' ' + tr("assistant_cases", "случаев") + ' (' + (diffPct >= 0 ? "+" : "") + diffPct + '%) ' + tr("assistant_vs_prev", "к прошлому месяцу");
+        html += '</div></div>';
+    }
+
+    // ── Демография нарушителей ────────────────────────────────
+    if (analysis.people) {
+        var p = analysis.people;
+        html += '<div class="assistant-section">';
+        html += '<div class="assistant-section-title">👤 ' + tr("assistant_offenders", "Профиль правонарушителей") + '</div>';
+        html += '<div class="assistant-people-grid">';
+        if (p.total) html += '<div><strong>' + tr("assistant_people_total", "Всего лиц") + ':</strong> ' + p.total + '</div>';
+        if (p.minors) html += '<div><strong>' + tr("assistant_minors", "Несовершеннолетних") + ':</strong> ' + p.minors + ' (' + pct(p.minors, p.total) + '%)</div>';
+        if (p.byGender && p.byGender[0]) html += '<div><strong>' + tr("assistant_top_gender", "Преобл. пол") + ':</strong> ' + escH(p.byGender[0].label) + ' (' + p.byGender[0].count + ')</div>';
+        if (p.byAge && p.byAge[0]) html += '<div><strong>' + tr("assistant_top_age", "Возрастная группа") + ':</strong> ' + escH(p.byAge[0].label) + '</div>';
+        if (p.byOccupation && p.byOccupation[0]) html += '<div><strong>' + tr("assistant_top_occupation", "Род занятий") + ':</strong> ' + escH(p.byOccupation[0].label) + '</div>';
+        html += '</div></div>';
+    }
+
+    // ── Рекомендации для прокурора ────────────────────────────
+    var recs = [];
+    if (top3Hours.length > 0) {
+        recs.push(tr("rec_patrol", "Усилить патрулирование в пиковые часы:") + " " + top3Hours.map(function (x) { return ("0" + x.h).slice(-2) + ":00"; }).join(", "));
+    }
+    if (topStreets.length > 0) {
+        recs.push(tr("rec_streets", "Установить надзор на улицах:") + " " + topStreets.slice(0, 3).map(function (s) { return s.label; }).join(", "));
+    }
+    if (validZones.length > 0) {
+        recs.push(tr("rec_cameras", "Рассмотреть установку камер видеонаблюдения в горячих зонах #1–#") + (Math.min(3, validZones.length)));
+    }
+    if (publicPct >= 50) {
+        recs.push(tr("rec_public", "Доля преступлений в общественных местах превышает 50% — требуется межведомственное взаимодействие с акиматом и полицией"));
+    }
+    if (topArt.length > 0) {
+        recs.push(tr("rec_article", "Приоритетная статья УК — ") + topArt[0].label + " (" + topArt[0].count + " " + tr("assistant_cases", "случаев") + "). " + tr("rec_article_action", "Провести анализ причин и условий."));
+    }
+    if (analysis.people && analysis.people.minors && analysis.people.minors > 0) {
+        recs.push(tr("rec_minors", "Среди правонарушителей выявлено") + " " + analysis.people.minors + " " + tr("rec_minors_action", "несовершеннолетних — направить материалы в комиссию по делам несовершеннолетних"));
+    }
+    if (recs.length > 0) {
+        html += '<div class="assistant-section assistant-recommendations">';
+        html += '<div class="assistant-section-title">✅ ' + tr("assistant_recommendations", "Рекомендации прокурору") + '</div>';
+        html += '<ol class="assistant-rec-list">';
+        recs.forEach(function (r) { html += '<li>' + escH(r) + '</li>'; });
+        html += '</ol></div>';
+    }
+
+    // ── Что ещё можно сделать ────────────────────────────────
+    html += '<div class="assistant-section assistant-extra">';
+    html += '<div class="assistant-section-title">💡 ' + tr("assistant_extra", "Дополнительные возможности") + '</div>';
+    html += '<ul class="assistant-rec-list">';
+    html += '<li>' + tr("extra_predict", "Прогнозирование риска по дням и зонам на основании исторических трендов") + '</li>';
+    html += '<li>' + tr("extra_correlate", "Корреляция с инфраструктурой: освещение, камеры, заброшенные здания") + '</li>';
+    html += '<li>' + tr("extra_repeat", "Выявление повторных правонарушителей по ФИО и адресам") + '</li>';
+    html += '<li>' + tr("extra_routes", "Построение маршрутов прокурорских проверок по горячим зонам") + '</li>';
+    html += '<li>' + tr("extra_export", "Экспорт брифинга в PDF для отчёта руководству") + '</li>';
+    html += '<li>' + tr("extra_alerts", "Уведомления при резком росте преступности на конкретной улице") + '</li>';
+    html += '</ul></div>';
+
+    return html;
+}
