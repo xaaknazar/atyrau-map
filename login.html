@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+    <title>Вход — Карта прокуратуры г. Атырау</title>
+    <link rel="manifest" href="manifest.json" />
+    <style>
+        * { box-sizing: border-box; }
+        html, body {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            background: #f4f6f9;
+            color: #1f2937;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+        .login-lang {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            gap: 2px;
+        }
+        .login-lang button {
+            padding: 6px 12px;
+            background: #fff;
+            color: #6b7280;
+            border: 1px solid #d1d5db;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+        .login-lang button:first-child { border-radius: 4px 0 0 4px; }
+        .login-lang button:last-child { border-radius: 0 4px 4px 0; margin-left: -1px; }
+        .login-lang button.active {
+            background: #1e3a5f;
+            color: #fff;
+            border-color: #1e3a5f;
+            position: relative;
+            z-index: 1;
+        }
+
+        .login-page {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+        }
+        .login-container {
+            width: 100%;
+            max-width: 420px;
+            text-align: center;
+        }
+        .login-header {
+            margin-bottom: 28px;
+        }
+        .login-header img {
+            width: 72px;
+            height: 72px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-bottom: 16px;
+            border: 2px solid #e5e7eb;
+        }
+        .login-header h1 {
+            margin: 0 0 6px;
+            font-size: 18px;
+            font-weight: 600;
+            color: #111827;
+            letter-spacing: 0.2px;
+        }
+        .login-header p {
+            margin: 0;
+            color: #6b7280;
+            font-size: 13px;
+        }
+
+        .login-card {
+            background: #fff;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 28px 28px 24px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+            text-align: left;
+        }
+        .login-card-title {
+            font-size: 15px;
+            font-weight: 600;
+            color: #111827;
+            margin: 0 0 20px;
+            text-align: center;
+        }
+
+        .role-tabs {
+            display: flex;
+            border-bottom: 1px solid #e5e7eb;
+            margin-bottom: 20px;
+        }
+        .role-tab {
+            flex: 1;
+            padding: 10px 8px;
+            background: none;
+            border: none;
+            border-bottom: 2px solid transparent;
+            color: #6b7280;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: color 0.15s, border-color 0.15s;
+        }
+        .role-tab:hover { color: #111827; }
+        .role-tab.active {
+            color: #1e3a5f;
+            border-bottom-color: #1e3a5f;
+        }
+
+        .login-field {
+            margin-bottom: 16px;
+        }
+        .login-field label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.4px;
+        }
+        .login-field input {
+            width: 100%;
+            padding: 10px 12px;
+            background: #fff;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            color: #111827;
+            font-size: 14px;
+            letter-spacing: 2px;
+            transition: border-color 0.15s, box-shadow 0.15s;
+        }
+        .login-field input:focus {
+            outline: none;
+            border-color: #1e3a5f;
+            box-shadow: 0 0 0 3px rgba(30,58,95,0.1);
+        }
+
+        .login-submit {
+            width: 100%;
+            padding: 11px;
+            background: #1e3a5f;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+        .login-submit:hover { background: #162a47; }
+        .login-submit:active { background: #0f1f36; }
+
+        .login-error {
+            color: #dc2626;
+            font-size: 13px;
+            margin-top: 10px;
+            min-height: 18px;
+            text-align: center;
+        }
+
+        .login-back {
+            display: inline-block;
+            margin-top: 20px;
+            color: #6b7280;
+            text-decoration: none;
+            font-size: 13px;
+        }
+        .login-back:hover { color: #111827; }
+
+        .login-footer {
+            margin-top: 32px;
+            color: #9ca3af;
+            font-size: 11px;
+            letter-spacing: 0.3px;
+        }
+
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+    <div class="login-lang">
+        <button class="lang-btn" data-lang="ru">RU</button>
+        <button class="lang-btn" data-lang="kz">KZ</button>
+    </div>
+
+    <div class="login-page">
+        <div class="login-container">
+            <div class="login-header">
+                <img src="images/placeholders/logos.jpeg" alt="Логотип" />
+                <h1 data-i18n="title">Цифровая карта прокуратуры г. Атырау</h1>
+                <p data-i18n="subtitle">Мониторинг безопасности городской среды</p>
+            </div>
+
+            <div class="login-card">
+                <div class="login-card-title" data-i18n="login_card_title">Вход в систему</div>
+
+                <div class="role-tabs">
+                    <button type="button" class="role-tab active" data-role="staff" data-i18n="staff_role_tab">Прокуратура</button>
+                    <button type="button" class="role-tab" data-role="akimat" data-i18n="akimat_role_tab">Акимат</button>
+                </div>
+
+                <!-- Staff -->
+                <div class="role-form" id="form-staff">
+                    <div class="login-field">
+                        <label data-i18n="login_password_label">Пароль</label>
+                        <input type="password" id="staff-pwd" autocomplete="off" />
+                    </div>
+                    <button class="login-submit" id="staff-submit" data-i18n="login_submit">Войти</button>
+                    <div class="login-error" id="staff-err"></div>
+                </div>
+
+                <!-- Akimat -->
+                <div class="role-form hidden" id="form-akimat">
+                    <div class="login-field">
+                        <label data-i18n="login_password_label">Пароль</label>
+                        <input type="password" id="akimat-pwd" autocomplete="off" />
+                    </div>
+                    <button class="login-submit" id="akimat-submit" data-i18n="login_submit">Войти</button>
+                    <div class="login-error" id="akimat-err"></div>
+                </div>
+            </div>
+
+            <a href="/" class="login-back" data-i18n="login_back">← Вернуться на карту (гостевой режим)</a>
+        </div>
+    </div>
+
+    <script src="js/i18n.js?v=3"></script>
+    <script>
+        (function () {
+            var saved = localStorage.getItem("atyrau-map-lang") || "ru";
+            setLanguage(saved);
+        })();
+        document.querySelectorAll(".lang-btn").forEach(function (btn) {
+            btn.addEventListener("click", function () {
+                setLanguage(this.getAttribute("data-lang"));
+            });
+        });
+
+        // Tab switching
+        document.querySelectorAll(".role-tab").forEach(function (tab) {
+            tab.addEventListener("click", function () {
+                var role = this.getAttribute("data-role");
+                document.querySelectorAll(".role-tab").forEach(function (t) { t.classList.remove("active"); });
+                this.classList.add("active");
+                document.getElementById("form-staff").classList.toggle("hidden", role !== "staff");
+                document.getElementById("form-akimat").classList.toggle("hidden", role !== "akimat");
+                var input = document.getElementById(role + "-pwd");
+                if (input) input.focus();
+            });
+        });
+
+        var STAFF_PASSWORD = "1345";
+        var AKIMAT_PASSWORD = "aa123";
+
+        function tryStaff() {
+            var pwd = document.getElementById("staff-pwd").value;
+            if (pwd === STAFF_PASSWORD) {
+                localStorage.setItem("atyrau-auth-role", "staff");
+                window.location.href = "/";
+            } else {
+                document.getElementById("staff-err").textContent = I18N[currentLang].staff_login_error || "Неверный пароль";
+            }
+        }
+        function tryAkimat() {
+            var pwd = document.getElementById("akimat-pwd").value;
+            if (pwd === AKIMAT_PASSWORD) {
+                localStorage.setItem("atyrau-auth-role", "akimat");
+                window.location.href = "/akimat";
+            } else {
+                document.getElementById("akimat-err").textContent = I18N[currentLang].akimat_login_error || "Неверный пароль";
+            }
+        }
+
+        document.getElementById("staff-submit").addEventListener("click", tryStaff);
+        document.getElementById("akimat-submit").addEventListener("click", tryAkimat);
+        document.getElementById("staff-pwd").addEventListener("keydown", function (e) {
+            if (e.key === "Enter") tryStaff();
+        });
+        document.getElementById("akimat-pwd").addEventListener("keydown", function (e) {
+            if (e.key === "Enter") tryAkimat();
+        });
+    </script>
+</body>
+</html>

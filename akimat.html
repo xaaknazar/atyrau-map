@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Заявки жителей — Акимат г. Атырау</title>
+    <link rel="stylesheet" href="css/style.css?v=5" />
+    <link rel="manifest" href="manifest.json" />
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            background: #0f1624;
+            color: #e0e6f0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            min-height: 100vh;
+        }
+        .akimat-page {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 0 20px 40px;
+        }
+        .akimat-page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 18px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        .akimat-page-header h1 {
+            margin: 0;
+            font-size: 20px;
+            color: #f39c12;
+        }
+        .akimat-page-controls {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+        .akimat-page-controls a {
+            padding: 8px 14px;
+            background: rgba(255,255,255,0.05);
+            color: #e0e6f0;
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 8px;
+            font-size: 13px;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+        .akimat-page-controls a:hover { background: rgba(255,255,255,0.1); }
+        .akimat-page-controls button {
+            padding: 8px 14px;
+            background: #c0392b;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .akimat-lang { display: flex; gap: 4px; }
+        .akimat-lang button {
+            padding: 6px 12px;
+            background: rgba(255,255,255,0.05);
+            color: #8892b0;
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .akimat-lang button.active {
+            background: #3498db;
+            color: #fff;
+            border-color: #3498db;
+        }
+        .akimat-page .akimat-tabs {
+            padding: 0;
+            margin-bottom: 16px;
+        }
+        .akimat-page .akimat-panel-body {
+            padding: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="akimat-page">
+        <div class="akimat-page-header">
+            <h1 data-i18n="akimat_page_title">Заявки жителей — Акимат г. Атырау</h1>
+            <div class="akimat-page-controls">
+                <div class="akimat-lang">
+                    <button class="lang-btn" data-lang="ru">RU</button>
+                    <button class="lang-btn" data-lang="kz">KZ</button>
+                </div>
+                <a href="/" data-i18n="akimat_back_to_map">← На карту</a>
+                <button id="akimat-logout" data-i18n="akimat_logout_btn">Выйти</button>
+            </div>
+        </div>
+
+        <div class="akimat-tabs">
+            <button class="akimat-tab active" data-tab="new" data-i18n="akimat_tab_new">Новые</button>
+            <button class="akimat-tab" data-tab="inprogress" data-i18n="akimat_tab_inprogress">В работе</button>
+            <button class="akimat-tab" data-tab="archive" data-i18n="akimat_tab_archive">Архив</button>
+        </div>
+
+        <div id="akimat-panel-body" class="akimat-panel-body"></div>
+    </div>
+
+    <!-- Accept dialog -->
+    <div id="akimat-accept-overlay" class="hidden">
+        <div id="akimat-accept-modal">
+            <button id="akimat-accept-close" aria-label="Закрыть">&times;</button>
+            <h2 data-i18n="akimat_accept_title">Принять заявку в работу</h2>
+            <div class="login-form">
+                <label data-i18n="akimat_accept_days_label">За сколько дней устраните проблему?</label>
+                <input type="number" id="akimat-accept-days" min="1" max="365" value="30" />
+                <div class="akimat-modal-actions">
+                    <button id="akimat-accept-cancel" class="btn-secondary" data-i18n="akimat_cancel">Отмена</button>
+                    <button id="akimat-accept-submit" class="btn-primary" data-i18n="akimat_accept_confirm">Подтвердить</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reject dialog -->
+    <div id="akimat-reject-overlay" class="hidden">
+        <div id="akimat-reject-modal">
+            <button id="akimat-reject-close" aria-label="Закрыть">&times;</button>
+            <h2 data-i18n="akimat_reject_title">Отклонить заявку</h2>
+            <div class="login-form">
+                <label data-i18n="akimat_reject_reason_label">Причина отклонения:</label>
+                <textarea id="akimat-reject-reason" rows="4" placeholder="..."></textarea>
+                <div class="akimat-modal-actions">
+                    <button id="akimat-reject-cancel" class="btn-secondary" data-i18n="akimat_cancel">Отмена</button>
+                    <button id="akimat-reject-submit" class="btn-danger" data-i18n="akimat_reject_confirm">Отклонить</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+    <script src="js/firebase-config.js?v=1"></script>
+    <script src="js/i18n.js?v=2"></script>
+    <script src="js/data.js?v=1"></script>
+    <script src="js/akimat-page.js?v=1"></script>
+</body>
+</html>
