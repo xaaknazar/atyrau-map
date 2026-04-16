@@ -1,0 +1,1532 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Мониторинг интернет-мошенничества — Прокуратура г. Атырау</title>
+    <link rel="icon" type="image/png" sizes="192x192" href="images/icon-192x192.png" />
+    <link rel="manifest" href="manifest.json" />
+    <meta name="theme-color" content="#0f1624" />
+    <style>
+        :root {
+            --bg: #0b1220;
+            --bg-2: #111a2e;
+            --panel: #16213e;
+            --panel-2: #1a243f;
+            --border: rgba(255,255,255,0.08);
+            --text: #e6ecf5;
+            --muted: #8892b0;
+            --primary: #3498db;
+            --accent: #f39c12;
+            --danger: #e74c3c;
+            --success: #27ae60;
+            --warning: #e67e22;
+            --purple: #9b59b6;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body {
+            background: radial-gradient(ellipse at top, #16213e 0%, #0b1220 55%) fixed;
+            color: var(--text);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Inter, sans-serif;
+            min-height: 100vh;
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+        }
+        a { color: inherit; text-decoration: none; }
+        button { font-family: inherit; cursor: pointer; }
+
+        /* ====== Top nav ====== */
+        .top-nav {
+            position: sticky;
+            top: 0;
+            z-index: 20;
+            background: rgba(11, 18, 32, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+        }
+        .top-nav-inner {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 14px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+        }
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .brand img {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            object-fit: cover;
+            background: #fff;
+        }
+        .brand-text .b-title {
+            font-size: 14px;
+            font-weight: 700;
+            letter-spacing: 0.2px;
+        }
+        .brand-text .b-sub {
+            font-size: 11px;
+            color: var(--muted);
+            margin-top: 2px;
+        }
+        .top-nav-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .nav-chip {
+            padding: 7px 12px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 600;
+            border: 1px solid var(--border);
+            background: rgba(255,255,255,0.04);
+            color: var(--muted);
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .nav-chip .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--success);
+            box-shadow: 0 0 0 0 rgba(39, 174, 96, 0.7);
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%   { box-shadow: 0 0 0 0 rgba(39, 174, 96, 0.5); }
+            70%  { box-shadow: 0 0 0 8px rgba(39, 174, 96, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(39, 174, 96, 0); }
+        }
+        .nav-btn {
+            padding: 8px 14px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            border: 1px solid var(--border);
+            background: rgba(255,255,255,0.04);
+            color: var(--text);
+            transition: background 0.2s, border-color 0.2s;
+        }
+        .nav-btn:hover { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.16); }
+        .nav-btn.primary {
+            background: var(--primary);
+            border-color: var(--primary);
+        }
+        .nav-btn.primary:hover { background: #2d87c9; border-color: #2d87c9; }
+
+        /* ====== Layout ====== */
+        .container {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 28px 24px 60px;
+        }
+
+        /* ====== Hero ====== */
+        .hero {
+            position: relative;
+            background: linear-gradient(135deg, rgba(52,152,219,0.10) 0%, rgba(243,156,18,0.08) 100%);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 36px 36px 32px;
+            overflow: hidden;
+        }
+        .hero::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background:
+              radial-gradient(circle at 10% 20%, rgba(52,152,219,0.18), transparent 40%),
+              radial-gradient(circle at 90% 80%, rgba(231,76,60,0.14), transparent 40%);
+            pointer-events: none;
+        }
+        .hero-tag {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 12px;
+            border-radius: 999px;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.6px;
+            text-transform: uppercase;
+            background: rgba(243,156,18,0.15);
+            color: var(--accent);
+            border: 1px solid rgba(243,156,18,0.3);
+        }
+        .hero h1 {
+            position: relative;
+            font-size: 34px;
+            line-height: 1.15;
+            margin-top: 16px;
+            max-width: 820px;
+        }
+        .hero h1 span.accent { color: var(--accent); }
+        .hero p.lede {
+            position: relative;
+            color: var(--muted);
+            max-width: 780px;
+            margin-top: 14px;
+            font-size: 15px;
+        }
+        .hero-stats {
+            position: relative;
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 16px;
+            margin-top: 28px;
+        }
+        .hero-stat {
+            background: rgba(11,18,32,0.55);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 16px 18px;
+        }
+        .hero-stat .label {
+            font-size: 11px;
+            color: var(--muted);
+            letter-spacing: 0.4px;
+            text-transform: uppercase;
+        }
+        .hero-stat .value {
+            font-size: 26px;
+            font-weight: 700;
+            margin-top: 6px;
+        }
+        .hero-stat .value.danger  { color: var(--danger); }
+        .hero-stat .value.warn    { color: var(--accent); }
+        .hero-stat .value.success { color: var(--success); }
+        .hero-stat .delta {
+            font-size: 11px;
+            margin-top: 4px;
+            color: var(--muted);
+        }
+        .hero-stat .delta.up   { color: var(--danger); }
+        .hero-stat .delta.down { color: var(--success); }
+
+        /* ====== Section ====== */
+        .section {
+            margin-top: 36px;
+        }
+        .section-head {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+        .section-head h2 {
+            font-size: 20px;
+            font-weight: 700;
+        }
+        .section-head .hint {
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        /* ====== About / cards grid ====== */
+        .about-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 16px;
+        }
+        .about-card {
+            position: relative;
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 20px 20px 22px;
+            overflow: hidden;
+        }
+        .about-card::before {
+            content: "";
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+            opacity: 0.7;
+        }
+        .about-card.is-danger::before  { background: linear-gradient(90deg, var(--danger), var(--accent)); }
+        .about-card.is-success::before { background: linear-gradient(90deg, var(--success), var(--primary)); }
+
+        .about-card .ico {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: grid;
+            place-items: center;
+            background: rgba(52,152,219,0.12);
+            color: var(--primary);
+            margin-bottom: 12px;
+            font-size: 20px;
+        }
+        .about-card.is-danger  .ico { background: rgba(231,76,60,0.14); color: var(--danger); }
+        .about-card.is-success .ico { background: rgba(39,174,96,0.14);  color: var(--success); }
+
+        .about-card h3 {
+            font-size: 15px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            color: var(--text);
+        }
+        .about-card ul {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .about-card li {
+            position: relative;
+            padding-left: 22px;
+            font-size: 13.5px;
+            color: #c7d1e1;
+            line-height: 1.45;
+        }
+        .about-card li::before {
+            content: "";
+            position: absolute;
+            left: 0;
+            top: 6px;
+            width: 12px;
+            height: 12px;
+            border-radius: 3px;
+            background: rgba(52,152,219,0.18);
+            border: 1px solid rgba(52,152,219,0.45);
+        }
+        .about-card.is-danger li::before  { background: rgba(231,76,60,0.16); border-color: rgba(231,76,60,0.5); }
+        .about-card.is-success li::before { background: rgba(39,174,96,0.16);  border-color: rgba(39,174,96,0.5); }
+
+        /* Essence banner */
+        .essence {
+            background: linear-gradient(135deg, rgba(52,152,219,0.10), rgba(155,89,182,0.10));
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 24px 26px;
+            display: grid;
+            grid-template-columns: 220px 1fr;
+            gap: 22px;
+            align-items: center;
+        }
+        .essence .e-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            color: var(--primary);
+            font-weight: 700;
+        }
+        .essence h3 {
+            font-size: 17px;
+            margin-top: 8px;
+            margin-bottom: 10px;
+        }
+        .essence p {
+            color: #c7d1e1;
+            font-size: 14px;
+            line-height: 1.55;
+        }
+        .essence .e-viz {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+        }
+        .src-chip {
+            background: rgba(11,18,32,0.6);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 10px 12px;
+            font-size: 12px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #c7d1e1;
+        }
+        .src-chip .sc-dot {
+            width: 8px; height: 8px; border-radius: 50%;
+            background: var(--success);
+        }
+        .src-chip.ig .sc-dot { background: #e1306c; }
+        .src-chip.tt .sc-dot { background: #25f4ee; }
+        .src-chip.fb .sc-dot { background: #1877f2; }
+        .src-chip.tg .sc-dot { background: #229ed9; }
+        .src-chip.ol .sc-dot { background: var(--accent); }
+        .src-chip.sm .sc-dot { background: var(--purple); }
+
+        /* ====== Dashboard toolbar ====== */
+        .toolbar {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 14px 16px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .toolbar-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            align-items: center;
+        }
+        .filter-chip {
+            padding: 7px 13px;
+            border-radius: 999px;
+            border: 1px solid var(--border);
+            background: rgba(255,255,255,0.04);
+            color: var(--muted);
+            font-size: 12.5px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.15s;
+        }
+        .filter-chip:hover { color: var(--text); border-color: rgba(255,255,255,0.2); }
+        .filter-chip.active {
+            background: rgba(52,152,219,0.15);
+            color: var(--primary);
+            border-color: rgba(52,152,219,0.5);
+        }
+        .filter-chip .count {
+            display: inline-block;
+            min-width: 20px;
+            padding: 1px 6px;
+            border-radius: 10px;
+            background: rgba(255,255,255,0.08);
+            color: var(--muted);
+            font-size: 11px;
+            text-align: center;
+        }
+        .filter-chip.active .count {
+            background: rgba(52,152,219,0.25);
+            color: var(--primary);
+        }
+        .toolbar-label {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            color: var(--muted);
+            margin-right: 4px;
+        }
+        .search-box {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(11,18,32,0.6);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 6px 12px;
+            min-width: 220px;
+        }
+        .search-box svg {
+            width: 14px; height: 14px;
+            color: var(--muted);
+            flex-shrink: 0;
+        }
+        .search-box input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            outline: none;
+            color: var(--text);
+            font-size: 13px;
+        }
+        .search-box input::placeholder { color: var(--muted); }
+
+        /* KPI cards (секция после тулбара) */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 14px;
+        }
+        .kpi {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-left: 3px solid var(--primary);
+            border-radius: 12px;
+            padding: 14px 16px;
+        }
+        .kpi.danger  { border-left-color: var(--danger); }
+        .kpi.warn    { border-left-color: var(--accent); }
+        .kpi.success { border-left-color: var(--success); }
+        .kpi.purple  { border-left-color: var(--purple); }
+        .kpi .label {
+            font-size: 11px;
+            color: var(--muted);
+            letter-spacing: 0.4px;
+            text-transform: uppercase;
+        }
+        .kpi .val {
+            font-size: 22px;
+            font-weight: 700;
+            margin-top: 4px;
+        }
+        .kpi .sub {
+            font-size: 11px;
+            color: var(--muted);
+            margin-top: 3px;
+        }
+
+        /* ====== Feed (лента публикаций) ====== */
+        .feed {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 14px;
+        }
+        .post {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 16px 18px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            position: relative;
+            transition: border-color 0.15s, transform 0.15s;
+        }
+        .post:hover { border-color: rgba(255,255,255,0.18); transform: translateY(-1px); }
+        .post.risk-high    { border-left: 4px solid var(--danger); }
+        .post.risk-medium  { border-left: 4px solid var(--accent); }
+        .post.risk-low     { border-left: 4px solid var(--primary); }
+
+        .post-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 12px;
+        }
+        .post-author {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            min-width: 0;
+        }
+        .post-avatar {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #3498db, #9b59b6);
+            display: grid;
+            place-items: center;
+            color: #fff;
+            font-weight: 700;
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+        .post-meta { min-width: 0; }
+        .post-meta .name {
+            font-size: 13.5px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 220px;
+        }
+        .post-meta .sub {
+            font-size: 11.5px;
+            color: var(--muted);
+            margin-top: 2px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .src-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 2px 8px;
+            border-radius: 999px;
+            font-size: 10.5px;
+            font-weight: 700;
+            letter-spacing: 0.3px;
+            text-transform: uppercase;
+            background: rgba(255,255,255,0.06);
+            border: 1px solid var(--border);
+            color: #c7d1e1;
+        }
+        .src-badge.ig { color: #e1306c; border-color: rgba(225,48,108,0.35); background: rgba(225,48,108,0.08); }
+        .src-badge.tt { color: #25f4ee; border-color: rgba(37,244,238,0.35); background: rgba(37,244,238,0.08); }
+        .src-badge.fb { color: #4b9cff; border-color: rgba(75,156,255,0.35); background: rgba(75,156,255,0.08); }
+        .src-badge.tg { color: #46c2ff; border-color: rgba(70,194,255,0.35); background: rgba(70,194,255,0.08); }
+        .src-badge.ol { color: var(--accent); border-color: rgba(243,156,18,0.35); background: rgba(243,156,18,0.08); }
+
+        .risk-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 5px 10px;
+            border-radius: 999px;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.3px;
+            text-transform: uppercase;
+            flex-shrink: 0;
+        }
+        .risk-badge.high   { background: rgba(231,76,60,0.15);  color: var(--danger);  border: 1px solid rgba(231,76,60,0.4); }
+        .risk-badge.medium { background: rgba(243,156,18,0.15); color: var(--accent);  border: 1px solid rgba(243,156,18,0.4); }
+        .risk-badge.low    { background: rgba(52,152,219,0.15); color: var(--primary); border: 1px solid rgba(52,152,219,0.4); }
+        .risk-badge .bar {
+            width: 34px;
+            height: 4px;
+            border-radius: 2px;
+            background: rgba(255,255,255,0.15);
+            position: relative;
+            overflow: hidden;
+        }
+        .risk-badge .bar::after {
+            content: "";
+            position: absolute;
+            left: 0; top: 0; bottom: 0;
+            background: currentColor;
+        }
+        .risk-badge.high   .bar::after { width: 95%; }
+        .risk-badge.medium .bar::after { width: 60%; }
+        .risk-badge.low    .bar::after { width: 28%; }
+
+        .post-text {
+            font-size: 13.5px;
+            color: #d7dfee;
+            line-height: 1.5;
+            max-height: 5.4em;
+            overflow: hidden;
+            display: -webkit-box;
+            -webkit-line-clamp: 4;
+            -webkit-box-orient: vertical;
+        }
+        .post-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+        .post-tag {
+            font-size: 11px;
+            padding: 3px 8px;
+            border-radius: 6px;
+            background: rgba(231,76,60,0.12);
+            color: #ff9a8f;
+            border: 1px solid rgba(231,76,60,0.25);
+        }
+        .post-tag.neutral {
+            background: rgba(255,255,255,0.06);
+            color: #c7d1e1;
+            border-color: var(--border);
+        }
+
+        .post-foot {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-top: 10px;
+            border-top: 1px solid var(--border);
+            font-size: 11.5px;
+            color: var(--muted);
+        }
+        .post-foot .score {
+            font-weight: 700;
+            color: var(--text);
+        }
+        .post-actions {
+            display: flex;
+            gap: 6px;
+        }
+        .post-btn {
+            padding: 6px 10px;
+            border-radius: 8px;
+            font-size: 11.5px;
+            font-weight: 600;
+            border: 1px solid var(--border);
+            background: rgba(255,255,255,0.04);
+            color: #c7d1e1;
+            transition: all 0.15s;
+        }
+        .post-btn:hover { color: var(--text); border-color: rgba(255,255,255,0.2); }
+        .post-btn.danger { color: var(--danger); border-color: rgba(231,76,60,0.3); }
+        .post-btn.danger:hover { background: rgba(231,76,60,0.12); }
+
+        .feed-empty {
+            grid-column: 1 / -1;
+            text-align: center;
+            color: var(--muted);
+            padding: 40px 20px;
+            background: var(--panel);
+            border: 1px dashed var(--border);
+            border-radius: 14px;
+        }
+
+        /* ====== Analytics (графики) ====== */
+        .analytics-grid {
+            display: grid;
+            grid-template-columns: 1.1fr 1fr;
+            gap: 16px;
+        }
+        .panel {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 18px 20px;
+        }
+        .panel h3 {
+            font-size: 14px;
+            font-weight: 700;
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .panel h3 .tag {
+            font-size: 10px;
+            font-weight: 600;
+            padding: 2px 8px;
+            border-radius: 999px;
+            background: rgba(52,152,219,0.15);
+            color: var(--primary);
+            letter-spacing: 0.4px;
+            text-transform: uppercase;
+        }
+
+        /* Горизонтальные бары категорий */
+        .hbars { display: flex; flex-direction: column; gap: 12px; }
+        .hbar-row {
+            display: grid;
+            grid-template-columns: 180px 1fr 48px;
+            align-items: center;
+            gap: 12px;
+            font-size: 12.5px;
+        }
+        .hbar-row .name { color: #d7dfee; }
+        .hbar-row .count { color: var(--muted); text-align: right; font-variant-numeric: tabular-nums; }
+        .hbar {
+            height: 10px;
+            background: rgba(255,255,255,0.06);
+            border-radius: 6px;
+            overflow: hidden;
+            position: relative;
+        }
+        .hbar > span {
+            display: block;
+            height: 100%;
+            border-radius: 6px;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+            width: 0;
+            transition: width 0.8s cubic-bezier(.2,.8,.2,1);
+        }
+        .hbar.is-danger  > span { background: linear-gradient(90deg, var(--danger), var(--accent)); }
+        .hbar.is-warn    > span { background: linear-gradient(90deg, var(--accent), #f1c40f); }
+        .hbar.is-primary > span { background: linear-gradient(90deg, var(--primary), #5dade2); }
+        .hbar.is-purple  > span { background: linear-gradient(90deg, var(--purple), var(--primary)); }
+        .hbar.is-success > span { background: linear-gradient(90deg, var(--success), #2ecc71); }
+
+        /* Кольцо «Распределение риска» */
+        .ring-wrap {
+            display: grid;
+            grid-template-columns: 180px 1fr;
+            gap: 20px;
+            align-items: center;
+        }
+        .ring {
+            --high: 57;
+            --med:  28;
+            --low:  15;
+            width: 160px; height: 160px;
+            border-radius: 50%;
+            background:
+                conic-gradient(
+                    var(--danger)  0 calc(var(--high) * 1%),
+                    var(--accent)  0 calc((var(--high) + var(--med)) * 1%),
+                    var(--primary) 0 100%
+                );
+            position: relative;
+            margin: 0 auto;
+        }
+        .ring::after {
+            content: "";
+            position: absolute;
+            inset: 18px;
+            border-radius: 50%;
+            background: var(--panel);
+        }
+        .ring-center {
+            position: absolute;
+            inset: 0;
+            display: grid;
+            place-items: center;
+            text-align: center;
+            z-index: 1;
+        }
+        .ring-center .rc-big {
+            font-size: 26px;
+            font-weight: 700;
+        }
+        .ring-center .rc-sub {
+            font-size: 10.5px;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-top: 2px;
+        }
+        .ring-legend { display: flex; flex-direction: column; gap: 10px; font-size: 13px; }
+        .ring-legend .leg {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+        .ring-legend .leg .name {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: #d7dfee;
+        }
+        .ring-legend .leg .dot {
+            width: 10px; height: 10px; border-radius: 3px;
+        }
+        .ring-legend .leg .pct {
+            font-weight: 700;
+            font-variant-numeric: tabular-nums;
+        }
+
+        /* Пайплайн анализа */
+        .pipeline {
+            display: grid;
+            grid-template-columns: repeat(6, minmax(0, 1fr));
+            gap: 10px;
+            margin-top: 6px;
+        }
+        .pipe-step {
+            background: rgba(11,18,32,0.6);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 14px 12px;
+            text-align: center;
+            position: relative;
+        }
+        .pipe-step .num {
+            width: 26px; height: 26px;
+            border-radius: 50%;
+            display: inline-grid;
+            place-items: center;
+            background: rgba(52,152,219,0.18);
+            color: var(--primary);
+            font-weight: 700;
+            font-size: 12px;
+            margin-bottom: 8px;
+        }
+        .pipe-step .title {
+            font-size: 12.5px;
+            font-weight: 600;
+            color: #d7dfee;
+            line-height: 1.35;
+        }
+        .pipe-step:not(:last-child)::after {
+            content: "›";
+            position: absolute;
+            right: -8px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--muted);
+            font-size: 18px;
+            font-weight: 700;
+            z-index: 1;
+        }
+
+        /* ====== Responsive ====== */
+        @media (max-width: 1000px) {
+            .about-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .feed { grid-template-columns: 1fr; }
+            .analytics-grid { grid-template-columns: 1fr; }
+            .pipeline { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+            .hbar-row { grid-template-columns: 140px 1fr 40px; }
+        }
+        @media (max-width: 560px) {
+            .pipeline { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .pipe-step:not(:last-child)::after { display: none; }
+            .ring-wrap { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 900px) {
+            .hero { padding: 26px 20px; border-radius: 16px; }
+            .hero h1 { font-size: 26px; }
+            .hero-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+            .container { padding: 20px 16px 40px; }
+            .top-nav-inner { padding: 12px 16px; }
+            .brand-text .b-title { font-size: 13px; }
+            .nav-chip { display: none; }
+        }
+        @media (max-width: 900px) {
+            .kpi-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        }
+        @media (max-width: 760px) {
+            .about-grid { grid-template-columns: 1fr; }
+            .essence { grid-template-columns: 1fr; padding: 20px; }
+            .search-box { min-width: 160px; flex: 1; }
+        }
+        @media (max-width: 520px) {
+            .hero h1 { font-size: 22px; }
+            .hero-tag { font-size: 10px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ====== Top nav ====== -->
+    <nav class="top-nav">
+        <div class="top-nav-inner">
+            <a class="brand" href="/">
+                <img src="images/placeholders/logos.jpeg" alt="Прокуратура" />
+                <div class="brand-text">
+                    <div class="b-title">Прокуратура г. Атырау</div>
+                    <div class="b-sub">ИИ-мониторинг интернет-мошенничества</div>
+                </div>
+            </a>
+            <div class="top-nav-actions">
+                <span class="nav-chip"><span class="dot"></span> Система активна</span>
+                <a class="nav-btn" href="/">← К карте</a>
+                <button class="nav-btn primary" id="export-report">Отчёт</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ====== Main ====== -->
+    <main class="container">
+
+        <!-- Hero -->
+        <section class="hero">
+            <span class="hero-tag">● Пилотный проект · Прокуратура</span>
+            <h1>
+                Автоматическое выявление
+                <span class="accent">интернет-мошенничества</span>
+                в соцсетях и мессенджерах
+            </h1>
+            <p class="lede">
+                Система непрерывно собирает и анализирует публикации из открытых источников —
+                Instagram, TikTok, Facebook, Telegram, сайтов объявлений и онлайн-СМИ —
+                выявляет признаки мошенничества с помощью ИИ и формирует аналитические отчёты
+                с оценкой уровня риска для оперативного реагирования.
+            </p>
+
+            <div class="hero-stats">
+                <div class="hero-stat">
+                    <div class="label">Проверено за 24 ч.</div>
+                    <div class="value" id="stat-scanned">—</div>
+                    <div class="delta down">▲ рост охвата источников</div>
+                </div>
+                <div class="hero-stat">
+                    <div class="label">Подозрительных</div>
+                    <div class="value warn" id="stat-suspicious">—</div>
+                    <div class="delta up">+12 за последний час</div>
+                </div>
+                <div class="hero-stat">
+                    <div class="label">Высокий риск</div>
+                    <div class="value danger" id="stat-high-risk">—</div>
+                    <div class="delta">требуют реагирования</div>
+                </div>
+                <div class="hero-stat">
+                    <div class="label">Заблокировано</div>
+                    <div class="value success" id="stat-blocked">—</div>
+                    <div class="delta">за текущий месяц</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ====== О проекте ====== -->
+        <section class="section">
+            <div class="section-head">
+                <h2>О проекте</h2>
+                <span class="hint">Актуальность, цели и функции системы</span>
+            </div>
+
+            <div class="about-grid">
+                <!-- Актуальность / возможности -->
+                <article class="about-card is-danger">
+                    <div class="ico">⚠</div>
+                    <h3>Актуальность и возможности</h3>
+                    <ul>
+                        <li>Ограничение распространения ложной информации в соцсетях</li>
+                        <li>Снижение числа жертв интернет-мошенничества</li>
+                        <li>Прогнозирование новых мошеннических схем</li>
+                        <li>Выявление ложной инвестиционной рекламы</li>
+                        <li>Обнаружение мошенничества и новых схем</li>
+                    </ul>
+                </article>
+
+                <!-- Функции -->
+                <article class="about-card">
+                    <div class="ico">⚙</div>
+                    <h3>Основные функции</h3>
+                    <ul>
+                        <li>Сбор информации из открытых источников</li>
+                        <li>Обработка текста с помощью ИИ</li>
+                        <li>Выявление признаков мошенничества</li>
+                        <li>Сравнительный анализ схем</li>
+                        <li>Оценка уровня риска</li>
+                        <li>Формирование аналитического отчёта</li>
+                    </ul>
+                </article>
+
+                <!-- Результаты -->
+                <article class="about-card is-success">
+                    <div class="ico">✓</div>
+                    <h3>Ожидаемые результаты</h3>
+                    <ul>
+                        <li>Своевременная блокировка рекламы и объявлений с высоким риском</li>
+                        <li>Усиление мер по предотвращению мошеннических публикаций</li>
+                        <li>Оперативное выявление интернет-преступлений</li>
+                        <li>Снижение ущерба для граждан и бизнеса</li>
+                    </ul>
+                </article>
+            </div>
+        </section>
+
+        <!-- ====== Суть проекта ====== -->
+        <section class="section">
+            <div class="essence">
+                <div>
+                    <span class="e-badge">● Суть системы</span>
+                    <h3>Автоматический мониторинг и ИИ-анализ контента</h3>
+                    <p>
+                        Система непрерывно мониторит социальные сети, сайты объявлений,
+                        мессенджеры и онлайн-СМИ. Анализирует текстовый, визуальный
+                        и метаданные контент, выявляет признаки мошенничества и
+                        формирует оценку риска с рекомендациями для надзорных органов.
+                    </p>
+                </div>
+                <div class="e-viz">
+                    <div class="src-chip ig"><span class="sc-dot"></span> Instagram</div>
+                    <div class="src-chip tt"><span class="sc-dot"></span> TikTok</div>
+                    <div class="src-chip fb"><span class="sc-dot"></span> Facebook</div>
+                    <div class="src-chip tg"><span class="sc-dot"></span> Telegram</div>
+                    <div class="src-chip ol"><span class="sc-dot"></span> Сайты объявлений</div>
+                    <div class="src-chip sm"><span class="sc-dot"></span> Онлайн-СМИ</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ====== Мониторинг ====== -->
+        <section class="section">
+            <div class="section-head">
+                <h2>Оперативный мониторинг</h2>
+                <span class="hint">Обновляется автоматически</span>
+            </div>
+
+            <!-- Toolbar: фильтры по источникам, риску, поиск -->
+            <div class="toolbar">
+                <div class="toolbar-group">
+                    <span class="toolbar-label">Источник:</span>
+                    <button class="filter-chip active" data-source="all">Все <span class="count" id="cnt-all">—</span></button>
+                    <button class="filter-chip" data-source="instagram">Instagram <span class="count" id="cnt-instagram">—</span></button>
+                    <button class="filter-chip" data-source="tiktok">TikTok <span class="count" id="cnt-tiktok">—</span></button>
+                    <button class="filter-chip" data-source="facebook">Facebook <span class="count" id="cnt-facebook">—</span></button>
+                    <button class="filter-chip" data-source="telegram">Telegram <span class="count" id="cnt-telegram">—</span></button>
+                    <button class="filter-chip" data-source="olx">Объявления <span class="count" id="cnt-olx">—</span></button>
+                </div>
+                <div class="toolbar-group">
+                    <span class="toolbar-label">Риск:</span>
+                    <button class="filter-chip active" data-risk="all">Все</button>
+                    <button class="filter-chip" data-risk="high">Высокий</button>
+                    <button class="filter-chip" data-risk="medium">Средний</button>
+                    <button class="filter-chip" data-risk="low">Низкий</button>
+                    <div class="search-box">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="11" cy="11" r="7"></circle>
+                            <path d="m21 21-4.3-4.3"></path>
+                        </svg>
+                        <input type="text" id="search-input" placeholder="Поиск по тексту / автору / схеме" />
+                    </div>
+                </div>
+            </div>
+
+            <!-- KPI сводка -->
+            <div class="kpi-grid" style="margin-top: 16px;">
+                <div class="kpi danger">
+                    <div class="label">Инвестиционные схемы</div>
+                    <div class="val" id="kpi-invest">—</div>
+                    <div class="sub">из них 18 — «инвестиции в криптовалюту»</div>
+                </div>
+                <div class="kpi warn">
+                    <div class="label">Фишинг / поддельные сайты</div>
+                    <div class="val" id="kpi-phish">—</div>
+                    <div class="sub">подделка под госорганы и банки</div>
+                </div>
+                <div class="kpi purple">
+                    <div class="label">Ложные объявления</div>
+                    <div class="val" id="kpi-ads">—</div>
+                    <div class="sub">жильё, работа, транспорт</div>
+                </div>
+                <div class="kpi success">
+                    <div class="label">Заблокировано / передано</div>
+                    <div class="val" id="kpi-blocked">—</div>
+                    <div class="sub">в профильные ведомства</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ====== Лента выявленных публикаций ====== -->
+        <section class="section">
+            <div class="section-head">
+                <h2>Выявленные публикации</h2>
+                <span class="hint"><span id="feed-count">0</span> из <span id="feed-total">0</span> · отсортировано по убыванию риска</span>
+            </div>
+            <div class="feed" id="feed"></div>
+        </section>
+
+        <!-- ====== Аналитика ====== -->
+        <section class="section">
+            <div class="section-head">
+                <h2>Аналитика</h2>
+                <span class="hint">Распределение по риску и категориям схем</span>
+            </div>
+
+            <div class="analytics-grid">
+                <!-- Горизонтальные бары: категории схем -->
+                <div class="panel">
+                    <h3>Топ категорий схем <span class="tag">за 7 дней</span></h3>
+                    <div class="hbars" id="hbars">
+                        <div class="hbar-row">
+                            <span class="name">Инвестиционное мошенничество</span>
+                            <span class="hbar is-danger"><span data-w="92"></span></span>
+                            <span class="count">74</span>
+                        </div>
+                        <div class="hbar-row">
+                            <span class="name">Фишинг / подделка бренда</span>
+                            <span class="hbar is-warn"><span data-w="68"></span></span>
+                            <span class="count">52</span>
+                        </div>
+                        <div class="hbar-row">
+                            <span class="name">Ложные объявления</span>
+                            <span class="hbar is-purple"><span data-w="78"></span></span>
+                            <span class="count">93</span>
+                        </div>
+                        <div class="hbar-row">
+                            <span class="name">Финансовые пирамиды</span>
+                            <span class="hbar is-danger"><span data-w="54"></span></span>
+                            <span class="count">41</span>
+                        </div>
+                        <div class="hbar-row">
+                            <span class="name">Ложные вакансии</span>
+                            <span class="hbar is-primary"><span data-w="45"></span></span>
+                            <span class="count">34</span>
+                        </div>
+                        <div class="hbar-row">
+                            <span class="name">Нелегальное кредитование</span>
+                            <span class="hbar is-warn"><span data-w="38"></span></span>
+                            <span class="count">29</span>
+                        </div>
+                        <div class="hbar-row">
+                            <span class="name">Онлайн-казино</span>
+                            <span class="hbar is-purple"><span data-w="28"></span></span>
+                            <span class="count">18</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Кольцевая диаграмма: уровни риска -->
+                <div class="panel">
+                    <h3>Распределение риска <span class="tag">341 публикация</span></h3>
+                    <div class="ring-wrap">
+                        <div class="ring" style="--high: 17; --med: 45;">
+                            <div class="ring-center">
+                                <div class="rc-big">341</div>
+                                <div class="rc-sub">Выявлено</div>
+                            </div>
+                        </div>
+                        <div class="ring-legend">
+                            <div class="leg">
+                                <span class="name"><span class="dot" style="background: var(--danger);"></span> Высокий</span>
+                                <span class="pct">57 · 17%</span>
+                            </div>
+                            <div class="leg">
+                                <span class="name"><span class="dot" style="background: var(--accent);"></span> Средний</span>
+                                <span class="pct">154 · 45%</span>
+                            </div>
+                            <div class="leg">
+                                <span class="name"><span class="dot" style="background: var(--primary);"></span> Низкий</span>
+                                <span class="pct">130 · 38%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ====== Пайплайн анализа ====== -->
+        <section class="section">
+            <div class="section-head">
+                <h2>Как работает система</h2>
+                <span class="hint">Цикл от сбора данных до аналитического отчёта</span>
+            </div>
+            <div class="panel">
+                <div class="pipeline">
+                    <div class="pipe-step"><div class="num">1</div><div class="title">Сбор<br/>из открытых источников</div></div>
+                    <div class="pipe-step"><div class="num">2</div><div class="title">ИИ-обработка<br/>текста и изображений</div></div>
+                    <div class="pipe-step"><div class="num">3</div><div class="title">Выявление<br/>признаков мошенничества</div></div>
+                    <div class="pipe-step"><div class="num">4</div><div class="title">Сравнительный<br/>анализ схем</div></div>
+                    <div class="pipe-step"><div class="num">5</div><div class="title">Оценка<br/>уровня риска</div></div>
+                    <div class="pipe-step"><div class="num">6</div><div class="title">Аналитический<br/>отчёт</div></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer hint -->
+        <section class="section" style="text-align: center; color: var(--muted); font-size: 12px; padding-top: 16px;">
+            Прокуратура г. Атырау · Пилотный проект цифрового надзора · Демонстрационные данные
+        </section>
+
+    </main>
+
+    <script>
+        // ==================== МОКОВЫЕ ДАННЫЕ ====================
+        const SOURCES = {
+            instagram: { label: 'Instagram', badge: 'IG', cls: 'ig' },
+            tiktok:    { label: 'TikTok',    badge: 'TT', cls: 'tt' },
+            facebook:  { label: 'Facebook',  badge: 'FB', cls: 'fb' },
+            telegram:  { label: 'Telegram',  badge: 'TG', cls: 'tg' },
+            olx:       { label: 'Объявления',badge: 'OBJ', cls: 'ol' }
+        };
+
+        const POSTS = [
+            {
+                id: 'p1',
+                source: 'instagram',
+                author: '@crypto_atyrau_invest',
+                authorName: 'Crypto Atyrau Invest',
+                time: '14 мин назад',
+                risk: 'high', score: 94,
+                category: 'Инвестиционное мошенничество',
+                text: 'Гарантируем 300% доходности за 14 дней! Вложение всего от 50 000 ₸. Выплаты ежедневно на Kaspi. Осталось 3 места — пишите в Direct!',
+                tags: ['гарантированная доходность', 'криптоинвестиции', 'ложная реклама'],
+                reasons: ['обещание фиксированной доходности', 'давление срочностью', 'отсутствие лицензии']
+            },
+            {
+                id: 'p2',
+                source: 'telegram',
+                author: '@halyk_bonus_kz',
+                authorName: 'Halyk Bonus (поддельный)',
+                time: '32 мин назад',
+                risk: 'high', score: 91,
+                category: 'Фишинг / подделка бренда',
+                text: 'Вам начислен кэшбек 48 500 ₸. Для получения пройдите верификацию карты по ссылке в закрепе. Акция до конца дня.',
+                tags: ['имитация банка', 'фишинговая ссылка', 'сбор данных карты'],
+                reasons: ['подделка под Halyk Bank', 'просьба ввести данные карты', 'домен вне официального']
+            },
+            {
+                id: 'p3',
+                source: 'tiktok',
+                author: '@easymoney_kz',
+                authorName: 'Easy Money KZ',
+                time: '1 ч назад',
+                risk: 'high', score: 88,
+                category: 'Финансовая пирамида',
+                text: 'Моя команда зарабатывает от 1 млн ₸ в месяц без вложений. Хочешь так же? Реферальная программа 4 уровня — подписывайся!',
+                tags: ['MLM', 'реферальная схема', 'ложные доходы'],
+                reasons: ['многоуровневая реферальная модель', 'нет реального продукта', 'агрессивный рекрутинг']
+            },
+            {
+                id: 'p4',
+                source: 'olx',
+                author: 'Анонимный продавец',
+                authorName: 'Объявление № 84521',
+                time: '2 ч назад',
+                risk: 'medium', score: 72,
+                category: 'Ложное объявление (аренда)',
+                text: 'Сдаётся 2-комнатная квартира в центре Атырау за 90 000 ₸/мес. Для брони — предоплата 50% на карту, смотреть после оплаты.',
+                tags: ['предоплата', 'занижённая цена', 'без осмотра'],
+                reasons: ['цена ниже рынка на 40%', 'требует предоплату до осмотра', 'профиль без истории']
+            },
+            {
+                id: 'p5',
+                source: 'facebook',
+                author: '@atyrau_jobs_fast',
+                authorName: 'Работа Атырау — удалёнка',
+                time: '3 ч назад',
+                risk: 'medium', score: 68,
+                category: 'Ложная вакансия',
+                text: 'Срочно нужны сотрудники на удалёнку, 25 000 ₸/день. Без опыта, без собеседования. Оплата обучающего курса — 15 000 ₸.',
+                tags: ['оплата за обучение', 'нереалистичный доход', 'без компании'],
+                reasons: ['требует оплату до старта', 'нет юрлица', 'доход в 10× выше рынка']
+            },
+            {
+                id: 'p6',
+                source: 'instagram',
+                author: '@forex_master_kz',
+                authorName: 'Forex Master KZ',
+                time: '4 ч назад',
+                risk: 'high', score: 86,
+                category: 'Инвестиционное мошенничество',
+                text: 'Торгую на Forex 5 лет. Копируй мои сделки — прибыль 80% в месяц. Вход от 200$. Лицензия оффшорная, всё официально.',
+                tags: ['копитрейдинг', 'оффшор', 'завышенная доходность'],
+                reasons: ['оффшорная регистрация', 'нет лицензии НБ РК', 'обещание стабильной прибыли']
+            },
+            {
+                id: 'p7',
+                source: 'telegram',
+                author: '@kaspi_bonus_official',
+                authorName: 'Kaspi Бонус (поддельный)',
+                time: '5 ч назад',
+                risk: 'high', score: 93,
+                category: 'Фишинг / подделка бренда',
+                text: 'Розыгрыш для клиентов Kaspi: 100 участников получат по 100 000 ₸. Для участия введите номер карты и СМС-код.',
+                tags: ['подделка под Kaspi', 'кража CVV', 'социальная инженерия'],
+                reasons: ['просит СМС-код', 'нелегитимный домен', 'подделка официальной страницы']
+            },
+            {
+                id: 'p8',
+                source: 'tiktok',
+                author: '@lucky_win_kz',
+                authorName: 'Lucky Win KZ',
+                time: '6 ч назад',
+                risk: 'medium', score: 64,
+                category: 'Онлайн-казино',
+                text: 'Нашёл рабочую схему в онлайн-казино. Ставка 5 000 ₸ → 85 000 ₸ за 20 минут. Промокод в био.',
+                tags: ['игорный бизнес', 'реклама БК без лицензии'],
+                reasons: ['продвижение онлайн-казино', 'отсутствие возрастных предупреждений']
+            },
+            {
+                id: 'p9',
+                source: 'olx',
+                author: 'Техника 24/7',
+                authorName: 'Объявление № 84997',
+                time: '7 ч назад',
+                risk: 'low', score: 38,
+                category: 'Сомнительная торговля',
+                text: 'iPhone 15 Pro Max — 220 000 ₸. Новый, запечатан. Отправка по РК через курьера после 30% предоплаты.',
+                tags: ['занижённая цена', 'предоплата'],
+                reasons: ['цена ниже рынка', 'требует предоплату']
+            },
+            {
+                id: 'p10',
+                source: 'facebook',
+                author: '@prokuratura_atr_help',
+                authorName: 'Помощь Прокуратуры (фейк)',
+                time: '8 ч назад',
+                risk: 'high', score: 90,
+                category: 'Подделка госоргана',
+                text: 'Вам назначена компенсация 150 000 ₸ по судебному делу. Подтвердите личность через форму и оплатите госпошлину 4 900 ₸.',
+                tags: ['подделка госоргана', 'сбор личных данных', 'госпошлина-приманка'],
+                reasons: ['использует символику прокуратуры', 'просит оплату «госпошлины»', 'фейковый домен']
+            },
+            {
+                id: 'p11',
+                source: 'instagram',
+                author: '@beauty_atyrau_sale',
+                authorName: 'Beauty Atyrau',
+                time: '9 ч назад',
+                risk: 'low', score: 32,
+                category: 'Сомнительная реклама',
+                text: 'Курс омоложения всего за 5 000 ₸. Запись только сегодня — количество мест ограничено.',
+                tags: ['давление срочностью'],
+                reasons: ['агрессивный маркетинг', 'нет подтверждённой лицензии']
+            },
+            {
+                id: 'p12',
+                source: 'telegram',
+                author: '@loan_fast_kz',
+                authorName: 'Займ за 5 минут',
+                time: '11 ч назад',
+                risk: 'medium', score: 70,
+                category: 'Нелегальное кредитование',
+                text: 'Займ без проверок до 500 000 ₸ за 5 минут. Без договора, под 2% в день. Перевод на Kaspi.',
+                tags: ['ростовщичество', 'нет лицензии МФО', 'скрытые условия'],
+                reasons: ['ставка выше лимита НБ РК', 'нет лицензии', 'без договора']
+            }
+        ];
+
+        // Инициализация hero + KPI + счётчиков фильтров + рендер ленты.
+        (function initDashboard() {
+            const basic = {
+                // hero
+                'stat-scanned':    '12 847',
+                'stat-suspicious': '341',
+                'stat-high-risk':  '57',
+                'stat-blocked':    '128',
+                // KPI
+                'kpi-invest':  '74',
+                'kpi-phish':   '52',
+                'kpi-ads':     '93',
+                'kpi-blocked': '128',
+                // счётчики в фильтрах по источникам
+                'cnt-all':       '341',
+                'cnt-instagram': '112',
+                'cnt-tiktok':    '64',
+                'cnt-facebook':  '48',
+                'cnt-telegram':  '81',
+                'cnt-olx':       '36'
+            };
+            Object.entries(basic).forEach(([id, val]) => {
+                const el = document.getElementById(id);
+                if (el) el.textContent = val;
+            });
+
+            // Состояние фильтров
+            const state = { source: 'all', risk: 'all', query: '' };
+
+            const feedEl  = document.getElementById('feed');
+            const cntEl   = document.getElementById('feed-count');
+            const totalEl = document.getElementById('feed-total');
+
+            function escapeHtml(s) {
+                return String(s)
+                    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+                    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+            }
+            function initials(name) {
+                const parts = String(name).replace(/[@_]/g, ' ').trim().split(/\s+/);
+                return (parts[0]?.[0] || '?').toUpperCase() + (parts[1]?.[0] || '').toUpperCase();
+            }
+            function riskLabel(r) {
+                return r === 'high' ? 'Высокий' : r === 'medium' ? 'Средний' : 'Низкий';
+            }
+
+            function renderPost(p) {
+                const src = SOURCES[p.source] || { label: p.source, badge: '?', cls: '' };
+                const tagsHtml = (p.tags || []).map(t =>
+                    `<span class="post-tag">${escapeHtml(t)}</span>`
+                ).join('');
+                return `
+                    <article class="post risk-${p.risk}" data-id="${escapeHtml(p.id)}">
+                        <div class="post-head">
+                            <div class="post-author">
+                                <div class="post-avatar">${escapeHtml(initials(p.authorName || p.author))}</div>
+                                <div class="post-meta">
+                                    <div class="name">${escapeHtml(p.authorName || p.author)}</div>
+                                    <div class="sub">
+                                        <span class="src-badge ${src.cls}">${escapeHtml(src.badge)} · ${escapeHtml(src.label)}</span>
+                                        <span>· ${escapeHtml(p.time)}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <span class="risk-badge ${p.risk}">
+                                <span class="bar"></span>
+                                ${riskLabel(p.risk)} ${p.score}
+                            </span>
+                        </div>
+                        <div class="post-text">${escapeHtml(p.text)}</div>
+                        <div class="post-tags">
+                            <span class="post-tag neutral">${escapeHtml(p.category)}</span>
+                            ${tagsHtml}
+                        </div>
+                        <div class="post-foot">
+                            <span>Автор: <span class="score">${escapeHtml(p.author)}</span></span>
+                            <div class="post-actions">
+                                <button class="post-btn" data-act="details">Подробнее</button>
+                                <button class="post-btn danger" data-act="block">К блокировке</button>
+                            </div>
+                        </div>
+                    </article>
+                `;
+            }
+
+            function applyFilters() {
+                const q = state.query.trim().toLowerCase();
+                const filtered = POSTS.filter(p => {
+                    if (state.source !== 'all' && p.source !== state.source) return false;
+                    if (state.risk   !== 'all' && p.risk   !== state.risk)   return false;
+                    if (q) {
+                        const hay = (
+                            p.text + ' ' + p.author + ' ' + (p.authorName || '') + ' ' +
+                            p.category + ' ' + (p.tags || []).join(' ')
+                        ).toLowerCase();
+                        if (!hay.includes(q)) return false;
+                    }
+                    return true;
+                });
+                // сортировка: high → medium → low, далее по score убыв.
+                const order = { high: 0, medium: 1, low: 2 };
+                filtered.sort((a, b) => (order[a.risk] - order[b.risk]) || (b.score - a.score));
+
+                if (filtered.length === 0) {
+                    feedEl.innerHTML = `<div class="feed-empty">Публикации по выбранным фильтрам не найдены</div>`;
+                } else {
+                    feedEl.innerHTML = filtered.map(renderPost).join('');
+                }
+                if (cntEl)   cntEl.textContent = filtered.length;
+                if (totalEl) totalEl.textContent = POSTS.length;
+            }
+
+            // Переключение активного состояния фильтр-чипов внутри своей группы.
+            document.querySelectorAll('.toolbar-group').forEach(group => {
+                group.addEventListener('click', (e) => {
+                    const chip = e.target.closest('.filter-chip');
+                    if (!chip) return;
+                    group.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+                    chip.classList.add('active');
+                    if (chip.dataset.source) state.source = chip.dataset.source;
+                    if (chip.dataset.risk)   state.risk   = chip.dataset.risk;
+                    applyFilters();
+                });
+            });
+
+            // Поиск
+            const search = document.getElementById('search-input');
+            if (search) {
+                search.addEventListener('input', (e) => {
+                    state.query = e.target.value || '';
+                    applyFilters();
+                });
+            }
+
+            // Действия в карточке поста (заглушки с уведомлением)
+            feedEl.addEventListener('click', (e) => {
+                const btn = e.target.closest('.post-btn');
+                if (!btn) return;
+                const card = btn.closest('.post');
+                const id = card?.dataset.id;
+                const post = POSTS.find(x => x.id === id);
+                if (!post) return;
+                if (btn.dataset.act === 'details') {
+                    showDetails(post);
+                } else if (btn.dataset.act === 'block') {
+                    alert(`Публикация ${post.id} отправлена на блокировку и в профильное ведомство.`);
+                }
+            });
+
+            function showDetails(p) {
+                const reasons = (p.reasons || []).map(r => `• ${r}`).join('\n');
+                alert(
+                    `${p.category}\n\n` +
+                    `Автор: ${p.authorName} (${p.author})\n` +
+                    `Источник: ${SOURCES[p.source]?.label || p.source}\n` +
+                    `Риск: ${riskLabel(p.risk)} (${p.score}/100)\n\n` +
+                    `Текст:\n${p.text}\n\n` +
+                    `Признаки:\n${reasons}`
+                );
+            }
+
+            // Кнопка «Отчёт»
+            const exportBtn = document.getElementById('export-report');
+            if (exportBtn) {
+                exportBtn.addEventListener('click', () => {
+                    alert('Аналитический отчёт за сутки сформирован и отправлен на e-mail руководителя.');
+                });
+            }
+
+            // Анимированное заполнение горизонтальных баров
+            requestAnimationFrame(() => {
+                document.querySelectorAll('.hbar > span[data-w]').forEach(bar => {
+                    const w = Math.max(0, Math.min(100, parseInt(bar.dataset.w, 10) || 0));
+                    bar.style.width = w + '%';
+                });
+            });
+
+            // Первичный рендер
+            applyFilters();
+        })();
+    </script>
+</body>
+</html>
