@@ -1410,7 +1410,7 @@
             if (_isHiddenArticle(c.article)) return;
 
             var marker = L.circleMarker([c.lat, c.lng], {
-                radius: 7,
+                radius: 5,
                 color: "rgba(255,255,255,0.85)",
                 weight: 1.5,
                 fillColor: "#e74c3c",
@@ -1829,7 +1829,7 @@
 
     function _createAVCircle(v) {
         var marker = L.circleMarker([v.lat, v.lng], {
-            radius: 8,
+            radius: 6.5,
             color: "#fff",
             weight: 1.5,
             fillColor: "#e67e22",
@@ -1877,7 +1877,7 @@
             if (typeof c.lat !== "number" || isNaN(c.lat)) return;
             if (_isHiddenArticle(c.article)) return;
             var marker = L.circleMarker([c.lat, c.lng], {
-                radius: 7,
+                radius: 5,
                 color: "rgba(255,255,255,0.85)",
                 weight: 1.5,
                 fillColor: "#e74c3c",
