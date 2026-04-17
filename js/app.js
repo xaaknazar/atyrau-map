@@ -84,7 +84,8 @@
         minZoom: 11,
         maxBounds: ATYRAU_BOUNDS,
         maxBoundsViscosity: 1.0,
-        preferCanvas: true
+        preferCanvas: true,
+        renderer: L.canvas({ tolerance: 12 })
     });
 
     L.control.zoom({ position: "bottomright" }).addTo(map);
@@ -1410,12 +1411,11 @@
             if (_isHiddenArticle(c.article)) return;
 
             var marker = L.circleMarker([c.lat, c.lng], {
-                radius: 5,
-                color: "rgba(255,255,255,0.85)",
-                weight: 1.5,
+                radius: 3.5,
+                color: "rgba(255,255,255,0.8)",
+                weight: 1,
                 fillColor: "#e74c3c",
-                fillOpacity: 0.9,
-                bubblingMouseEvents: false
+                fillOpacity: 0.9
             });
 
             if (isStaff) {
@@ -1829,12 +1829,11 @@
 
     function _createAVCircle(v) {
         var marker = L.circleMarker([v.lat, v.lng], {
-            radius: 6.5,
+            radius: 5,
             color: "#fff",
             weight: 1.5,
             fillColor: "#e67e22",
-            fillOpacity: 0.9,
-            bubblingMouseEvents: false
+            fillOpacity: 0.9
         });
         var fio = [v.lastName, v.firstName, v.patronymic].filter(Boolean).join(" ") || "";
         marker.bindTooltip((v.article || "—") + (fio ? " | " + fio : ""), {
@@ -1877,12 +1876,11 @@
             if (typeof c.lat !== "number" || isNaN(c.lat)) return;
             if (_isHiddenArticle(c.article)) return;
             var marker = L.circleMarker([c.lat, c.lng], {
-                radius: 5,
-                color: "rgba(255,255,255,0.85)",
-                weight: 1.5,
+                radius: 3.5,
+                color: "rgba(255,255,255,0.8)",
+                weight: 1,
                 fillColor: "#e74c3c",
-                fillOpacity: 0.9,
-                bubblingMouseEvents: false
+                fillOpacity: 0.9
             });
             if (isStaff) {
                 marker.bindTooltip((c.article || "—") + " | " + (c.street ? "ул. " + c.street : ""), {
