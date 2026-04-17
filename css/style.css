@@ -4363,3 +4363,135 @@ body {
     color: #c5d0e6;
 }
 .assistant-trend-detail strong { color: #ffffff; }
+
+/* ═══════════════════════════════════════════════════════════
+   RESPONSIVE REFINEMENTS — Reports & Akimat (tablet & mobile)
+   Дополнительные правки под телефоны / планшеты / узкие экраны.
+   ═══════════════════════════════════════════════════════════ */
+
+/* Крупные планшеты ≤ 1024 */
+@media (max-width: 1024px) {
+    .report-selector-cards { padding: 20px; gap: 14px; }
+    .report-card { padding: 18px; }
+    .crime-panel-header { padding: 14px 18px 10px; }
+    .crime-panel-results-bar { flex-wrap: wrap; gap: 6px; }
+}
+
+/* Планшеты / крупные телефоны ≤ 768 */
+@media (max-width: 768px) {
+    /* Report selector */
+    .report-selector-header { padding: 12px 16px; }
+    .report-selector-header h2 { font-size: 17px; margin-top: 10px; }
+    .report-selector-cards { padding: 14px; gap: 12px; }
+    .report-card { padding: 14px; gap: 12px; }
+    .report-card-icon { width: 48px; height: 48px; }
+    .report-card-icon svg { width: 24px; height: 24px; }
+    .report-card-body h3 { font-size: 14.5px; }
+    .report-card-body p { font-size: 12px; margin-bottom: 6px; }
+    .report-card-count { font-size: 11px; }
+
+    /* Crime/AV panel body */
+    .crime-stats-cards { grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 10px; }
+    .crime-stat-card { padding: 10px 12px; }
+    .crime-stat-value { font-size: 19px; }
+    .crime-stat-label { font-size: 10px; }
+    .crime-panel-header { padding: 10px 14px; }
+    .crime-panel-header h2 { font-size: 15px; }
+
+    .crime-panel-filters { gap: 6px; }
+    .crime-filter-row { flex-direction: column; align-items: stretch; gap: 8px; }
+    .crime-filter-group-inline { width: 100%; flex-wrap: nowrap; }
+    .crime-filter-group-inline label { min-width: 74px; font-size: 11px; }
+    .crime-select { max-width: none; flex: 1; font-size: 13px; padding: 8px 10px; }
+    .crime-filter-buttons { flex: 1; }
+    .crime-period-btn,
+    .av-period-btn { font-size: 11px; padding: 6px 4px; }
+    .crime-search-wrapper input { font-size: 13px; padding: 9px 12px 9px 34px; }
+
+    .crime-list { padding: 10px 12px; }
+    .crime-list-item { padding: 12px 14px; margin-bottom: 8px; }
+    .crime-list-item-header { flex-wrap: wrap; gap: 6px; }
+    .crime-list-article { font-size: 12px; }
+    .crime-list-date { font-size: 11px; }
+    .crime-list-address { font-size: 12.5px; }
+    .crime-list-description { font-size: 11.5px; }
+    .crime-panel-results-bar { font-size: 12px; }
+
+    /* Close button */
+    .close-crime-panel-btn { padding: 5px 10px; font-size: 12px; }
+    .close-crime-panel-btn span { display: inline; }
+}
+
+/* Телефоны ≤ 480 */
+@media (max-width: 480px) {
+    .report-selector-header { padding: 10px 12px; }
+    .report-selector-header h2 { font-size: 16px; }
+    .report-selector-cards { padding: 12px; gap: 10px; }
+    .report-card { padding: 12px; gap: 10px; border-radius: 10px; }
+    .report-card-icon { width: 42px; height: 42px; border-radius: 10px; }
+    .report-card-body h3 { font-size: 13.5px; }
+    .report-card-body p { font-size: 11.5px; }
+
+    .crime-panel-header { padding: 10px 12px; gap: 8px; }
+    .crime-panel-top-row { flex-direction: column; align-items: flex-start; gap: 6px; margin-bottom: 10px; }
+    .crime-panel-header h2 { font-size: 14.5px; }
+    .crime-stats-cards { gap: 6px; }
+    .crime-stat-card { padding: 8px 10px; }
+    .crime-stat-value { font-size: 17px; }
+    .crime-list { padding: 8px 10px; }
+    .crime-list-item { padding: 10px 12px; border-left-width: 3px; }
+
+    /* Скрыть текст "Назад к карте" — оставить только иконку */
+    .close-crime-panel-btn { padding: 5px 9px; }
+    .close-crime-panel-btn span { display: none; }
+    .close-crime-panel-btn svg { width: 18px; height: 18px; }
+}
+
+/* Очень узкие телефоны ≤ 360 */
+@media (max-width: 360px) {
+    .crime-stats-cards { grid-template-columns: repeat(2, 1fr); }
+    .crime-stat-value { font-size: 15px; }
+    .crime-filter-group-inline { flex-direction: column; align-items: stretch; gap: 4px; }
+    .crime-filter-group-inline label { min-width: 0; }
+    .crime-filter-buttons { width: 100%; }
+}
+
+/* Akimat — mobile refinements */
+@media (max-width: 768px) {
+    .akimat-card { padding: 12px 14px; }
+    .akimat-card-top { gap: 8px; margin-bottom: 8px; }
+    .akimat-card-meta { gap: 4px; }
+    .akimat-cat-badge,
+    .status-badge,
+    .sla-badge { font-size: 11px; padding: 2px 8px; }
+    .akimat-card-date { font-size: 11px; }
+    .akimat-card-field { font-size: 12.5px; }
+    .akimat-card-desc { font-size: 13px; padding: 7px 9px; }
+    .akimat-card-response { font-size: 12px; padding: 7px 9px; }
+    .akimat-card-photo { max-height: 200px; }
+    .akimat-card-photo img { max-height: 200px; }
+    .akimat-card-actions { gap: 6px; }
+    .akimat-card-actions button { padding: 7px 12px; font-size: 12.5px; flex: 1 0 auto; }
+
+    /* Modal dialogs */
+    #akimat-accept-overlay, #akimat-reject-overlay { padding: 14px; }
+    #akimat-accept-modal, #akimat-reject-modal { padding: 20px; border-radius: 10px; }
+    #akimat-accept-modal h2, #akimat-reject-modal h2 { font-size: 16px; margin-bottom: 14px; }
+    #akimat-accept-days, #akimat-reject-reason { font-size: 13.5px; padding: 9px 11px; }
+    .akimat-modal-actions { gap: 6px; }
+    .akimat-modal-actions button { padding: 9px 14px; font-size: 13px; flex: 1; }
+}
+@media (max-width: 480px) {
+    .akimat-card { padding: 10px 12px; border-radius: 8px; border-left-width: 3px; }
+    .akimat-card-top { flex-direction: column; align-items: flex-start; }
+    .akimat-card-meta { width: 100%; }
+    .akimat-card-date { margin-top: 2px; }
+    .akimat-card-photo { max-height: 180px; }
+    .akimat-card-photo img { max-height: 180px; }
+    .akimat-card-actions button { width: 100%; }
+
+    #akimat-accept-modal, #akimat-reject-modal { padding: 16px; max-width: 100%; }
+    #akimat-accept-modal h2, #akimat-reject-modal h2 { font-size: 15px; }
+    .akimat-modal-actions { flex-direction: column-reverse; }
+    .akimat-modal-actions button { width: 100%; }
+}

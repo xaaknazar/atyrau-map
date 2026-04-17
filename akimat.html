@@ -32,13 +32,17 @@
         }
         .akimat-page-header h1 {
             margin: 0;
-            font-size: 20px;
+            font-size: clamp(15px, 2.4vw, 20px);
             color: #f39c12;
+            flex: 1 1 200px;
+            min-width: 0;
+            word-wrap: break-word;
         }
         .akimat-page-controls {
             display: flex;
             gap: 8px;
             align-items: center;
+            flex-wrap: wrap;
         }
         .akimat-page-controls a {
             padding: 8px 14px;
@@ -49,6 +53,7 @@
             font-size: 13px;
             text-decoration: none;
             transition: all 0.2s;
+            white-space: nowrap;
         }
         .akimat-page-controls a:hover { background: rgba(255,255,255,0.1); }
         .akimat-page-controls button {
@@ -60,6 +65,7 @@
             font-size: 13px;
             font-weight: 600;
             cursor: pointer;
+            white-space: nowrap;
         }
         .akimat-lang { display: flex; gap: 4px; }
         .akimat-lang button {
@@ -80,9 +86,47 @@
         .akimat-page .akimat-tabs {
             padding: 0;
             margin-bottom: 16px;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
         }
+        .akimat-page .akimat-tabs::-webkit-scrollbar { display: none; }
+        .akimat-page .akimat-tab { white-space: nowrap; flex-shrink: 0; }
         .akimat-page .akimat-panel-body {
             padding: 0;
+        }
+
+        /* Адаптив для страницы акимата */
+        @media (max-width: 768px) {
+            .akimat-page { padding: 0 16px 32px; }
+            .akimat-page-header { padding: 14px 0; margin-bottom: 16px; gap: 10px; }
+            .akimat-page-controls { gap: 6px; }
+            .akimat-page-controls a,
+            .akimat-page-controls button { padding: 7px 12px; font-size: 12.5px; }
+        }
+        @media (max-width: 560px) {
+            .akimat-page { padding: 0 12px 24px; }
+            .akimat-page-header { flex-direction: column; align-items: stretch; padding: 12px 0; }
+            .akimat-page-header h1 { font-size: 16px; text-align: center; }
+            .akimat-page-controls {
+                width: 100%;
+                justify-content: space-between;
+                gap: 6px;
+            }
+            .akimat-page-controls a,
+            .akimat-page-controls button {
+                flex: 1;
+                text-align: center;
+                padding: 8px 6px;
+                font-size: 12px;
+            }
+            .akimat-lang { order: -1; justify-content: center; width: 100%; }
+            .akimat-lang button { padding: 5px 14px; flex: 1; max-width: 100px; }
+        }
+        @media (max-width: 380px) {
+            .akimat-page-header h1 { font-size: 14.5px; }
+            .akimat-page-controls a,
+            .akimat-page-controls button { font-size: 11.5px; padding: 7px 4px; }
         }
     </style>
 </head>
