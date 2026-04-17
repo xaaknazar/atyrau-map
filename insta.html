@@ -897,8 +897,6 @@
             </a>
             <div class="top-nav-actions">
                 <span class="nav-chip"><span class="dot"></span> Система активна</span>
-                <a class="nav-btn" href="/">← К карте</a>
-                <button class="nav-btn primary" id="export-report">Отчёт</button>
             </div>
         </div>
     </nav>
@@ -1506,14 +1504,6 @@
                     `Текст:\n${p.text}\n\n` +
                     `Признаки:\n${reasons}`
                 );
-            }
-
-            // Кнопка «Отчёт»
-            const exportBtn = document.getElementById('export-report');
-            if (exportBtn) {
-                exportBtn.addEventListener('click', () => {
-                    alert('Аналитический отчёт за сутки сформирован и отправлен на e-mail руководителя.');
-                });
             }
 
             // Анимированное заполнение горизонтальных баров
