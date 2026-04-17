@@ -1410,11 +1410,12 @@
             if (_isHiddenArticle(c.article)) return;
 
             var marker = L.circleMarker([c.lat, c.lng], {
-                radius: 3.5,
-                color: "rgba(255,255,255,0.8)",
-                weight: 1,
+                radius: 7,
+                color: "rgba(255,255,255,0.85)",
+                weight: 1.5,
                 fillColor: "#e74c3c",
-                fillOpacity: 0.9
+                fillOpacity: 0.9,
+                bubblingMouseEvents: false
             });
 
             if (isStaff) {
@@ -1828,11 +1829,12 @@
 
     function _createAVCircle(v) {
         var marker = L.circleMarker([v.lat, v.lng], {
-            radius: 5,
+            radius: 8,
             color: "#fff",
             weight: 1.5,
             fillColor: "#e67e22",
-            fillOpacity: 0.9
+            fillOpacity: 0.9,
+            bubblingMouseEvents: false
         });
         var fio = [v.lastName, v.firstName, v.patronymic].filter(Boolean).join(" ") || "";
         marker.bindTooltip((v.article || "—") + (fio ? " | " + fio : ""), {
@@ -1875,11 +1877,12 @@
             if (typeof c.lat !== "number" || isNaN(c.lat)) return;
             if (_isHiddenArticle(c.article)) return;
             var marker = L.circleMarker([c.lat, c.lng], {
-                radius: 3.5,
-                color: "rgba(255,255,255,0.8)",
-                weight: 1,
+                radius: 7,
+                color: "rgba(255,255,255,0.85)",
+                weight: 1.5,
                 fillColor: "#e74c3c",
-                fillOpacity: 0.9
+                fillOpacity: 0.9,
+                bubblingMouseEvents: false
             });
             if (isStaff) {
                 marker.bindTooltip((c.article || "—") + " | " + (c.street ? "ул. " + c.street : ""), {
@@ -2177,6 +2180,27 @@
     function checkUrlPoint() {
         if (urlPointChecked) return;
         var params = new URLSearchParams(window.location.search);
+
+        // Focus on akimat suggestion (accepted / resolved) by id+coords
+        var focusId = params.get("focus");
+        if (focusId) {
+            var fid = parseInt(focusId, 10);
+            var flat = parseFloat(params.get("lat"));
+            var flng = parseFloat(params.get("lng"));
+            urlPointChecked = true;
+            // Попробуем открыть popup маркера; если слой ещё не готов — просто центрируем карту.
+            if (!isNaN(flat) && !isNaN(flng)) {
+                map.setView([flat, flng], 17);
+            }
+            var tries = 0;
+            var tryFocus = function () {
+                if (typeof focusSuggestionOnMap === "function" && focusSuggestionOnMap(fid)) return;
+                if (++tries < 20) setTimeout(tryFocus, 200);
+            };
+            tryFocus();
+            return;
+        }
+
         var pointId = params.get("point");
         if (!pointId) return;
         var id = parseInt(pointId, 10);
@@ -3163,11 +3187,15 @@
     var acceptedAppsLayer = L.layerGroup();
     map.addLayer(acceptedAppsLayer);
 
-    function _createInProgressIcon(category) {
+    function _createInProgressIcon(category, resolved) {
         var info = CATEGORIES[category] || { color: "#888" };
-        var html = '<div class="in-progress-marker" style="background:' + info.color + ';">' +
-                    '<span class="in-progress-pulse" style="background:' + info.color + ';"></span>' +
-                    '<span class="in-progress-icon">⚒</span>' +
+        var bg = resolved ? "#27ae60" : info.color;
+        var cls = resolved ? "in-progress-marker is-resolved" : "in-progress-marker";
+        var icon = resolved ? "✓" : "⚒";
+        var pulse = resolved ? "" : '<span class="in-progress-pulse" style="background:' + bg + ';"></span>';
+        var html = '<div class="' + cls + '" style="background:' + bg + ';">' +
+                    pulse +
+                    '<span class="in-progress-icon">' + icon + '</span>' +
                    '</div>';
         return L.divIcon({
             className: "in-progress-marker-wrap",
@@ -3180,31 +3208,61 @@
     function rebuildAcceptedSuggestionsLayer() {
         if (!acceptedAppsLayer) return;
         acceptedAppsLayer.clearLayers();
-        var accepted = mapSuggestions.filter(function (s) { return s.status === "accepted"; });
-        accepted.forEach(function (s) {
-            var marker = L.marker([s.lat, s.lng], { icon: _createInProgressIcon(s.category) });
-            var sla = calcSLA(s.created, s.status, s.akimatResponseAt);
+        var inWork = mapSuggestions.filter(function (s) {
+            return s.status === "accepted" || s.status === "resolved";
+        });
+        inWork.forEach(function (s) {
+            var resolved = s.status === "resolved";
+            var marker = L.marker([s.lat, s.lng], {
+                icon: _createInProgressIcon(s.category, resolved)
+            });
             var photoHtml = s.photo ? '<div class="popup-photo"><img src="' + s.photo + '" alt="" /></div>' : '';
+            var resolvedPhotoHtml = s.resolvePhoto
+                ? '<div class="popup-row"><strong>' + t("akimat_resolve_photo_label") + '</strong></div>' +
+                  '<div class="popup-photo"><img src="' + s.resolvePhoto + '" alt="" /></div>'
+                : '';
             var publicInfo = '';
             if (isStaff || isAkimat) {
                 publicInfo = '<div class="popup-row"><strong>' + t("suggest_from") + '</strong> ' + escHtml(s.name) + '</div>' +
                              '<div class="popup-row"><strong>' + t("suggest_contact_label") + '</strong> ' + escHtml(s.contact) + '</div>';
             }
+            var statusBadge = resolved
+                ? '<span class="status-badge status-resolved">' + t("status_resolved") + '</span>'
+                : '<span class="status-badge status-accepted">' + t("badge_in_progress") + '</span>';
+            var resolvedRow = resolved
+                ? '<div class="popup-row"><strong>' + t("akimat_resolved_on") + '</strong> ' + _fmtDMY(s.resolvedAt) + '</div>'
+                : '<div class="popup-row"><strong>' + t("akimat_accepted_on") + '</strong> ' + _fmtDMY(s.akimatResponseAt) + '</div>' +
+                  '<div class="popup-row"><strong>' + t("akimat_promised") + '</strong> ' + escHtml(s.promisedDays) + ' ' + t("akimat_days_short") + '</div>';
             var popup = '<div class="in-progress-popup">' +
-                '<div class="popup-header">' + _catBadge(s.category) +
-                    ' <span class="status-badge status-accepted">' + t("badge_in_progress") + '</span></div>' +
+                '<div class="popup-header">' + _catBadge(s.category) + ' ' + statusBadge + '</div>' +
                 photoHtml +
                 '<div class="popup-row">' + escHtml(s.description) + '</div>' +
                 publicInfo +
-                '<div class="popup-row"><strong>' + t("akimat_accepted_on") + '</strong> ' + _fmtDMY(s.akimatResponseAt) + '</div>' +
-                '<div class="popup-row"><strong>' + t("akimat_promised") + '</strong> ' + escHtml(s.promisedDays) + ' ' + t("akimat_days_short") + '</div>' +
+                resolvedRow +
+                resolvedPhotoHtml +
             '</div>';
             marker.bindPopup(popup, { maxWidth: 280 });
-            marker.bindTooltip(t("badge_in_progress") + ": " + escHtml(s.description).slice(0, 40), {
+            var tipLabel = resolved ? t("status_resolved") : t("badge_in_progress");
+            marker.bindTooltip(tipLabel + ": " + escHtml(s.description).slice(0, 40), {
                 direction: "top", offset: [0, -14], className: "marker-tooltip"
             });
+            marker._suggestionId = s.id;
             acceptedAppsLayer.addLayer(marker);
         });
+    }
+
+    // Открыть popup конкретной заявки (используется при переходе с /akimat)
+    function focusSuggestionOnMap(id) {
+        if (!acceptedAppsLayer) return false;
+        var found = null;
+        acceptedAppsLayer.eachLayer(function (layer) {
+            if (layer._suggestionId === id) found = layer;
+        });
+        if (!found) return false;
+        var ll = found.getLatLng();
+        map.setView([ll.lat, ll.lng], 17);
+        setTimeout(function () { found.openPopup(); }, 400);
+        return true;
     }
 
     // ══════════════════════════════════════════════════════

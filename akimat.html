@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Заявки жителей — Акимат г. Атырау</title>
-    <link rel="stylesheet" href="css/style.css?v=5" />
+    <link rel="stylesheet" href="css/style.css?v=10" />
     <link rel="manifest" href="manifest.json" />
     <style>
         html, body {
@@ -89,11 +89,17 @@
             overflow-x: auto;
             -webkit-overflow-scrolling: touch;
             scrollbar-width: none;
+            flex-shrink: 0;
         }
         .akimat-page .akimat-tabs::-webkit-scrollbar { display: none; }
         .akimat-page .akimat-tab { white-space: nowrap; flex-shrink: 0; }
+        /* Страница прокручивается естественно через body, чтобы список
+           не ограничивался высотой контейнера и скроллился на планшетах. */
         .akimat-page .akimat-panel-body {
             padding: 0;
+            overflow: visible;
+            flex: 0 1 auto;
+            -webkit-overflow-scrolling: touch;
         }
 
         /* Адаптив для страницы акимата */
@@ -169,6 +175,26 @@
         </div>
     </div>
 
+    <!-- Resolve dialog (фото устранения) -->
+    <div id="akimat-resolve-overlay" class="hidden">
+        <div id="akimat-resolve-modal">
+            <button id="akimat-resolve-close" aria-label="Закрыть">&times;</button>
+            <h2 data-i18n="akimat_resolve_title">Устранение проблемы</h2>
+            <div class="login-form">
+                <label data-i18n="akimat_resolve_photo_label">Фото устранения:</label>
+                <p class="akimat-resolve-hint" data-i18n="akimat_resolve_photo_hint">Приложите фото, подтверждающее устранение</p>
+                <input type="file" id="akimat-resolve-photo-input" accept="image/*" capture="environment" hidden />
+                <button type="button" id="akimat-resolve-photo-pick" class="btn-secondary" data-i18n="akimat_resolve_photo_pick">Выбрать фото</button>
+                <div id="akimat-resolve-photo-preview" class="akimat-resolve-preview hidden"></div>
+                <div id="akimat-resolve-err" class="akimat-resolve-err"></div>
+                <div class="akimat-modal-actions">
+                    <button id="akimat-resolve-cancel" class="btn-secondary" data-i18n="akimat_cancel">Отмена</button>
+                    <button id="akimat-resolve-submit" class="btn-success" data-i18n="akimat_resolve">Отметить как устранено</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Reject dialog -->
     <div id="akimat-reject-overlay" class="hidden">
         <div id="akimat-reject-modal">
@@ -188,8 +214,8 @@
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
     <script src="js/firebase-config.js?v=1"></script>
-    <script src="js/i18n.js?v=2"></script>
+    <script src="js/i18n.js?v=4"></script>
     <script src="js/data.js?v=1"></script>
-    <script src="js/akimat-page.js?v=1"></script>
+    <script src="js/akimat-page.js?v=2"></script>
 </body>
 </html>
