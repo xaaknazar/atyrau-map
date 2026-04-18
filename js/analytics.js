@@ -622,6 +622,17 @@ function buildProsecutorBriefing(analysis, allCrimes, lang) {
         return '<div class="assistant-empty">' + tr("assistant_no_data", "Нет данных за выбранный период.") + '</div>';
     }
 
+    // Подсчёт точек карты для ҰСЫНУ
+    var blindSpotsCount = 0, abandonedCount = 0, unlitCount = 0, camerasGlobalCount = 0;
+    if (typeof mapPoints !== "undefined") {
+        mapPoints.forEach(function (p) {
+            if (p.category === "blind-spots") blindSpotsCount++;
+            else if (p.category === "abandoned") abandonedCount++;
+            else if (p.category === "unlit") unlitCount++;
+        });
+    }
+    if (typeof cameraPoints !== "undefined") camerasGlobalCount = cameraPoints.length;
+
     var html = "";
 
     // ── Краткое резюме ─────────────────────────────────────────
@@ -796,6 +807,38 @@ function buildProsecutorBriefing(analysis, allCrimes, lang) {
         html += '</ol></div>';
     }
 
+    // ── Скачивание ҰСЫНУ по каждому направлению ──────────────
+    var usynuTypes = [];
+    if (blindSpotsCount > 0 || camerasGlobalCount > 0) {
+        usynuTypes.push({ type: "cameras", label: "Бейнебақылау камералары (слепые зоны)", icon: "📹" });
+    }
+    if (abandonedCount > 0) {
+        usynuTypes.push({ type: "abandoned", label: "Қараусыз қалған ғимараттар (заброшенные здания)", icon: "🏚" });
+    }
+    if (unlitCount > 0) {
+        usynuTypes.push({ type: "unlit", label: "Жарықтандырылмаған аумақтар (неосвещённые улицы)", icon: "🔦" });
+    }
+    if (topStreets.length > 0 || top3Hours.length > 0) {
+        usynuTypes.push({ type: "patrol", label: "Патрульдеу және қауіпті аймақтар (патрулирование)", icon: "🚔" });
+    }
+    if (publicPct >= 30) {
+        usynuTypes.push({ type: "public", label: "Қоғамдық орындардағы қылмыс (общественные места)", icon: "🏛" });
+    }
+    if (analysis.people && analysis.people.minors && analysis.people.minors > 0) {
+        usynuTypes.push({ type: "minors", label: "Кәмелетке толмағандар (несовершеннолетние)", icon: "👦" });
+    }
+
+    if (usynuTypes.length > 0) {
+        html += '<div class="assistant-section">';
+        html += '<div class="assistant-section-title">📄 ҰСЫНУ жүктеу (акт надзора)</div>';
+        html += '<div class="usynu-buttons-grid">';
+        usynuTypes.forEach(function (u) {
+            html += '<button class="usynu-download-btn" data-usynu-type="' + u.type + '">' +
+                u.icon + ' ' + escH(u.label) + '</button>';
+        });
+        html += '</div></div>';
+    }
+
     // ── Что ещё можно сделать ────────────────────────────────
     html += '<div class="assistant-section assistant-extra">';
     html += '<div class="assistant-section-title">💡 ' + tr("assistant_extra", "Дополнительные возможности") + '</div>';
@@ -816,203 +859,237 @@ function buildProsecutorBriefing(analysis, allCrimes, lang) {
     return html;
 }
 
-/**
- * Generate a formal prosecutorial oversight document (ҰСЫНУ) in Kazakh.
- * Uses analytics data + mapPoints (blind-spots, abandoned, unlit) to fill template.
- * Returns HTML string formatted as a Word-compatible document.
- */
-function generateUsynuDocument(analysis, allCrimes) {
-    var blindSpots = 0, abandoned = 0, unlit = 0;
-    if (typeof mapPoints !== "undefined") {
-        mapPoints.forEach(function (p) {
-            if (p.category === "blind-spots") blindSpots++;
-            else if (p.category === "abandoned") abandoned++;
-            else if (p.category === "unlit") unlit++;
-        });
-    }
-    var camerasCount = (typeof cameraPoints !== "undefined") ? cameraPoints.length : 0;
+// ═══════════════════════════════════════════════════════════════
+//  ҰСЫНУ DOCUMENT GENERATORS (per-type)
+// ═══════════════════════════════════════════════════════════════
 
-    var topArticles = (analysis.byArticle || []).slice(0, 5);
-    var topStreets = (analysis.byStreet || []).slice(0, 10);
-    var zones = (analysis.problemZones || []).filter(function (z) { return z.count <= 50; }).slice(0, 5);
-    var publicPct = analysis.total > 0 ? Math.round(analysis.publicCount / analysis.total * 100) : 0;
+var _usynuCSS =
+    'body{font-family:"Times New Roman",serif;font-size:14pt;line-height:1.8;margin:60px 80px;color:#000;}' +
+    'p{text-align:justify;text-indent:50px;margin:4px 0;}' +
+    '.addr{text-align:right;margin-bottom:40px;line-height:1.4;}' +
+    '.blank{border-bottom:1px solid #000;display:inline-block;min-width:250px;}' +
+    '.center{text-align:center;}' +
+    '.title{text-align:center;font-weight:bold;font-size:14pt;margin:30px 0 5px;}' +
+    '.subtitle{text-align:center;font-size:14pt;margin-bottom:30px;}' +
+    '.rec-title{text-align:center;font-weight:bold;font-size:14pt;margin:30px 0 15px;}' +
+    'ol,ul{margin-left:50px;}' +
+    'ol li,ul li{margin-bottom:8px;text-align:justify;}' +
+    'ul{list-style-type:"– ";}' +
+    '.sign{margin-top:70px;display:flex;justify-content:space-between;}' +
+    '.exec{margin-top:100px;font-size:12pt;color:#444;}' +
+    '.page-break{page-break-before:always;}';
 
-    var hourPeaks = [];
-    if (analysis.byHour) {
-        analysis.byHour.forEach(function (c, h) { hourPeaks.push({ h: h, c: c }); });
-        hourPeaks.sort(function (a, b) { return b.c - a.c; });
-    }
-    var top3Hours = hourPeaks.slice(0, 3).filter(function (x) { return x.c > 0; });
-    var peakHoursStr = top3Hours.map(function (x) { return ("0" + x.h).slice(-2) + ":00"; }).join(", ");
-
-    var topStreetsStr = topStreets.slice(0, 5).map(function (s) { return s.label + " (" + s.count + ")"; }).join(", ");
-
-    var topArticlesStr = topArticles.map(function (a) { return a.label + " – " + a.count; }).join("; ");
-
-    var minors = (analysis.people && analysis.people.minors) ? analysis.people.minors : 0;
-
-    var today = new Date();
-    var dd = ("0" + today.getDate()).slice(-2);
-    var mm = ("0" + (today.getMonth() + 1)).slice(-2);
-    var yyyy = today.getFullYear();
-    var dateStr = dd + "." + mm + "." + yyyy + "ж.";
-
-    // Составляю список проблемных көшелер (улиц без камер)
-    var blindStreetsList = "";
-    if (topStreets.length > 0) {
-        blindStreetsList = topStreets.slice(0, 10).map(function (s, i) {
-            return (i + 1) + ") " + s.label;
-        }).join(";\n");
-    }
-
-    var doc = '<!DOCTYPE html><html><head><meta charset="utf-8">' +
-        '<style>' +
-        'body{font-family:"Times New Roman",serif;font-size:14pt;line-height:1.6;margin:40px 60px;color:#000;}' +
-        'h2{text-align:center;font-size:14pt;font-weight:bold;margin:20px 0 10px;}' +
-        'p{text-align:justify;text-indent:40px;margin:6px 0;}' +
-        '.addressee{text-align:right;margin-bottom:30px;}' +
-        '.addressee-blank{border-bottom:1px solid #000;display:inline-block;min-width:250px;height:20px;}' +
-        '.title{text-align:center;font-weight:bold;font-size:15pt;margin:30px 0 5px;}' +
-        '.subtitle{text-align:center;font-size:13pt;margin-bottom:30px;}' +
-        '.recommend-title{text-align:center;font-weight:bold;font-size:14pt;margin:25px 0 15px;}' +
-        'ol{margin-left:40px;}' +
-        'ol li{margin-bottom:10px;text-align:justify;}' +
-        'ul{margin-left:60px;list-style-type:"- ";}' +
-        'ul li{margin-bottom:6px;text-align:justify;}' +
-        '.footer{margin-top:50px;}' +
-        '.footer-line{display:flex;justify-content:space-between;margin-top:30px;}' +
-        '.sign-block{margin-top:60px;}' +
-        '.exec{margin-top:80px;font-size:12pt;color:#555;}' +
-        '</style></head><body>';
-
-    // Адресат (пустое поле для заполнения)
-    doc += '<div class="addressee">';
-    doc += '<span class="addressee-blank">&nbsp;</span><br>';
-    doc += '<span style="font-size:12pt;color:#888;">(адресат / лауазымды тұлға)</span>';
-    doc += '</div>';
-
-    // Заголовок
-    doc += '<div class="title">ҰСЫНУ</div>';
-    doc += '<div class="subtitle">заңдылықтың бұзылуын жою туралы</div>';
-
-    // Вводная часть
-    doc += '<p>Қала прокуратурасы қадағалау аумағындағы құқық бұзушылықтың алдын алу және қоғамдық қауіпсіздікті қамтамасыз ету бойынша талдау жүргізді.</p>';
-
-    doc += '<p>Талдау барысында қауіпті аймақтар, қараусыз қалған ғимараттар, бейнебақылау камераларымен қамтылмаған көшелер, жарықтандырылмаған аумақтар және қоғамдық тәртіпті бұзу деректері анықталды.</p>';
-
-    // Статистика
-    doc += '<p><strong>Статистикалық мәліметтер:</strong> талдау кезеңінде қала аумағында жалпы ' +
-        analysis.total + ' құқық бұзушылық тіркелген, оның ішінде ' +
-        analysis.publicCount + ' (' + publicPct + '%) қоғамдық орындарда орын алған.</p>';
-
-    if (topArticlesStr) {
-        doc += '<p>Негізгі қылмыс түрлері: ' + topArticlesStr + '.</p>';
-    }
-
-    if (peakHoursStr) {
-        doc += '<p>Құқық бұзушылықтардың пик уақыты: ' + peakHoursStr + ' сағат аралығында.</p>';
-    }
-
-    // Бейнекамералар
-    if (blindSpots > 0) {
-        doc += '<p><strong>Бейнебақылау камералары бойынша</strong></p>';
-        doc += '<p>Талдау барысында бейнебақылау камераларымен қамтылмаған ' + blindSpots +
-            ' нүкте анықталды. Қазіргі таңда қала аумағында ' + camerasCount + ' бейнебақылау камерасы орнатылған, алайда бұл қылмыстық ахуалды толық бақылау үшін жеткіліксіз.</p>';
-        doc += '<p>«Құқық бұзушылық профилактикасы туралы» Заңның 6-бабының 2-тармағына сәйкес, жергілікті атқарушы органдар құқық бұзушылық жасауға итермелейтін себептер мен жағдайларды жою жөнінде шаралар қолданады.</p>';
-    }
-
-    // Қараусыз ғимараттар
-    if (abandoned > 0) {
-        doc += '<p><strong>Қараусыз қалған ғимараттар бойынша</strong></p>';
-        doc += '<p>Талдаумен қала аумағында ' + abandoned +
-            ' қараусыз қалған ғимарат анықталды. Қараусыз қалған ғимараттар балалардың өмірі мен денсаулығына тікелей қауіп төндіреді және жазатайым оқиғалардың орын алуына себеп болуы мүмкін.</p>';
-        doc += '<p>«Жергілікті мемлекеттік басқару және өзін-өзі басқару туралы» Заңының 30-бабының 16-тармағына сәйкес, аудандық (облыстық маңызы бар қалалық) әкімдік қоғамдық орындарды абаттандыру және сыртқы безендіру мәселелерін шешеді.</p>';
-    }
-
-    // Жарықтандырылмаған көшелер
-    if (unlit > 0) {
-        doc += '<p><strong>Жарықтандырылмаған аумақтар бойынша</strong></p>';
-        doc += '<p>Қала аумағында жарық жүргізілмеген ' + unlit +
-            ' нүкте анықталды. Жарықтандырудың болмауы түнгі уақытта құқық бұзушылықтардың орын алу ықтималдылығын арттырады.</p>';
-    }
-
-    // Қауіпті көшелер
-    if (topStreetsStr) {
-        doc += '<p><strong>Қауіпті аймақтар бойынша</strong></p>';
-        doc += '<p>Ең көп құқық бұзушылық орын алған көшелер: ' + topStreetsStr + '.</p>';
-        doc += '<p>Аталған көшелерде бейнебақылау камераларын орнату, жарықтандыру жүйелерін күшейту және патрульдеу жұмыстарын жиілету қажет.</p>';
-    }
-
-    // Кәмелетке толмағандар
-    if (minors > 0) {
-        doc += '<p><strong>Кәмелетке толмағандар бойынша</strong></p>';
-        doc += '<p>Құқық бұзушылар арасында ' + minors +
-            ' кәмелетке толмаған тұлға анықталды. Бұл мәселе бойынша кәмелетке толмағандар істері жөніндегі комиссияға материалдар жолдау қажет.</p>';
-    }
-
-    // Қорытынды
-    doc += '<p>Орын алған кемшіліктер, қала әкімдігінің аталған салаға жауапты орынбасары және бөлім басшылары тарапынан ведомстволық бақылаудың болмауынан орын алған.</p>';
-
-    doc += '<p>Жоғарыдағылардың негізінде, Қазақстан Республикасы Конституциясының 83-бабын, «Прокуратура туралы» Конституциялық заңның 36-бабын басшылыққа алып,</p>';
-
-    // ҰСЫНАМЫН
-    doc += '<div class="recommend-title">ҰСЫНАМЫН:</div>';
-    doc += '<ol>';
-
-    doc += '<li>Ұсынуды қарауды және орын алған заң бұзушылықтарға ықпал еткен себептер мен салдарды жоюға және алдағы уақытта болдырмау үшін нақты шаралар қабылдауды, ол үшін:';
-    doc += '<ul>';
-    if (blindSpots > 0) {
-        doc += '<li>бейнебақылау камераларымен қамтылмаған ' + blindSpots + ' нүктеге камераларды орнату мәселесін қарастыруды;</li>';
-    }
-    if (unlit > 0) {
-        doc += '<li>жарықтандырылмаған ' + unlit + ' аумақты жарық шамдарымен жабдықтауды;</li>';
-    }
-    if (abandoned > 0) {
-        doc += '<li>қараусыз қалған ' + abandoned + ' ғимаратты заңдастыру немесе қоршау бойынша шаралар қабылдауды;</li>';
-    }
-    if (topStreets.length > 0) {
-        doc += '<li>қылмыс көп орын алатын көшелерде патрульдеу жұмыстарын күшейтуді;</li>';
-    }
-    doc += '</ul></li>';
-
-    doc += '<li>Анықталған заң бұзушылықтарға жол берген жауапты қызметкерлерді тәртіптік жауаптылыққа тарту мәселесін қарастыруды.</li>';
-
-    doc += '<li>Ұсынуды заңда көзделген мерзімде прокурордың қатысуымен қарап, нәтижесі туралы толықтай ақпаратты дәлелді құжаттарымен қоса қала прокуратурасына жолдауды.</li>';
-
-    doc += '</ol>';
-
-    // Қосымша
-    doc += '<p>Қосымша: тізім «___» парақта.</p>';
-
-    // Подпись
-    doc += '<div class="sign-block">';
-    doc += '<div class="footer-line">';
-    doc += '<span>Қала прокуроры</span>';
-    doc += '<span class="addressee-blank">&nbsp;</span>';
-    doc += '</div></div>';
-
-    // Исполнитель
-    doc += '<div class="exec">';
-    doc += 'Орынд.: _________________<br>';
-    doc += 'Тел.: _________________';
-    doc += '</div>';
-
-    doc += '</body></html>';
-    return doc;
+function _usynuStart() {
+    return '<!DOCTYPE html><html><head><meta charset="utf-8"><style>' + _usynuCSS + '</style></head><body>' +
+        '<div class="addr"><span class="blank">&nbsp;</span><br><span class="blank">&nbsp;</span></div>' +
+        '<div class="title">ҰСЫНУ</div>' +
+        '<div class="subtitle">заңдылықтың бұзылуын жою туралы</div>';
 }
 
-/**
- * Trigger download of ҰСЫНУ document as .doc file.
- */
-function downloadUsynu(analysis, allCrimes) {
-    var html = generateUsynuDocument(analysis, allCrimes);
+function _usynuEnd() {
+    return '<p style="margin-top:20px;">Жоғарыдағылардың негізінде, Қазақстан Республикасы Конституциясының 83-бабын, «Прокуратура туралы» Конституциялық заңның 36-бабын басшылыққа алып,</p>' +
+        '<div class="rec-title">ҰСЫНАМЫН:</div>';
+}
+
+function _usynuSignature() {
+    return '<p style="margin-top:15px;">Ұсынуды заңда көзделген мерзімде прокурордың қатысуымен қарап, нәтижесі туралы толықтай ақпаратты дәлелді құжаттарымен қоса қала прокуратурасына жолдауды.</p>' +
+        '<p>Қосымша: тізім «___» парақта.</p>' +
+        '<div class="sign"><span>Қала прокуроры</span><span class="blank">&nbsp;</span></div>' +
+        '<div class="exec">Орынд.: _________________<br>Тел.: _________________</div>' +
+        '</body></html>';
+}
+
+function _usynuDownload(html, name) {
     var blob = new Blob(['\ufeff' + html], { type: 'application/msword' });
     var url = URL.createObjectURL(blob);
     var a = document.createElement('a');
     a.href = url;
-    a.download = 'Usynu_' + new Date().toISOString().slice(0, 10) + '.doc';
+    a.download = 'Usynu_' + name + '_' + new Date().toISOString().slice(0, 10) + '.doc';
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
+}
+
+function _getMapCounts() {
+    var r = { blindSpots: 0, abandoned: 0, unlit: 0, cameras: 0 };
+    if (typeof mapPoints !== "undefined") mapPoints.forEach(function (p) {
+        if (p.category === "blind-spots") r.blindSpots++;
+        else if (p.category === "abandoned") r.abandoned++;
+        else if (p.category === "unlit") r.unlit++;
+    });
+    if (typeof cameraPoints !== "undefined") r.cameras = cameraPoints.length;
+    return r;
+}
+
+function _peakHoursStr(analysis) {
+    var h = [];
+    if (analysis.byHour) analysis.byHour.forEach(function (c, i) { h.push({ h: i, c: c }); });
+    h.sort(function (a, b) { return b.c - a.c; });
+    return h.slice(0, 3).filter(function (x) { return x.c > 0; }).map(function (x) { return ("0" + x.h).slice(-2) + ":00"; }).join(", ");
+}
+
+// ── CAMERAS (слепые зоны / бейнебақылау) ─────────────────────
+_usynuGenerators = {};
+_usynuGenerators.cameras = function (a) {
+    var m = _getMapCounts();
+    var streets = (a.byStreet || []).slice(0, 10);
+    var d = _usynuStart();
+    d += '<p>Қала прокуратурасы қадағалау аумағындағы қоғамдық қауіпсіздікті қамтамасыз ету және құқық бұзушылықтың алдын алу мақсатында бейнебақылау камераларының жай-күйіне талдау жүргізді.</p>';
+    d += '<p>«Құқық бұзушылық профилактикасы туралы» Қазақстан Республикасы Заңының (бұдан әрі – Заң) 6-бабының 2-тармағына сәйкес, жергілікті атқарушы органдар құқық бұзушылық профилактикасы субъектілерінің өзара іс-қимылын жергілікті деңгейде қамтамасыз етеді және құқық бұзушылық жасауға итермелейтін себептер мен жағдайларды жою жөнінде шаралар қолданады.</p>';
+    d += '<p><strong>Статистикалық мәліметтер:</strong> талдау кезеңінде қала аумағында жалпы ' + a.total + ' құқық бұзушылық тіркелген.</p>';
+    d += '<p>Қазіргі таңда қала аумағында ' + m.cameras + ' бейнебақылау камерасы орнатылған. Алайда, талдау барысында бейнебақылау камераларымен қамтылмаған <strong>' + m.blindSpots + ' нүкте</strong> анықталды.</p>';
+    d += '<p>Бейнебақылау камераларының жоқтығы немесе істен шығуы қылмыстарды ашуға теріс ықпал тигізіп, қоғамдық қауіпсіздіктің төмендеуіне себеп болуда.</p>';
+    if (streets.length > 0) {
+        d += '<p>Қылмыс көп орын алған көшелер:</p><ul>';
+        streets.forEach(function (s) { d += '<li>' + s.label + ' – ' + s.count + ' құқық бұзушылық;</li>'; });
+        d += '</ul>';
+        d += '<p>Аталған көшелердің басым көпшілігінде бейнебақылау камералары орнатылмаған немесе істен шыққан.</p>';
+    }
+    d += '<p>Бұл «Автомобиль жолдары туралы» Заңының 19-4-бабына және «Құқық бұзушылық профилактикасы туралы» Заңның 6-бабына қайшы келеді.</p>';
+    d += '<p>Аталған кемшіліктер жергілікті атқарушы органның ведомстволық бақылауды тиісті деңгейде жүзеге асырмауынан орын алған.</p>';
+    d += _usynuEnd();
+    d += '<ol>';
+    d += '<li>Ұсынуды қарауды және орын алған заң бұзушылықтарға ықпал еткен себептер мен салдарды жоюға нақты шаралар қабылдауды, ол үшін:<ul>';
+    d += '<li>бейнебақылау камераларымен қамтылмаған ' + m.blindSpots + ' нүктеге камераларды орнату мәселесін қарастыруды;</li>';
+    d += '<li>қолда бар камераларды іске қосу және техникалық қызмет көрсетуін қамтамасыз етуді;</li>';
+    d += '<li>құқық бұзушылықтар орын алатын, адамдар көп жиналатын аймақтарды талдау жүргізу арқылы анықтауды;</li>';
+    d += '<li>бейнебақылау камерасын орнататын жерлерді прокуратурамен бірлесе нақтылауды;</li>';
+    d += '</ul></li>';
+    d += '<li>Анықталған заң бұзушылықтарға жол берген жауапты қызметкерлерді тәртіптік жауаптылыққа тарту мәселесін қарастыруды.</li>';
+    d += '</ol>';
+    d += _usynuSignature();
+    return d;
+};
+
+// ── ABANDONED (қараусыз ғимараттар) ──────────────────────────
+_usynuGenerators.abandoned = function (a) {
+    var m = _getMapCounts();
+    var d = _usynuStart();
+    d += '<p>Қала прокуратурасы қадағалау аумағындағы қараусыз қалған ғимараттар мен тұрғын үйлердің жай-күйіне талдау жүргізді.</p>';
+    d += '<p>«Жергілікті мемлекеттік басқару және өзін-өзі басқару туралы» Заңының 30-бабының 16-тармағына сәйкес, аудандық (облыстық маңызы бар қалалық) әкімдік қоғамдық орындарды абаттандыру және сыртқы безендіру мәселелерін шешеді.</p>';
+    d += '<p>Азаматтық кодекстің 242-бабының 1-бөлігіне сәйкес, иесі жоқ жылжымайтын заттарды олар табылған аумақтағы жергілікті атқарушы органдардың өтініші бойынша жылжымайтын мүлікті мемлекеттік тіркеуді жүзеге асыратын орган есепке алады.</p>';
+    d += '<p><strong>Статистикалық мәліметтер:</strong> талдау кезеңінде қала аумағында ' + a.total + ' құқық бұзушылық тіркелген.</p>';
+    d += '<p>Талдаумен қала аумағында <strong>' + m.abandoned + ' қараусыз қалған ғимарат</strong> анықталды.</p>';
+    d += '<p>Қараусыз қалған ғимараттар балалардың өмірі мен денсаулығына тікелей қауіп төндіреді және жазатайым оқиғалардың орын алуына себеп болуы мүмкін. Аталған ғимараттар тұрақты мекенжайы жоқ, есірткі не алкогольді масаң күйдегі адамдардың панасына, маргиналды топтардың жиналу аумағына айналуы, қылмыс жасауға қолайлы «соқыр аймақ» ретінде пайдалану қауіптілігі жоққа шығарылмайды.</p>';
+    d += '<p>Дегенмен, жергілікті атқарушы органмен мемлекет мұқтажына алуға тиісті шаралар қабылданбауда.</p>';
+    d += '<p>Коммуналдық меншікке түскен мүлікті есепке алу, сақтау, бағалау, одан әрі пайдалану және өткізу жөніндегі жұмыстарды ұйымдастыруды жергілікті атқарушы орган жүзеге асырады.</p>';
+    d += _usynuEnd();
+    d += '<ol>';
+    d += '<li>Ұсынуды қарауды және нақты шаралар қабылдауды, ол үшін:<ul>';
+    d += '<li>қараусыз қалған ' + m.abandoned + ' ғимаратты заңдастыру бойынша шаралар қабылдауды;</li>';
+    d += '<li>аталған ғимараттарды қоршау немесе жою бойынша жұмыстар жүргізуді;</li>';
+    d += '<li>иесіз қалған мүлікті мемлекеттік мұқтажға алу үшін сотқа жүгінуді;</li>';
+    d += '</ul></li>';
+    d += '<li>Жауапты қызметкерлерді тәртіптік жауаптылыққа тарту мәселесін қарастыруды.</li>';
+    d += '</ol>';
+    d += _usynuSignature();
+    return d;
+};
+
+// ── UNLIT (жарықтандырылмаған аумақтар) ──────────────────────
+_usynuGenerators.unlit = function (a) {
+    var m = _getMapCounts();
+    var pk = _peakHoursStr(a);
+    var d = _usynuStart();
+    d += '<p>Қала прокуратурасы қадағалау аумағындағы көше жарықтандыруының жай-күйіне талдау жүргізді.</p>';
+    d += '<p>«Автомобиль жолдары туралы» Заңының 19-4-бабының 2-бөлігіне сәйкес, автомобиль жолдарының және елді мекендер көшелерінің жүргіншілер бөлігі, жаяу жүргіншілер мен велосипед жолдары тротуарларының жабыны жол жүрісі қауіпсіздігін қамтамасыз ететін жағдайда болуға тиіс.</p>';
+    d += '<p><strong>Статистикалық мәліметтер:</strong> талдау кезеңінде ' + a.total + ' құқық бұзушылық тіркелген.</p>';
+    d += '<p>Талдаумен қала аумағында жарық жүргізілмеген <strong>' + m.unlit + ' нүкте</strong> анықталды.</p>';
+    if (pk) d += '<p>Құқық бұзушылықтардың пик уақыты: ' + pk + ' сағат аралығында, яғни қараңғы уақытта қылмыс көп орын алуда.</p>';
+    d += '<p>Жарықтандырудың болмауы түнгі уақытта құқық бұзушылықтардың орын алу ықтималдылығын арттырып, тұрғындардың өміріне қауіп төндіруде.</p>';
+    d += _usynuEnd();
+    d += '<ol>';
+    d += '<li>Нақты шаралар қабылдауды, ол үшін:<ul>';
+    d += '<li>жарықтандырылмаған ' + m.unlit + ' аумақты жарық шамдарымен жабдықтауды;</li>';
+    d += '<li>қараңғы аймақтарды қосымша жарық шамдарымен жабдықтауды;</li>';
+    d += '</ul></li>';
+    d += '<li>Жауапты қызметкерлерді тәртіптік жауаптылыққа тарту мәселесін қарастыруды.</li>';
+    d += '</ol>';
+    d += _usynuSignature();
+    return d;
+};
+
+// ── PATROL (патрульдеу / қауіпті аймақтар) ───────────────────
+_usynuGenerators.patrol = function (a) {
+    var streets = (a.byStreet || []).slice(0, 10);
+    var pk = _peakHoursStr(a);
+    var zones = (a.problemZones || []).filter(function (z) { return z.count <= 50; }).slice(0, 5);
+    var d = _usynuStart();
+    d += '<p>Қала прокуратурасы қадағалау аумағындағы құқық бұзушылықтардың орын алу жиілігі мен аумақтық таралуына талдау жүргізді.</p>';
+    d += '<p>«Құқық бұзушылық профилактикасы туралы» Заңның 6-бабына сәйкес, жергілікті атқарушы органдар құқық бұзушылық жасауға итермелейтін себептер мен жағдайларды жою жөнінде шаралар қолданады, азаматтардың құқықтық тәрбиесін ұйымдастыруды қамтамасыз етеді.</p>';
+    d += '<p><strong>Статистикалық мәліметтер:</strong> талдау кезеңінде ' + a.total + ' құқық бұзушылық тіркелген.</p>';
+    if (pk) d += '<p>Құқық бұзушылықтардың пик уақыты: <strong>' + pk + '</strong> сағат аралығында.</p>';
+    if (streets.length > 0) {
+        d += '<p>Ең көп құқық бұзушылық орын алған көшелер:</p><ul>';
+        streets.forEach(function (s) { d += '<li>' + s.label + ' – ' + s.count + ' жағдай;</li>'; });
+        d += '</ul>';
+    }
+    if (zones.length > 0) {
+        d += '<p>Анықталған қауіпті аймақтар (кластерлер): <strong>' + zones.length + '</strong>.</p>';
+    }
+    d += '<p>Профилактикалық жұмыстардың тиісті түрде жүргізілмеуі салдарынан аталған аймақтарда құқық бұзушылық деңгейі жоғары болып қалуда.</p>';
+    d += _usynuEnd();
+    d += '<ol>';
+    d += '<li>Нақты шаралар қабылдауды, ол үшін:<ul>';
+    if (pk) d += '<li>пик уақытта (' + pk + ') патрульдеу жұмыстарын күшейтуді;</li>';
+    d += '<li>қылмыс көп орын алатын көшелерде тұрақты бақылау орнатуды;</li>';
+    d += '<li>құқық бұзушылық динамикасына терең талдау мен мониторинг жүргізуді;</li>';
+    d += '</ul></li>';
+    d += '<li>Жауапты қызметкерлерді тәртіптік жауаптылыққа тарту мәселесін қарастыруды.</li>';
+    d += '</ol>';
+    d += _usynuSignature();
+    return d;
+};
+
+// ── PUBLIC (қоғамдық орындардағы қылмыс) ─────────────────────
+_usynuGenerators.public = function (a) {
+    var pct = a.total > 0 ? Math.round(a.publicCount / a.total * 100) : 0;
+    var d = _usynuStart();
+    d += '<p>Қала прокуратурасы қоғамдық орындарда орын алған құқық бұзушылықтарға талдау жүргізді.</p>';
+    d += '<p>«Құқық бұзушылық профилактикасы туралы» Заңның 6-бабына сәйкес, жергілікті атқарушы органдар профилактикаға қатысатын азаматтардың және ұйымдардың есебін жүргізеді, азаматтарды қоғамдық тәртіпті сақтауға тарту жөнінде шаралар қолданады.</p>';
+    d += '<p><strong>Статистикалық мәліметтер:</strong> ' + a.total + ' құқық бұзушылықтың ' + a.publicCount + '-і (<strong>' + pct + '%</strong>) қоғамдық орындарда орын алған.</p>';
+    d += '<p>Қоғамдық орындардағы қылмыстардың жоғары үлесі ведомствоаралық өзара іс-қимылдың тиісті деңгейде жолға қойылмағанын, профилактикалық шаралардың жеткіліксіз деңгейде өткізілгенін көрсетеді.</p>';
+    d += _usynuEnd();
+    d += '<ol>';
+    d += '<li>Нақты шаралар қабылдауды, ол үшін:<ul>';
+    d += '<li>полиция, әкімдік және ЖКХ бөлімімен ведомствоаралық өзара іс-қимылды қалыптастыруды;</li>';
+    d += '<li>қоғамдық орындарда патрульдеу мен бейнебақылауды күшейтуді;</li>';
+    d += '<li>тұрғындарды қоғамдық тәртіпті белсенді қамтамасыз етуге шақыратын үгіт-насихат жұмыстарын жүргізуді;</li>';
+    d += '</ul></li>';
+    d += '<li>Жауапты қызметкерлерді тәртіптік жауаптылыққа тарту мәселесін қарастыруды.</li>';
+    d += '</ol>';
+    d += _usynuSignature();
+    return d;
+};
+
+// ── MINORS (кәмелетке толмағандар) ───────────────────────────
+_usynuGenerators.minors = function (a) {
+    var p = a.people || {};
+    var d = _usynuStart();
+    d += '<p>Қала прокуратурасы кәмелетке толмағандардың құқық бұзушылықтарға қатысуына талдау жүргізді.</p>';
+    d += '<p>«Құқық бұзушылық профилактикасы туралы» Заңның 6-бабына сәйкес, жергілікті атқарушы органдар білім беру ұйымдарының білім алушылары мен тәрбиеленушілерінде заңға мойынсынушылық мінез-құлықты қалыптастыруға бағытталған бағдарламалар мен әдістемелерді ендіреді және іске асырады.</p>';
+    d += '<p><strong>Статистикалық мәліметтер:</strong> ' + a.total + ' құқық бұзушылық тіркелген, құқық бұзушылар арасында <strong>' + (p.minors || 0) + ' кәмелетке толмаған</strong> тұлға анықталды.</p>';
+    if (p.total) d += '<p>Жалпы тіркелген тұлғалар саны: ' + p.total + '.</p>';
+    d += '<p>Кәмелетке толмағандардың құқық бұзушылыққа тартылуы отбасын қолдау орталығының мүмкіндіктерінің кеңінен қолданылмауынан, NEET санатындағы жастармен жұмыстың жеткіліксіздігінен орын алуда.</p>';
+    d += _usynuEnd();
+    d += '<ol>';
+    d += '<li>Нақты шаралар қабылдауды, ол үшін:<ul>';
+    d += '<li>кәмелетке толмағандар істері жөніндегі комиссияға материалдар жолдауды;</li>';
+    d += '<li>NEET санатындағы жастармен жұмысты шынайы жүргізуді;</li>';
+    d += '<li>отбасын қолдау орталығының мүмкіндіктерін кеңінен қолдануды;</li>';
+    d += '<li>білім беру ұйымдарында құқықтық тәрбие жұмыстарын жандандыруды;</li>';
+    d += '</ul></li>';
+    d += '<li>Жауапты қызметкерлерді тәртіптік жауаптылыққа тарту мәселесін қарастыруды.</li>';
+    d += '</ol>';
+    d += _usynuSignature();
+    return d;
+};
+
+// ── Download dispatcher ─────────────────────────────────────
+function downloadUsynuByType(type, analysis) {
+    var gen = _usynuGenerators[type];
+    if (!gen) { alert("Белгісіз тип: " + type); return; }
+    var html = gen(analysis);
+    _usynuDownload(html, type);
 }

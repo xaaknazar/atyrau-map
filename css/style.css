@@ -4431,30 +4431,34 @@ body {
 }
 .assistant-trend-detail strong { color: #ffffff; }
 
-/* ҰСЫНУ download button */
+/* ҰСЫНУ download buttons grid */
+.usynu-buttons-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+}
 .usynu-download-btn {
     display: block;
     width: 100%;
-    padding: 14px 20px;
+    padding: 12px 14px;
     background: linear-gradient(135deg, #0f3460, #16213e);
-    border: 1px solid rgba(52, 152, 219, 0.4);
+    border: 1px solid rgba(52, 152, 219, 0.35);
     border-radius: 10px;
     color: #fff;
-    font-size: 14px;
-    font-weight: 700;
+    font-size: 12.5px;
+    font-weight: 600;
     cursor: pointer;
-    text-align: center;
+    text-align: left;
     transition: all 0.2s;
-    letter-spacing: 0.3px;
+    line-height: 1.4;
 }
 .usynu-download-btn:hover {
     background: linear-gradient(135deg, #163d6e, #1a2a4e);
     border-color: rgba(52, 152, 219, 0.7);
     box-shadow: 0 4px 16px rgba(52, 152, 219, 0.2);
 }
-.usynu-download-btn:active {
-    transform: scale(0.98);
-}
+.usynu-download-btn:active { transform: scale(0.98); }
+@media (max-width: 600px) { .usynu-buttons-grid { grid-template-columns: 1fr; } }
 
 /* ═══════════════════════════════════════════════════════════
    RESPONSIVE REFINEMENTS — Reports & Akimat (tablet & mobile)

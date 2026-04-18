@@ -870,14 +870,12 @@
         var assistantBody = document.getElementById("assistant-body");
         if (assistantBody && typeof buildProsecutorBriefing === "function") {
             assistantBody.innerHTML = buildProsecutorBriefing(analysis, filtered, currentLang || "ru");
-            var usynuBtn = document.getElementById("download-usynu-btn");
-            if (usynuBtn) {
-                usynuBtn.addEventListener("click", function () {
-                    if (typeof downloadUsynu === "function") {
-                        downloadUsynu(analysis, filtered);
-                    }
+            assistantBody.querySelectorAll("[data-usynu-type]").forEach(function (btn) {
+                btn.addEventListener("click", function () {
+                    var tp = this.getAttribute("data-usynu-type");
+                    if (typeof downloadUsynuByType === "function") downloadUsynuByType(tp, analysis);
                 });
-            }
+            });
         }
     }
 
