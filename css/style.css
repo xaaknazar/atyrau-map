@@ -4431,6 +4431,31 @@ body {
 }
 .assistant-trend-detail strong { color: #ffffff; }
 
+/* ҰСЫНУ download button */
+.usynu-download-btn {
+    display: block;
+    width: 100%;
+    padding: 14px 20px;
+    background: linear-gradient(135deg, #0f3460, #16213e);
+    border: 1px solid rgba(52, 152, 219, 0.4);
+    border-radius: 10px;
+    color: #fff;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.2s;
+    letter-spacing: 0.3px;
+}
+.usynu-download-btn:hover {
+    background: linear-gradient(135deg, #163d6e, #1a2a4e);
+    border-color: rgba(52, 152, 219, 0.7);
+    box-shadow: 0 4px 16px rgba(52, 152, 219, 0.2);
+}
+.usynu-download-btn:active {
+    transform: scale(0.98);
+}
+
 /* ═══════════════════════════════════════════════════════════
    RESPONSIVE REFINEMENTS — Reports & Akimat (tablet & mobile)
    Дополнительные правки под телефоны / планшеты / узкие экраны.

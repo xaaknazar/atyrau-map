@@ -808,5 +808,211 @@ function buildProsecutorBriefing(analysis, allCrimes, lang) {
     html += '<li>' + tr("extra_alerts", "Уведомления при резком росте преступности на конкретной улице") + '</li>';
     html += '</ul></div>';
 
+    // ── Кнопка скачивания ҰСЫНУ ──────────────────────────────
+    html += '<div class="assistant-section">';
+    html += '<button id="download-usynu-btn" class="usynu-download-btn">📄 ҰСЫНУ жүктеу (акт надзора)</button>';
+    html += '</div>';
+
     return html;
+}
+
+/**
+ * Generate a formal prosecutorial oversight document (ҰСЫНУ) in Kazakh.
+ * Uses analytics data + mapPoints (blind-spots, abandoned, unlit) to fill template.
+ * Returns HTML string formatted as a Word-compatible document.
+ */
+function generateUsynuDocument(analysis, allCrimes) {
+    var blindSpots = 0, abandoned = 0, unlit = 0;
+    if (typeof mapPoints !== "undefined") {
+        mapPoints.forEach(function (p) {
+            if (p.category === "blind-spots") blindSpots++;
+            else if (p.category === "abandoned") abandoned++;
+            else if (p.category === "unlit") unlit++;
+        });
+    }
+    var camerasCount = (typeof cameraPoints !== "undefined") ? cameraPoints.length : 0;
+
+    var topArticles = (analysis.byArticle || []).slice(0, 5);
+    var topStreets = (analysis.byStreet || []).slice(0, 10);
+    var zones = (analysis.problemZones || []).filter(function (z) { return z.count <= 50; }).slice(0, 5);
+    var publicPct = analysis.total > 0 ? Math.round(analysis.publicCount / analysis.total * 100) : 0;
+
+    var hourPeaks = [];
+    if (analysis.byHour) {
+        analysis.byHour.forEach(function (c, h) { hourPeaks.push({ h: h, c: c }); });
+        hourPeaks.sort(function (a, b) { return b.c - a.c; });
+    }
+    var top3Hours = hourPeaks.slice(0, 3).filter(function (x) { return x.c > 0; });
+    var peakHoursStr = top3Hours.map(function (x) { return ("0" + x.h).slice(-2) + ":00"; }).join(", ");
+
+    var topStreetsStr = topStreets.slice(0, 5).map(function (s) { return s.label + " (" + s.count + ")"; }).join(", ");
+
+    var topArticlesStr = topArticles.map(function (a) { return a.label + " – " + a.count; }).join("; ");
+
+    var minors = (analysis.people && analysis.people.minors) ? analysis.people.minors : 0;
+
+    var today = new Date();
+    var dd = ("0" + today.getDate()).slice(-2);
+    var mm = ("0" + (today.getMonth() + 1)).slice(-2);
+    var yyyy = today.getFullYear();
+    var dateStr = dd + "." + mm + "." + yyyy + "ж.";
+
+    // Составляю список проблемных көшелер (улиц без камер)
+    var blindStreetsList = "";
+    if (topStreets.length > 0) {
+        blindStreetsList = topStreets.slice(0, 10).map(function (s, i) {
+            return (i + 1) + ") " + s.label;
+        }).join(";\n");
+    }
+
+    var doc = '<!DOCTYPE html><html><head><meta charset="utf-8">' +
+        '<style>' +
+        'body{font-family:"Times New Roman",serif;font-size:14pt;line-height:1.6;margin:40px 60px;color:#000;}' +
+        'h2{text-align:center;font-size:14pt;font-weight:bold;margin:20px 0 10px;}' +
+        'p{text-align:justify;text-indent:40px;margin:6px 0;}' +
+        '.addressee{text-align:right;margin-bottom:30px;}' +
+        '.addressee-blank{border-bottom:1px solid #000;display:inline-block;min-width:250px;height:20px;}' +
+        '.title{text-align:center;font-weight:bold;font-size:15pt;margin:30px 0 5px;}' +
+        '.subtitle{text-align:center;font-size:13pt;margin-bottom:30px;}' +
+        '.recommend-title{text-align:center;font-weight:bold;font-size:14pt;margin:25px 0 15px;}' +
+        'ol{margin-left:40px;}' +
+        'ol li{margin-bottom:10px;text-align:justify;}' +
+        'ul{margin-left:60px;list-style-type:"- ";}' +
+        'ul li{margin-bottom:6px;text-align:justify;}' +
+        '.footer{margin-top:50px;}' +
+        '.footer-line{display:flex;justify-content:space-between;margin-top:30px;}' +
+        '.sign-block{margin-top:60px;}' +
+        '.exec{margin-top:80px;font-size:12pt;color:#555;}' +
+        '</style></head><body>';
+
+    // Адресат (пустое поле для заполнения)
+    doc += '<div class="addressee">';
+    doc += '<span class="addressee-blank">&nbsp;</span><br>';
+    doc += '<span style="font-size:12pt;color:#888;">(адресат / лауазымды тұлға)</span>';
+    doc += '</div>';
+
+    // Заголовок
+    doc += '<div class="title">ҰСЫНУ</div>';
+    doc += '<div class="subtitle">заңдылықтың бұзылуын жою туралы</div>';
+
+    // Вводная часть
+    doc += '<p>Қала прокуратурасы қадағалау аумағындағы құқық бұзушылықтың алдын алу және қоғамдық қауіпсіздікті қамтамасыз ету бойынша талдау жүргізді.</p>';
+
+    doc += '<p>Талдау барысында қауіпті аймақтар, қараусыз қалған ғимараттар, бейнебақылау камераларымен қамтылмаған көшелер, жарықтандырылмаған аумақтар және қоғамдық тәртіпті бұзу деректері анықталды.</p>';
+
+    // Статистика
+    doc += '<p><strong>Статистикалық мәліметтер:</strong> талдау кезеңінде қала аумағында жалпы ' +
+        analysis.total + ' құқық бұзушылық тіркелген, оның ішінде ' +
+        analysis.publicCount + ' (' + publicPct + '%) қоғамдық орындарда орын алған.</p>';
+
+    if (topArticlesStr) {
+        doc += '<p>Негізгі қылмыс түрлері: ' + topArticlesStr + '.</p>';
+    }
+
+    if (peakHoursStr) {
+        doc += '<p>Құқық бұзушылықтардың пик уақыты: ' + peakHoursStr + ' сағат аралығында.</p>';
+    }
+
+    // Бейнекамералар
+    if (blindSpots > 0) {
+        doc += '<p><strong>Бейнебақылау камералары бойынша</strong></p>';
+        doc += '<p>Талдау барысында бейнебақылау камераларымен қамтылмаған ' + blindSpots +
+            ' нүкте анықталды. Қазіргі таңда қала аумағында ' + camerasCount + ' бейнебақылау камерасы орнатылған, алайда бұл қылмыстық ахуалды толық бақылау үшін жеткіліксіз.</p>';
+        doc += '<p>«Құқық бұзушылық профилактикасы туралы» Заңның 6-бабының 2-тармағына сәйкес, жергілікті атқарушы органдар құқық бұзушылық жасауға итермелейтін себептер мен жағдайларды жою жөнінде шаралар қолданады.</p>';
+    }
+
+    // Қараусыз ғимараттар
+    if (abandoned > 0) {
+        doc += '<p><strong>Қараусыз қалған ғимараттар бойынша</strong></p>';
+        doc += '<p>Талдаумен қала аумағында ' + abandoned +
+            ' қараусыз қалған ғимарат анықталды. Қараусыз қалған ғимараттар балалардың өмірі мен денсаулығына тікелей қауіп төндіреді және жазатайым оқиғалардың орын алуына себеп болуы мүмкін.</p>';
+        doc += '<p>«Жергілікті мемлекеттік басқару және өзін-өзі басқару туралы» Заңының 30-бабының 16-тармағына сәйкес, аудандық (облыстық маңызы бар қалалық) әкімдік қоғамдық орындарды абаттандыру және сыртқы безендіру мәселелерін шешеді.</p>';
+    }
+
+    // Жарықтандырылмаған көшелер
+    if (unlit > 0) {
+        doc += '<p><strong>Жарықтандырылмаған аумақтар бойынша</strong></p>';
+        doc += '<p>Қала аумағында жарық жүргізілмеген ' + unlit +
+            ' нүкте анықталды. Жарықтандырудың болмауы түнгі уақытта құқық бұзушылықтардың орын алу ықтималдылығын арттырады.</p>';
+    }
+
+    // Қауіпті көшелер
+    if (topStreetsStr) {
+        doc += '<p><strong>Қауіпті аймақтар бойынша</strong></p>';
+        doc += '<p>Ең көп құқық бұзушылық орын алған көшелер: ' + topStreetsStr + '.</p>';
+        doc += '<p>Аталған көшелерде бейнебақылау камераларын орнату, жарықтандыру жүйелерін күшейту және патрульдеу жұмыстарын жиілету қажет.</p>';
+    }
+
+    // Кәмелетке толмағандар
+    if (minors > 0) {
+        doc += '<p><strong>Кәмелетке толмағандар бойынша</strong></p>';
+        doc += '<p>Құқық бұзушылар арасында ' + minors +
+            ' кәмелетке толмаған тұлға анықталды. Бұл мәселе бойынша кәмелетке толмағандар істері жөніндегі комиссияға материалдар жолдау қажет.</p>';
+    }
+
+    // Қорытынды
+    doc += '<p>Орын алған кемшіліктер, қала әкімдігінің аталған салаға жауапты орынбасары және бөлім басшылары тарапынан ведомстволық бақылаудың болмауынан орын алған.</p>';
+
+    doc += '<p>Жоғарыдағылардың негізінде, Қазақстан Республикасы Конституциясының 83-бабын, «Прокуратура туралы» Конституциялық заңның 36-бабын басшылыққа алып,</p>';
+
+    // ҰСЫНАМЫН
+    doc += '<div class="recommend-title">ҰСЫНАМЫН:</div>';
+    doc += '<ol>';
+
+    doc += '<li>Ұсынуды қарауды және орын алған заң бұзушылықтарға ықпал еткен себептер мен салдарды жоюға және алдағы уақытта болдырмау үшін нақты шаралар қабылдауды, ол үшін:';
+    doc += '<ul>';
+    if (blindSpots > 0) {
+        doc += '<li>бейнебақылау камераларымен қамтылмаған ' + blindSpots + ' нүктеге камераларды орнату мәселесін қарастыруды;</li>';
+    }
+    if (unlit > 0) {
+        doc += '<li>жарықтандырылмаған ' + unlit + ' аумақты жарық шамдарымен жабдықтауды;</li>';
+    }
+    if (abandoned > 0) {
+        doc += '<li>қараусыз қалған ' + abandoned + ' ғимаратты заңдастыру немесе қоршау бойынша шаралар қабылдауды;</li>';
+    }
+    if (topStreets.length > 0) {
+        doc += '<li>қылмыс көп орын алатын көшелерде патрульдеу жұмыстарын күшейтуді;</li>';
+    }
+    doc += '</ul></li>';
+
+    doc += '<li>Анықталған заң бұзушылықтарға жол берген жауапты қызметкерлерді тәртіптік жауаптылыққа тарту мәселесін қарастыруды.</li>';
+
+    doc += '<li>Ұсынуды заңда көзделген мерзімде прокурордың қатысуымен қарап, нәтижесі туралы толықтай ақпаратты дәлелді құжаттарымен қоса қала прокуратурасына жолдауды.</li>';
+
+    doc += '</ol>';
+
+    // Қосымша
+    doc += '<p>Қосымша: тізім «___» парақта.</p>';
+
+    // Подпись
+    doc += '<div class="sign-block">';
+    doc += '<div class="footer-line">';
+    doc += '<span>Қала прокуроры</span>';
+    doc += '<span class="addressee-blank">&nbsp;</span>';
+    doc += '</div></div>';
+
+    // Исполнитель
+    doc += '<div class="exec">';
+    doc += 'Орынд.: _________________<br>';
+    doc += 'Тел.: _________________';
+    doc += '</div>';
+
+    doc += '</body></html>';
+    return doc;
+}
+
+/**
+ * Trigger download of ҰСЫНУ document as .doc file.
+ */
+function downloadUsynu(analysis, allCrimes) {
+    var html = generateUsynuDocument(analysis, allCrimes);
+    var blob = new Blob(['\ufeff' + html], { type: 'application/msword' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = 'Usynu_' + new Date().toISOString().slice(0, 10) + '.doc';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
 }

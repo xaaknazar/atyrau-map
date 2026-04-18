@@ -870,6 +870,14 @@
         var assistantBody = document.getElementById("assistant-body");
         if (assistantBody && typeof buildProsecutorBriefing === "function") {
             assistantBody.innerHTML = buildProsecutorBriefing(analysis, filtered, currentLang || "ru");
+            var usynuBtn = document.getElementById("download-usynu-btn");
+            if (usynuBtn) {
+                usynuBtn.addEventListener("click", function () {
+                    if (typeof downloadUsynu === "function") {
+                        downloadUsynu(analysis, filtered);
+                    }
+                });
+            }
         }
     }
 
