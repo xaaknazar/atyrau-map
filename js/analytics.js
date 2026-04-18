@@ -606,6 +606,140 @@ function requestAIAnalysis(summaryText, apiKey, callback) {
 //  7. ИИ ПОМОЩНИК ПРОКУРОРА (offline rule-based briefing)
 // ══════════════════════════════════════════════════════════════
 
+// ═══════════════════════════════════════════════════════════════
+//  SMART FINDINGS ENGINE — prioritized prosecutorial findings
+// ═══════════════════════════════════════════════════════════════
+
+function buildSmartFindings(analysis, allCrimes) {
+    var findings = [];
+    var m = _getMapCounts();
+    var total = analysis.total || 0;
+    if (total === 0) return findings;
+
+    var streets = (analysis.byStreet || []).slice(0, 15);
+    var zones = (analysis.problemZones || []).filter(function (z) { return z.count <= 50; });
+    var publicPct = Math.round((analysis.publicCount || 0) / total * 100);
+    var minors = (analysis.people && analysis.people.minors) || 0;
+    var minorsPct = analysis.people ? Math.round(minors / (analysis.people.total || 1) * 100) : 0;
+
+    // Пиковые часы
+    var hourPeaks = [];
+    if (analysis.byHour) analysis.byHour.forEach(function (c, i) { hourPeaks.push({ h: i, c: c }); });
+    hourPeaks.sort(function (a, b) { return b.c - a.c; });
+    var top3h = hourPeaks.slice(0, 3).filter(function (x) { return x.c > 0; });
+
+    // ── 1. Камеры / слепые зоны ──
+    if (m.blindSpots > 0) {
+        var camSeverity = Math.min(100, Math.round(m.blindSpots / (m.blindSpots + m.cameras + 1) * 100) + zones.length * 5);
+        findings.push({
+            type: "cameras",
+            severity: camSeverity,
+            title: "Бейнебақылау камераларының тапшылығы",
+            subtitle: m.blindSpots + " соқыр нүкте, " + m.cameras + " камера орнатылған",
+            facts: [
+                "Бейнебақылау камераларымен қамтылмаған " + m.blindSpots + " нүкте анықталды",
+                "Қазіргі таңда " + m.cameras + " камера орнатылған — бұл жеткіліксіз",
+                zones.length > 0 ? "Қылмыс кластері бар " + zones.length + " аймақта камера жоқ" : null
+            ].filter(Boolean),
+            data: { blindSpots: m.blindSpots, cameras: m.cameras, zones: zones, streets: streets }
+        });
+    }
+
+    // ── 2. Қараусыз ғимараттар ──
+    if (m.abandoned > 0) {
+        var abSeverity = Math.min(100, m.abandoned * 3 + (zones.length > 0 ? 20 : 0));
+        findings.push({
+            type: "abandoned",
+            severity: abSeverity,
+            title: "Қараусыз қалған ғимараттар",
+            subtitle: m.abandoned + " ғимарат анықталды",
+            facts: [
+                m.abandoned + " қараусыз қалған ғимарат тіркелген",
+                "Балалардың өмірі мен денсаулығына тікелей қауіп бар",
+                "Маргиналды топтардың жиналу орнына айналу қаупі жоққа шығарылмайды"
+            ],
+            data: { count: m.abandoned }
+        });
+    }
+
+    // ── 3. Жарықтандырылмаған аумақтар ──
+    if (m.unlit > 0) {
+        var nightCrimes = 0;
+        if (analysis.byHour) {
+            for (var h = 20; h < 24; h++) nightCrimes += (analysis.byHour[h] || 0);
+            for (var h2 = 0; h2 < 6; h2++) nightCrimes += (analysis.byHour[h2] || 0);
+        }
+        var nightPct = Math.round(nightCrimes / total * 100);
+        var ulSeverity = Math.min(100, m.unlit * 4 + nightPct);
+        findings.push({
+            type: "unlit",
+            severity: ulSeverity,
+            title: "Жарықтандырылмаған аумақтар",
+            subtitle: m.unlit + " нүкте, түнгі қылмыс " + nightPct + "%",
+            facts: [
+                m.unlit + " жарықтандырылмаған нүкте анықталды",
+                "Түнгі уақытта (20:00–06:00) " + nightCrimes + " қылмыс (" + nightPct + "%) тіркелген",
+                "Жарықтандырудың болмауы қылмыс орын алуын тікелей арттырады"
+            ],
+            data: { count: m.unlit, nightCrimes: nightCrimes, nightPct: nightPct }
+        });
+    }
+
+    // ── 4. Қауіпті аймақтар / патрульдеу ──
+    if (streets.length > 0 && top3h.length > 0) {
+        var topStreet = streets[0];
+        var patrolSeverity = Math.min(100, topStreet.count * 2 + top3h[0].c);
+        findings.push({
+            type: "patrol",
+            severity: patrolSeverity,
+            title: "Қауіпті аймақтар мен патрульдеу",
+            subtitle: streets.length + " көше, пик: " + top3h.map(function (x) { return ("0" + x.h).slice(-2) + ":00"; }).join(", "),
+            facts: [
+                "Ең қауіпті көше: " + topStreet.label + " (" + topStreet.count + " жағдай)",
+                "Пик уақыт: " + top3h.map(function (x) { return ("0" + x.h).slice(-2) + ":00 (" + x.c + ")"; }).join(", "),
+                zones.length > 0 ? zones.length + " қылмыс кластері анықталды" : null
+            ].filter(Boolean),
+            data: { streets: streets, hours: top3h, zones: zones }
+        });
+    }
+
+    // ── 5. Қоғамдық орындар ──
+    if (publicPct >= 30) {
+        findings.push({
+            type: "public",
+            severity: Math.min(100, publicPct + 20),
+            title: "Қоғамдық орындардағы қылмыс деңгейі",
+            subtitle: analysis.publicCount + " жағдай (" + publicPct + "%)",
+            facts: [
+                total + " қылмыстың " + analysis.publicCount + "-і (" + publicPct + "%) қоғамдық орындарда орын алған",
+                "Ведомствоаралық өзара іс-қимыл тиісті деңгейде жолға қойылмаған",
+                publicPct >= 50 ? "50%-дан асуы — шұғыл шаралар қабылдау қажет" : null
+            ].filter(Boolean),
+            data: { count: analysis.publicCount, pct: publicPct }
+        });
+    }
+
+    // ── 6. Кәмелетке толмағандар ──
+    if (minors > 0) {
+        findings.push({
+            type: "minors",
+            severity: Math.min(100, minors * 8 + minorsPct * 2),
+            title: "Кәмелетке толмағандар арасындағы қылмыс",
+            subtitle: minors + " тұлға (" + minorsPct + "%)",
+            facts: [
+                "Құқық бұзушылар арасында " + minors + " кәмелетке толмаған (" + minorsPct + "%)",
+                "NEET санатындағы жастармен жұмыс жеткіліксіз",
+                "Отбасын қолдау орталығының мүмкіндіктері кеңінен қолданылмауда"
+            ],
+            data: { minors: minors, pct: minorsPct, total: (analysis.people || {}).total || 0 }
+        });
+    }
+
+    // Сортировка по severity (высокий → низкий)
+    findings.sort(function (a, b) { return b.severity - a.severity; });
+    return findings;
+}
+
 /**
  * Generate a structured analytical briefing for the Prosecutor.
  * Pure function — no external API.
@@ -807,34 +941,27 @@ function buildProsecutorBriefing(analysis, allCrimes, lang) {
         html += '</ol></div>';
     }
 
-    // ── Скачивание ҰСЫНУ по каждому направлению ──────────────
-    var usynuTypes = [];
-    if (blindSpotsCount > 0 || camerasGlobalCount > 0) {
-        usynuTypes.push({ type: "cameras", label: "Бейнебақылау камералары (слепые зоны)", icon: "📹" });
-    }
-    if (abandonedCount > 0) {
-        usynuTypes.push({ type: "abandoned", label: "Қараусыз қалған ғимараттар (заброшенные здания)", icon: "🏚" });
-    }
-    if (unlitCount > 0) {
-        usynuTypes.push({ type: "unlit", label: "Жарықтандырылмаған аумақтар (неосвещённые улицы)", icon: "🔦" });
-    }
-    if (topStreets.length > 0 || top3Hours.length > 0) {
-        usynuTypes.push({ type: "patrol", label: "Патрульдеу және қауіпті аймақтар (патрулирование)", icon: "🚔" });
-    }
-    if (publicPct >= 30) {
-        usynuTypes.push({ type: "public", label: "Қоғамдық орындардағы қылмыс (общественные места)", icon: "🏛" });
-    }
-    if (analysis.people && analysis.people.minors && analysis.people.minors > 0) {
-        usynuTypes.push({ type: "minors", label: "Кәмелетке толмағандар (несовершеннолетние)", icon: "👦" });
-    }
-
-    if (usynuTypes.length > 0) {
+    // ── Smart findings + ҰСЫНУ ──────────────────────────────
+    var smartFindings = buildSmartFindings(analysis, allCrimes);
+    if (smartFindings.length > 0) {
         html += '<div class="assistant-section">';
-        html += '<div class="assistant-section-title">📄 ҰСЫНУ жүктеу (акт надзора)</div>';
-        html += '<div class="usynu-buttons-grid">';
-        usynuTypes.forEach(function (u) {
-            html += '<button class="usynu-download-btn" data-usynu-type="' + u.type + '">' +
-                u.icon + ' ' + escH(u.label) + '</button>';
+        html += '<div class="assistant-section-title">📄 Анықталған мәселелер бойынша ҰСЫНУ</div>';
+        html += '<div class="assistant-hint">Жүйе деректерді талдап, маңызды мәселелерді анықтады. Әр мәселе бойынша жеке акт надзора жүктей аласыз.</div>';
+        html += '<div class="usynu-findings-list">';
+        smartFindings.forEach(function (f) {
+            var sevCls = f.severity >= 70 ? "sev-high" : (f.severity >= 40 ? "sev-med" : "sev-low");
+            html += '<div class="usynu-finding ' + sevCls + '">';
+            html += '<div class="usynu-finding-head">';
+            html += '<div class="usynu-finding-sev"><div class="sev-bar" style="width:' + f.severity + '%;"></div></div>';
+            html += '<span class="usynu-finding-score">' + f.severity + '</span>';
+            html += '</div>';
+            html += '<div class="usynu-finding-title">' + escH(f.title) + '</div>';
+            html += '<div class="usynu-finding-sub">' + escH(f.subtitle) + '</div>';
+            html += '<ul class="usynu-finding-facts">';
+            f.facts.forEach(function (fact) { html += '<li>' + escH(fact) + '</li>'; });
+            html += '</ul>';
+            html += '<button class="usynu-download-btn" data-usynu-type="' + f.type + '">📄 ҰСЫНУ жүктеу</button>';
+            html += '</div>';
         });
         html += '</div></div>';
     }
@@ -864,19 +991,22 @@ function buildProsecutorBriefing(analysis, allCrimes, lang) {
 // ═══════════════════════════════════════════════════════════════
 
 var _usynuCSS =
-    'body{font-family:"Times New Roman",serif;font-size:14pt;line-height:1.8;margin:60px 80px;color:#000;}' +
-    'p{text-align:justify;text-indent:50px;margin:4px 0;}' +
-    '.addr{text-align:right;margin-bottom:40px;line-height:1.4;}' +
+    '@page{size:A4;margin:2cm 1.5cm 2cm 3cm;}' +
+    'body{font-family:"Times New Roman",serif;font-size:14pt;line-height:1.5;margin:0;padding:0;color:#000;}' +
+    'p{text-align:justify;text-indent:1.25cm;margin:3pt 0;}' +
+    '.addr{text-align:right;margin-bottom:30pt;line-height:1.3;}' +
     '.blank{border-bottom:1px solid #000;display:inline-block;min-width:250px;}' +
-    '.center{text-align:center;}' +
-    '.title{text-align:center;font-weight:bold;font-size:14pt;margin:30px 0 5px;}' +
-    '.subtitle{text-align:center;font-size:14pt;margin-bottom:30px;}' +
-    '.rec-title{text-align:center;font-weight:bold;font-size:14pt;margin:30px 0 15px;}' +
-    'ol,ul{margin-left:50px;}' +
-    'ol li,ul li{margin-bottom:8px;text-align:justify;}' +
-    'ul{list-style-type:"– ";}' +
-    '.sign{margin-top:70px;display:flex;justify-content:space-between;}' +
-    '.exec{margin-top:100px;font-size:12pt;color:#444;}' +
+    '.title{text-align:center;font-weight:bold;font-size:14pt;margin:20pt 0 4pt;text-transform:uppercase;}' +
+    '.subtitle{text-align:center;font-size:14pt;margin-bottom:20pt;}' +
+    '.rec-title{text-align:center;font-weight:bold;font-size:14pt;margin:20pt 0 12pt;text-transform:uppercase;}' +
+    'ol,ul{margin-left:1.25cm;padding-left:0;}' +
+    'ol li,ul li{margin-bottom:6pt;text-align:justify;}' +
+    'ul{list-style-type:disc;}' +
+    '.sign{margin-top:50pt;}' +
+    '.sign-row{display:block;margin-top:8pt;overflow:hidden;}' +
+    '.sign-l{float:left;}' +
+    '.sign-r{float:right;}' +
+    '.exec{margin-top:70pt;font-size:12pt;}' +
     '.page-break{page-break-before:always;}';
 
 function _usynuStart() {
@@ -892,9 +1022,11 @@ function _usynuEnd() {
 }
 
 function _usynuSignature() {
-    return '<p style="margin-top:15px;">Ұсынуды заңда көзделген мерзімде прокурордың қатысуымен қарап, нәтижесі туралы толықтай ақпаратты дәлелді құжаттарымен қоса қала прокуратурасына жолдауды.</p>' +
+    return '<li>Ұсынуды заңда көзделген мерзімде прокурордың қатысуымен қарап, нәтижесі туралы толықтай ақпаратты дәлелді құжаттарымен қоса қала прокуратурасына жолдауды.</li></ol>' +
         '<p>Қосымша: тізім «___» парақта.</p>' +
-        '<div class="sign"><span>Қала прокуроры</span><span class="blank">&nbsp;</span></div>' +
+        '<div class="sign">' +
+        '<div class="sign-row"><span class="sign-l">Қала прокуроры</span><span class="sign-r"><span class="blank">&nbsp;</span></span></div>' +
+        '</div>' +
         '<div class="exec">Орынд.: _________________<br>Тел.: _________________</div>' +
         '</body></html>';
 }

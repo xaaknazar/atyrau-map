@@ -4431,34 +4431,63 @@ body {
 }
 .assistant-trend-detail strong { color: #ffffff; }
 
-/* ҰСЫНУ download buttons grid */
-.usynu-buttons-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 10px;
+/* ҰСЫНУ findings list */
+.usynu-findings-list { display: flex; flex-direction: column; gap: 12px; }
+.usynu-finding {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-left: 4px solid #3498db;
+    border-radius: 10px;
+    padding: 14px 16px;
+}
+.usynu-finding.sev-high { border-left-color: #e74c3c; }
+.usynu-finding.sev-med  { border-left-color: #f39c12; }
+.usynu-finding.sev-low  { border-left-color: #3498db; }
+.usynu-finding-head { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.usynu-finding-sev {
+    flex: 1; height: 6px; background: rgba(255,255,255,0.08);
+    border-radius: 3px; overflow: hidden;
+}
+.sev-bar { height: 100%; border-radius: 3px; transition: width 0.6s; }
+.sev-high .sev-bar { background: linear-gradient(90deg, #e74c3c, #c0392b); }
+.sev-med .sev-bar  { background: linear-gradient(90deg, #f39c12, #e67e22); }
+.sev-low .sev-bar  { background: linear-gradient(90deg, #3498db, #2980b9); }
+.usynu-finding-score {
+    font-size: 12px; font-weight: 700; min-width: 28px; text-align: right;
+    font-variant-numeric: tabular-nums;
+}
+.sev-high .usynu-finding-score { color: #e74c3c; }
+.sev-med .usynu-finding-score  { color: #f39c12; }
+.sev-low .usynu-finding-score  { color: #3498db; }
+.usynu-finding-title { font-size: 14px; font-weight: 700; color: #fff; margin-bottom: 2px; }
+.usynu-finding-sub { font-size: 12px; color: #8892b0; margin-bottom: 8px; }
+.usynu-finding-facts {
+    list-style: none; padding: 0; margin: 0 0 10px;
+    display: flex; flex-direction: column; gap: 4px;
+}
+.usynu-finding-facts li {
+    font-size: 12.5px; color: #c0c8e0; padding-left: 16px; position: relative;
+}
+.usynu-finding-facts li::before {
+    content: "•"; position: absolute; left: 0; color: #8892b0;
 }
 .usynu-download-btn {
-    display: block;
-    width: 100%;
-    padding: 12px 14px;
+    display: inline-block;
+    padding: 8px 14px;
     background: linear-gradient(135deg, #0f3460, #16213e);
     border: 1px solid rgba(52, 152, 219, 0.35);
-    border-radius: 10px;
+    border-radius: 8px;
     color: #fff;
-    font-size: 12.5px;
+    font-size: 12px;
     font-weight: 600;
     cursor: pointer;
-    text-align: left;
-    transition: all 0.2s;
-    line-height: 1.4;
+    transition: all 0.15s;
 }
 .usynu-download-btn:hover {
     background: linear-gradient(135deg, #163d6e, #1a2a4e);
     border-color: rgba(52, 152, 219, 0.7);
-    box-shadow: 0 4px 16px rgba(52, 152, 219, 0.2);
 }
 .usynu-download-btn:active { transform: scale(0.98); }
-@media (max-width: 600px) { .usynu-buttons-grid { grid-template-columns: 1fr; } }
 
 /* ═══════════════════════════════════════════════════════════
    RESPONSIVE REFINEMENTS — Reports & Akimat (tablet & mobile)
