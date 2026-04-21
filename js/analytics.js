@@ -133,6 +133,54 @@ function analyzeByStreet(crimes) {
     return Object.values(map).sort(function (a, b) { return b.count - a.count; });
 }
 
+function analyzeByGeoZone(crimes, radius) {
+    radius = radius || 0.003;
+    var grid = {};
+    crimes.forEach(function (c) {
+        if (typeof c.lat !== "number" || isNaN(c.lat)) return;
+        if (typeof c.lng !== "number" || isNaN(c.lng)) return;
+        var cellLat = Math.floor(c.lat / radius) * radius;
+        var cellLng = Math.floor(c.lng / radius) * radius;
+        var key = cellLat.toFixed(4) + "," + cellLng.toFixed(4);
+        if (!grid[key]) {
+            grid[key] = {
+                lat: cellLat + radius / 2,
+                lng: cellLng + radius / 2,
+                count: 0,
+                crimes: [],
+                streetNames: {},
+                articles: {}
+            };
+        }
+        var z = grid[key];
+        z.count++;
+        z.crimes.push(c);
+        if (c.street) z.streetNames[c.street] = (z.streetNames[c.street] || 0) + 1;
+        if (c.article) {
+            var ak = extractArticleNumber(c.article);
+            z.articles[ak] = (z.articles[ak] || 0) + 1;
+        }
+    });
+    var zones = Object.values(grid).filter(function (z) { return z.count >= 2; });
+    zones.forEach(function (z) {
+        var bestStreet = "", bestCount = 0;
+        Object.keys(z.streetNames).forEach(function (s) {
+            if (z.streetNames[s] > bestCount) { bestStreet = s; bestCount = z.streetNames[s]; }
+        });
+        z.label = bestStreet
+            ? bestStreet + " аймағы"
+            : z.lat.toFixed(4) + ", " + z.lng.toFixed(4);
+        z.coords = z.lat.toFixed(4) + ", " + z.lng.toFixed(4);
+        var topArt = "", topC = 0;
+        Object.keys(z.articles).forEach(function (a) {
+            if (z.articles[a] > topC) { topArt = a; topC = z.articles[a]; }
+        });
+        z.topArticle = topArt;
+        z.topArticleCount = topC;
+    });
+    return zones.sort(function (a, b) { return b.count - a.count; });
+}
+
 function analyzeByVictimType(crimes) {
     var map = {};
     crimes.forEach(function (c) {
@@ -363,6 +411,7 @@ function runFullAnalysis(crimes, people) {
         byPlaceType: analyzeByPlaceType(crimes),
         byArea: analyzeByArea(crimes),
         byStreet: analyzeByStreet(crimes),
+        byGeoZone: analyzeByGeoZone(crimes),
         byVictimType: analyzeByVictimType(crimes),
         byCrimeMethod: analyzeByCrimeMethod(crimes),
         bySecurity: analyzeBySecurity(crimes),
@@ -616,7 +665,7 @@ function buildSmartFindings(analysis, allCrimes) {
     var total = analysis.total || 0;
     if (total === 0) return findings;
 
-    var streets = (analysis.byStreet || []).slice(0, 15);
+    var geoZones = (analysis.byGeoZone || []).slice(0, 15);
     var zones = (analysis.problemZones || []).filter(function (z) { return z.count <= 50; });
     var publicPct = Math.round((analysis.publicCount || 0) / total * 100);
     var minors = (analysis.people && analysis.people.minors) || 0;
@@ -641,7 +690,7 @@ function buildSmartFindings(analysis, allCrimes) {
                 "Қазіргі таңда " + m.cameras + " камера орнатылған — бұл жеткіліксіз",
                 zones.length > 0 ? "Қылмыс кластері бар " + zones.length + " аймақта камера жоқ" : null
             ].filter(Boolean),
-            data: { blindSpots: m.blindSpots, cameras: m.cameras, zones: zones, streets: streets }
+            data: { blindSpots: m.blindSpots, cameras: m.cameras, zones: zones, geoZones: geoZones }
         });
     }
 
@@ -686,20 +735,20 @@ function buildSmartFindings(analysis, allCrimes) {
     }
 
     // ── 4. Қауіпті аймақтар / патрульдеу ──
-    if (streets.length > 0 && top3h.length > 0) {
-        var topStreet = streets[0];
-        var patrolSeverity = Math.min(100, topStreet.count * 2 + top3h[0].c);
+    if (geoZones.length > 0 && top3h.length > 0) {
+        var topZone = geoZones[0];
+        var patrolSeverity = Math.min(100, topZone.count * 2 + top3h[0].c);
         findings.push({
             type: "patrol",
             severity: patrolSeverity,
             title: "Қауіпті аймақтар мен патрульдеу",
-            subtitle: streets.length + " көше, пик: " + top3h.map(function (x) { return ("0" + x.h).slice(-2) + ":00"; }).join(", "),
+            subtitle: geoZones.length + " аймақ, пик: " + top3h.map(function (x) { return ("0" + x.h).slice(-2) + ":00"; }).join(", "),
             facts: [
-                "Ең қауіпті көше: " + topStreet.label + " (" + topStreet.count + " жағдай)",
+                "Ең қауіпті аймақ: " + topZone.label + " [" + topZone.coords + "] (" + topZone.count + " жағдай)",
                 "Пик уақыт: " + top3h.map(function (x) { return ("0" + x.h).slice(-2) + ":00 (" + x.c + ")"; }).join(", "),
                 zones.length > 0 ? zones.length + " қылмыс кластері анықталды" : null
             ].filter(Boolean),
-            data: { streets: streets, hours: top3h, zones: zones }
+            data: { geoZones: geoZones, hours: top3h, zones: zones }
         });
     }
 
@@ -809,30 +858,26 @@ function buildProsecutorBriefing(analysis, allCrimes, lang) {
     });
     html += '</tbody></table></div>';
 
-    // ── Топ улиц по преступности (с радиусом / горячими точками) ─
+    // ── Топ аймақтар по координатам (радиус ~300м) ──────────────
+    var topGeoZones = (analysis.byGeoZone || []).slice(0, 10);
     html += '<div class="assistant-section">';
-    html += '<div class="assistant-section-title">📍 ' + tr("assistant_top_streets", "Топ улиц с концентрацией преступлений") + '</div>';
-    html += '<div class="assistant-hint">' + tr("assistant_streets_hint", "Улицы, требующие усиленного прокурорского надзора и патрулирования") + '</div>';
+    html += '<div class="assistant-section-title">📍 ' + tr("assistant_top_zones_geo", "Топ аймақтар бойынша қылмыс (координаталар бойынша)") + '</div>';
+    html += '<div class="assistant-hint">' + tr("assistant_zones_geo_hint", "Группировка по координатам (радиус ~300м) — не зависит от названия улиц") + '</div>';
     html += '<table class="assistant-table"><thead><tr>';
-    html += '<th>#</th><th>' + tr("assistant_street", "Улица") + '</th>';
+    html += '<th>#</th><th>' + tr("assistant_zone_name", "Аймақ") + '</th>';
+    html += '<th>' + tr("assistant_coords", "Координаты") + '</th>';
     html += '<th>' + tr("assistant_count", "Кол-во") + '</th>';
-    html += '<th>' + tr("assistant_top_arts", "Топ-3 статьи") + '</th>';
+    html += '<th>' + tr("assistant_top_art", "Негізгі бап") + '</th>';
     html += '</tr></thead><tbody>';
-    var topStreets = analysis.byStreet.slice(0, 10);
-    topStreets.forEach(function (s, i) {
-        var artCount = {};
-        allCrimes.forEach(function (c) {
-            if (c.street === s.label && c.article) {
-                artCount[c.article] = (artCount[c.article] || 0) + 1;
-            }
-        });
-        var topArtsStr = Object.keys(artCount).sort(function (x, y) { return artCount[y] - artCount[x]; })
-            .slice(0, 3).map(function (a) { return a + " (" + artCount[a] + ")"; }).join(", ");
+    topGeoZones.forEach(function (z, i) {
+        var topArts = Object.keys(z.articles).sort(function (x, y) { return z.articles[y] - z.articles[x]; })
+            .slice(0, 3).map(function (a) { return a + " (" + z.articles[a] + ")"; }).join(", ");
         html += '<tr>';
         html += '<td>' + (i + 1) + '</td>';
-        html += '<td><strong>' + escH(s.label) + '</strong></td>';
-        html += '<td>' + s.count + '</td>';
-        html += '<td class="muted">' + escH(topArtsStr || "—") + '</td>';
+        html += '<td><strong>' + escH(z.label) + '</strong></td>';
+        html += '<td class="muted">' + escH(z.coords) + '</td>';
+        html += '<td>' + z.count + '</td>';
+        html += '<td class="muted">' + escH(topArts || "—") + '</td>';
         html += '</tr>';
     });
     html += '</tbody></table></div>';
@@ -1065,18 +1110,18 @@ function _peakHoursStr(analysis) {
 _usynuGenerators = {};
 _usynuGenerators.cameras = function (a) {
     var m = _getMapCounts();
-    var streets = (a.byStreet || []).slice(0, 10);
+    var geoZones = (a.byGeoZone || []).slice(0, 10);
     var d = _usynuStart();
     d += '<p>Қала прокуратурасы қадағалау аумағындағы қоғамдық қауіпсіздікті қамтамасыз ету және құқық бұзушылықтың алдын алу мақсатында бейнебақылау камераларының жай-күйіне талдау жүргізді.</p>';
     d += '<p>«Құқық бұзушылық профилактикасы туралы» Қазақстан Республикасы Заңының (бұдан әрі – Заң) 6-бабының 2-тармағына сәйкес, жергілікті атқарушы органдар құқық бұзушылық профилактикасы субъектілерінің өзара іс-қимылын жергілікті деңгейде қамтамасыз етеді және құқық бұзушылық жасауға итермелейтін себептер мен жағдайларды жою жөнінде шаралар қолданады.</p>';
     d += '<p><strong>Статистикалық мәліметтер:</strong> талдау кезеңінде қала аумағында жалпы ' + a.total + ' құқық бұзушылық тіркелген.</p>';
     d += '<p>Қазіргі таңда қала аумағында ' + m.cameras + ' бейнебақылау камерасы орнатылған. Алайда, талдау барысында бейнебақылау камераларымен қамтылмаған <strong>' + m.blindSpots + ' нүкте</strong> анықталды.</p>';
     d += '<p>Бейнебақылау камераларының жоқтығы немесе істен шығуы қылмыстарды ашуға теріс ықпал тигізіп, қоғамдық қауіпсіздіктің төмендеуіне себеп болуда.</p>';
-    if (streets.length > 0) {
-        d += '<p>Қылмыс көп орын алған көшелер:</p><ul>';
-        streets.forEach(function (s) { d += '<li>' + s.label + ' – ' + s.count + ' құқық бұзушылық;</li>'; });
+    if (geoZones.length > 0) {
+        d += '<p>Қылмыс көп орын алған аймақтар (координаталар бойынша):</p><ul>';
+        geoZones.forEach(function (z) { d += '<li>' + z.label + ' [' + z.coords + '] – ' + z.count + ' құқық бұзушылық;</li>'; });
         d += '</ul>';
-        d += '<p>Аталған көшелердің басым көпшілігінде бейнебақылау камералары орнатылмаған немесе істен шыққан.</p>';
+        d += '<p>Аталған аймақтардың басым көпшілігінде бейнебақылау камералары орнатылмаған немесе істен шыққан.</p>';
     }
     d += '<p>Бұл «Автомобиль жолдары туралы» Заңының 19-4-бабына және «Құқық бұзушылық профилактикасы туралы» Заңның 6-бабына қайшы келеді.</p>';
     d += '<p>Аталған кемшіліктер жергілікті атқарушы органның ведомстволық бақылауды тиісті деңгейде жүзеге асырмауынан орын алған.</p>';
@@ -1144,7 +1189,7 @@ _usynuGenerators.unlit = function (a) {
 
 // ── PATROL (патрульдеу / қауіпті аймақтар) ───────────────────
 _usynuGenerators.patrol = function (a) {
-    var streets = (a.byStreet || []).slice(0, 10);
+    var geoZones = (a.byGeoZone || []).slice(0, 10);
     var pk = _peakHoursStr(a);
     var zones = (a.problemZones || []).filter(function (z) { return z.count <= 50; }).slice(0, 5);
     var d = _usynuStart();
@@ -1152,9 +1197,9 @@ _usynuGenerators.patrol = function (a) {
     d += '<p>«Құқық бұзушылық профилактикасы туралы» Заңның 6-бабына сәйкес, жергілікті атқарушы органдар құқық бұзушылық жасауға итермелейтін себептер мен жағдайларды жою жөнінде шаралар қолданады, азаматтардың құқықтық тәрбиесін ұйымдастыруды қамтамасыз етеді.</p>';
     d += '<p><strong>Статистикалық мәліметтер:</strong> талдау кезеңінде ' + a.total + ' құқық бұзушылық тіркелген.</p>';
     if (pk) d += '<p>Құқық бұзушылықтардың пик уақыты: <strong>' + pk + '</strong> сағат аралығында.</p>';
-    if (streets.length > 0) {
-        d += '<p>Ең көп құқық бұзушылық орын алған көшелер:</p><ul>';
-        streets.forEach(function (s) { d += '<li>' + s.label + ' – ' + s.count + ' жағдай;</li>'; });
+    if (geoZones.length > 0) {
+        d += '<p>Ең көп құқық бұзушылық орын алған аймақтар (координаталар бойынша):</p><ul>';
+        geoZones.forEach(function (z) { d += '<li>' + z.label + ' [' + z.coords + '] – ' + z.count + ' жағдай;</li>'; });
         d += '</ul>';
     }
     if (zones.length > 0) {
@@ -1165,7 +1210,7 @@ _usynuGenerators.patrol = function (a) {
     d += '<ol>';
     d += '<li>Нақты шаралар қабылдауды, ол үшін:<ul>';
     if (pk) d += '<li>пик уақытта (' + pk + ') патрульдеу жұмыстарын күшейтуді;</li>';
-    d += '<li>қылмыс көп орын алатын көшелерде тұрақты бақылау орнатуды;</li>';
+    d += '<li>қылмыс көп орын алатын аймақтарда тұрақты бақылау орнатуды;</li>';
     d += '<li>құқық бұзушылық динамикасына терең талдау мен мониторинг жүргізуді;</li>';
     d += '</ul></li>';
     d += '<li>Жауапты қызметкерлерді тәртіптік жауаптылыққа тарту мәселесін қарастыруды.</li>';
