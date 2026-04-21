@@ -882,30 +882,33 @@
                     var lat = parseFloat(this.getAttribute("data-lat"));
                     var lng = parseFloat(this.getAttribute("data-lng"));
                     if (isNaN(lat) || isNaN(lng)) return;
-                    // Закрыть аналитику, перейти на карту
-                    var ap = document.getElementById("analytics-panel");
-                    if (ap) ap.classList.add("hidden");
-                    document.getElementById("map").style.display = "";
-                    map.invalidateSize();
-                    map.setView([lat, lng], 16);
-                    // Нарисовать круг 500м
-                    if (window._geoZoneCircle) { map.removeLayer(window._geoZoneCircle); }
-                    window._geoZoneCircle = L.circle([lat, lng], {
-                        radius: 500,
-                        color: '#e74c3c',
-                        fillColor: '#e74c3c',
-                        fillOpacity: 0.12,
-                        weight: 2,
-                        dashArray: '6,4'
-                    }).addTo(map);
-                    window._geoZoneCircle.bindPopup(
-                        '<strong>' + lat.toFixed(4) + ', ' + lng.toFixed(4) + '</strong><br>' +
-                        'Радиус: 500 м'
-                    ).openPopup();
-                    // Убрать круг через 30 сек
+                    // Закрыть аналитику, показать карту
+                    hideAnalyticsPanel();
                     setTimeout(function () {
-                        if (window._geoZoneCircle) { map.removeLayer(window._geoZoneCircle); window._geoZoneCircle = null; }
-                    }, 30000);
+                        map.invalidateSize();
+                        map.setView([lat, lng], 15);
+                        // Нарисовать круг 500м
+                        if (window._geoZoneCircle) { map.removeLayer(window._geoZoneCircle); }
+                        window._geoZoneCircle = L.circle([lat, lng], {
+                            radius: 500,
+                            color: '#e74c3c',
+                            fillColor: '#e74c3c',
+                            fillOpacity: 0.15,
+                            weight: 3,
+                            dashArray: '8,6'
+                        }).addTo(map);
+                        window._geoZoneCircle.bindPopup(
+                            '<strong>' + lat.toFixed(4) + ', ' + lng.toFixed(4) + '</strong><br>' +
+                            'Радиус: 500 м'
+                        ).openPopup();
+                        // Убрать круг через 60 сек
+                        setTimeout(function () {
+                            if (window._geoZoneCircle) {
+                                map.removeLayer(window._geoZoneCircle);
+                                window._geoZoneCircle = null;
+                            }
+                        }, 60000);
+                    }, 100);
                 });
             });
         }
