@@ -504,28 +504,28 @@
                     </svg>
                     <span>Назад к карте</span>
                 </button>
-                <h2>Қылмыс талдауы</h2>
+                <h2 data-i18n="an_title">Аналитика преступлений</h2>
             </div>
             <!-- Период -->
             <div class="analytics-period-row">
-                <span class="analytics-period-label">Кезең:</span>
+                <span class="analytics-period-label" data-i18n="an_period">Период:</span>
                 <div class="crime-period-buttons">
-                    <button class="an-period-btn active" data-period="all">Барлығы</button>
-                    <button class="an-period-btn" data-period="month">Ай</button>
-                    <button class="an-period-btn" data-period="week">Апта</button>
-                    <button class="an-period-btn" data-period="day">Күн</button>
+                    <button class="an-period-btn active" data-period="all" data-i18n="an_all">Все</button>
+                    <button class="an-period-btn" data-period="month" data-i18n="an_month">Месяц</button>
+                    <button class="an-period-btn" data-period="week" data-i18n="an_week">Неделя</button>
+                    <button class="an-period-btn" data-period="day" data-i18n="an_day">День</button>
                 </div>
                 <span id="analytics-period-hint" class="period-hint"></span>
             </div>
             <!-- Табы -->
             <div class="analytics-tabs">
-                <button class="analytics-tab active" data-tab="assistant" data-i18n="an_tab_assistant">ИИ Көмекші</button>
-                <button class="analytics-tab" data-tab="overview" data-i18n="an_tab_overview">Шолу</button>
-                <button class="analytics-tab" data-tab="time" data-i18n="an_tab_time">Уақыт</button>
-                <button class="analytics-tab" data-tab="places" data-i18n="an_tab_places">Аймақтар</button>
-                <button class="analytics-tab" data-tab="people" data-i18n="an_tab_people">Тұлғалар</button>
-                <button class="analytics-tab" data-tab="zones" data-i18n="an_tab_zones">Аймақтар</button>
-                <button class="analytics-tab" data-tab="ai" data-i18n="an_tab_ai">AI-талдау</button>
+                <button class="analytics-tab active" data-tab="assistant" data-i18n="an_tab_assistant">ИИ Помощник</button>
+                <button class="analytics-tab" data-tab="overview" data-i18n="an_tab_overview">Обзор</button>
+                <button class="analytics-tab" data-tab="time" data-i18n="an_tab_time">Время</button>
+                <button class="analytics-tab" data-tab="places" data-i18n="an_tab_places">Районы</button>
+                <button class="analytics-tab" data-tab="people" data-i18n="an_tab_people">Лица</button>
+                <button class="analytics-tab" data-tab="zones" data-i18n="an_tab_zones">Зоны</button>
+                <button class="analytics-tab" data-tab="ai" data-i18n="an_tab_ai">AI-анализ</button>
             </div>
         </div>
         <div class="analytics-body">
@@ -542,8 +542,8 @@
                             </svg>
                         </div>
                         <div>
-                            <h3 data-i18n="assistant_title">Прокурордың ИИ Көмекшісі</h3>
-                            <p data-i18n="assistant_subtitle">Криминогендік жағдай бойынша талдамалық брифинг</p>
+                            <h3 data-i18n="assistant_title">ИИ Помощник Прокурора</h3>
+                            <p data-i18n="assistant_subtitle">Аналитический брифинг по криминогенной обстановке</p>
                         </div>
                     </div>
                     <div id="assistant-body" class="assistant-body"></div>
@@ -554,23 +554,23 @@
             <div class="analytics-tab-content" data-tab="overview">
                 <div class="an-stats-grid" id="an-overview-stats"></div>
                 <div class="an-section">
-                    <h3>Негізгі баптар</h3>
+                    <h3 data-i18n="an_h_articles">Топ статьи</h3>
                     <div id="an-articles-chart" class="an-bar-chart"></div>
                 </div>
                 <div class="an-section">
-                    <h3>Айлар бойынша (тренд)</h3>
+                    <h3 data-i18n="an_h_months">По месяцам (тренд)</h3>
                     <div id="an-months-chart" class="an-bar-chart"></div>
                 </div>
                 <div class="an-section">
-                    <h3>Тіркеу органдары бойынша</h3>
+                    <h3 data-i18n="an_h_organs">По органам регистрации</h3>
                     <div id="an-organs-chart" class="an-bar-chart"></div>
                 </div>
                 <div class="an-section">
-                    <h3>Жасалу тәсілі</h3>
+                    <h3 data-i18n="an_h_method">Способ совершения</h3>
                     <div id="an-method-chart" class="an-bar-chart"></div>
                 </div>
                 <div class="an-section">
-                    <h3>Жасалу орны түрі</h3>
+                    <h3 data-i18n="an_h_place">Тип места совершения</h3>
                     <div id="an-place-chart" class="an-bar-chart"></div>
                 </div>
             </div>
@@ -578,16 +578,16 @@
             <!-- Таб: Время -->
             <div class="analytics-tab-content" data-tab="time">
                 <div class="an-section">
-                    <h3>Тәулік сағаттары бойынша</h3>
-                    <p class="an-hint">Қылмыстар қашан жасалады</p>
+                    <h3 data-i18n="an_h_hours">По часам суток</h3>
+                    <p class="an-hint" data-i18n="an_hint_hours">Когда совершаются преступления</p>
                     <div id="an-hours-chart" class="an-bar-chart an-hours"></div>
                 </div>
                 <div class="an-section">
-                    <h3>Апта күндері бойынша</h3>
+                    <h3 data-i18n="an_h_days">По дням недели</h3>
                     <div id="an-days-chart" class="an-bar-chart"></div>
                 </div>
                 <div class="an-section">
-                    <h3>Қауіпті уақыт</h3>
+                    <h3 data-i18n="an_h_danger">Опасное время</h3>
                     <div id="an-danger-times" class="an-insight-cards"></div>
                 </div>
             </div>
@@ -604,27 +604,27 @@
             <div class="analytics-tab-content" data-tab="people">
                 <div class="an-stats-grid" id="an-people-stats"></div>
                 <div class="an-section">
-                    <h3>Жас бойынша</h3>
+                    <h3 data-i18n="an_h_age">По возрасту</h3>
                     <div id="an-people-age-chart" class="an-bar-chart"></div>
                 </div>
                 <div class="an-section">
-                    <h3>Жынысы бойынша</h3>
+                    <h3 data-i18n="an_h_gender">По полу</h3>
                     <div id="an-people-gender-chart" class="an-bar-chart"></div>
                 </div>
                 <div class="an-section">
-                    <h3>Білімі бойынша</h3>
+                    <h3 data-i18n="an_h_edu">По образованию</h3>
                     <div id="an-people-education-chart" class="an-bar-chart"></div>
                 </div>
                 <div class="an-section">
-                    <h3>Қызмет түрі бойынша</h3>
+                    <h3 data-i18n="an_h_occup">По роду занятий</h3>
                     <div id="an-people-occupation-chart" class="an-bar-chart"></div>
                 </div>
                 <div class="an-section">
-                    <h3>Отбасылық жағдайы бойынша</h3>
+                    <h3 data-i18n="an_h_marital">По семейному положению</h3>
                     <div id="an-people-marital-chart" class="an-bar-chart"></div>
                 </div>
                 <div class="an-section">
-                    <h3>Ұлты бойынша</h3>
+                    <h3 data-i18n="an_h_nation">По национальности</h3>
                     <div id="an-people-nationality-chart" class="an-bar-chart"></div>
                 </div>
             </div>
@@ -632,9 +632,9 @@
             <!-- Таб: Зоны -->
             <div class="analytics-tab-content" data-tab="zones">
                 <div class="an-section">
-                    <h3>Картадағы проблемалық аймақтар</h3>
-                    <p class="an-hint">Қылмыстың ең көп шоғырланған аймақтары (радиус ~500м)</p>
-                    <button id="an-show-zones-on-map" class="an-action-btn">Картада көрсету</button>
+                    <h3 data-i18n="an_h_zones">Проблемные зоны на карте</h3>
+                    <p class="an-hint" data-i18n="an_hint_zones">Зоны с наибольшей концентрацией преступлений (радиус ~500м)</p>
+                    <button id="an-show-zones-on-map" class="an-action-btn" data-i18n="an_show_map">Показать на карте</button>
                 </div>
                 <div id="an-zones-list" class="an-zones-list"></div>
             </div>
@@ -642,13 +642,13 @@
             <!-- Таб: AI-талдау -->
             <div class="analytics-tab-content" data-tab="ai">
                 <div class="an-section an-ai-section">
-                    <h3>Қылмысты AI-талдау</h3>
-                    <p class="an-hint">ИИ барлық қылмыс деректерін талдап, себептері, болжамдары және прокуратура үшін нақты ұсыныстары бар аналитикалық есеп дайындайды</p>
+                    <h3 data-i18n="an_h_ai">AI-анализ преступности</h3>
+                    <p class="an-hint" data-i18n="an_hint_ai">ИИ проанализирует все данные и подготовит аналитический отчёт с причинами, прогнозами и рекомендациями</p>
                     <div class="an-ai-key-row">
-                        <input type="password" id="an-ai-key" placeholder="OpenAI API кілті (sk-...)" class="an-ai-input" />
-                        <button id="an-ai-run" class="an-action-btn">Талдауды бастау</button>
+                        <input type="password" id="an-ai-key" placeholder="OpenAI API ключ (sk-...)" class="an-ai-input" />
+                        <button id="an-ai-run" class="an-action-btn" data-i18n="an_ai_run">Запустить анализ</button>
                     </div>
-                    <div id="an-ai-status" class="an-ai-status hidden">Талдау жүргізілуде...</div>
+                    <div id="an-ai-status" class="an-ai-status hidden" data-i18n="an_ai_status">Анализ выполняется...</div>
                     <div id="an-ai-result" class="an-ai-result"></div>
                 </div>
             </div>

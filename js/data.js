@@ -41,7 +41,7 @@ if (typeof FIREBASE_CONFIG !== "undefined" &&
 
 if (useFirebase) {
     // ── One-time migration: clear all old points ─────────────
-    var DATA_VERSION = 3;
+    var DATA_VERSION = 4;
     var metaRef = db.ref("_meta/data_version");
     var migrationDone = false;
 
