@@ -4488,6 +4488,57 @@ body {
     border-color: rgba(52, 152, 219, 0.7);
 }
 .usynu-download-btn:active { transform: scale(0.98); }
+.an-zone-map-btn {
+    background: rgba(52,152,219,0.15);
+    border: 1px solid rgba(52,152,219,0.4);
+    border-radius: 6px;
+    color: #3498db;
+    padding: 4px 8px;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+.an-zone-map-btn:hover { background: rgba(52,152,219,0.3); }
+
+/* Clickable stat card */
+.an-stat-clickable { cursor: pointer; border: 1px solid rgba(231,76,60,0.3); transition: all 0.15s; }
+.an-stat-clickable:hover { background: rgba(231,76,60,0.1); border-color: rgba(231,76,60,0.5); }
+
+/* Minors portrait modal */
+.minors-portrait-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 5000;
+    display: flex; align-items: center; justify-content: center; padding: 20px;
+}
+.minors-portrait-modal {
+    background: #16213e; border-radius: 14px; width: 100%; max-width: 600px;
+    max-height: 90vh; overflow-y: auto; color: #e0e6f0;
+}
+.minors-portrait-header {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 18px 22px; border-bottom: 1px solid rgba(255,255,255,0.08);
+    position: sticky; top: 0; background: #16213e; z-index: 1;
+}
+.minors-portrait-header h2 { font-size: 17px; margin: 0; color: #e74c3c; }
+.minors-portrait-close {
+    background: none; border: none; color: #8892b0; font-size: 28px; cursor: pointer;
+}
+.minors-portrait-list { padding: 16px 22px; }
+.minor-card {
+    display: flex; gap: 14px; padding: 14px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.minor-card:last-child { border-bottom: none; }
+.minor-card-num {
+    width: 32px; height: 32px; border-radius: 50%; background: rgba(231,76,60,0.2);
+    color: #e74c3c; display: grid; place-items: center; font-weight: 700; font-size: 14px; flex-shrink: 0;
+}
+.minor-card-body { flex: 1; min-width: 0; }
+.minor-row { font-size: 13px; color: #c0c8e0; margin-bottom: 3px; }
+.minor-row strong { color: #8892b0; }
+.minor-crime {
+    margin-top: 8px; padding: 8px 10px; background: rgba(231,76,60,0.08);
+    border-left: 3px solid #e74c3c; border-radius: 0 6px 6px 0;
+}
 
 /* ═══════════════════════════════════════════════════════════
    RESPONSIVE REFINEMENTS — Reports & Akimat (tablet & mobile)

@@ -876,6 +876,38 @@
                     if (typeof downloadUsynuByType === "function") downloadUsynuByType(tp, analysis);
                 });
             });
+            // Кнопки "показать на карте" для гео-зон
+            assistantBody.querySelectorAll(".an-zone-map-btn").forEach(function (btn) {
+                btn.addEventListener("click", function () {
+                    var lat = parseFloat(this.getAttribute("data-lat"));
+                    var lng = parseFloat(this.getAttribute("data-lng"));
+                    if (isNaN(lat) || isNaN(lng)) return;
+                    // Закрыть аналитику, перейти на карту
+                    var ap = document.getElementById("analytics-panel");
+                    if (ap) ap.classList.add("hidden");
+                    document.getElementById("map").style.display = "";
+                    map.invalidateSize();
+                    map.setView([lat, lng], 16);
+                    // Нарисовать круг 500м
+                    if (window._geoZoneCircle) { map.removeLayer(window._geoZoneCircle); }
+                    window._geoZoneCircle = L.circle([lat, lng], {
+                        radius: 500,
+                        color: '#e74c3c',
+                        fillColor: '#e74c3c',
+                        fillOpacity: 0.12,
+                        weight: 2,
+                        dashArray: '6,4'
+                    }).addTo(map);
+                    window._geoZoneCircle.bindPopup(
+                        '<strong>' + lat.toFixed(4) + ', ' + lng.toFixed(4) + '</strong><br>' +
+                        'Радиус: 500 м'
+                    ).openPopup();
+                    // Убрать круг через 30 сек
+                    setTimeout(function () {
+                        if (window._geoZoneCircle) { map.removeLayer(window._geoZoneCircle); window._geoZoneCircle = null; }
+                    }, 30000);
+                });
+            });
         }
     }
 
@@ -899,10 +931,66 @@
         if (!el) return;
         el.innerHTML =
             _statCard(pa.total, "Всего лиц") +
-            _statCard(pa.minors, "Несовершеннолетних") +
+            '<div class="an-stat-card an-stat-clickable" id="an-minors-card"><div class="an-stat-val">' + pa.minors + '</div><div class="an-stat-lbl">Несовершеннолетних ▸</div></div>' +
             _statCard(pa.byNationality.length, "Национальностей") +
             _statCard(pa.byEducation.length, "Уровней образ.") +
             _statCard(pa.byOccupation.length, "Родов занятий");
+
+        var minorsCard = document.getElementById("an-minors-card");
+        if (minorsCard && pa.minors > 0) {
+            minorsCard.addEventListener("click", function () {
+                showMinorsPortrait();
+            });
+        }
+    }
+
+    function showMinorsPortrait() {
+        var minors = (typeof crimePeople !== "undefined" ? crimePeople : []).filter(function (p) {
+            return p.age !== null && p.age < 18;
+        });
+        if (minors.length === 0) { alert("Несовершеннолетних не найдено"); return; }
+        var html = '<div class="minors-portrait-overlay" id="minors-portrait-overlay">' +
+            '<div class="minors-portrait-modal">' +
+            '<div class="minors-portrait-header">' +
+            '<h2>Портрет несовершеннолетних (' + minors.length + ')</h2>' +
+            '<button class="minors-portrait-close" id="minors-portrait-close">&times;</button>' +
+            '</div>' +
+            '<div class="minors-portrait-list">';
+        minors.forEach(function (p, i) {
+            var crime = crimeIncidents.find(function (c) { return c.erdr === p.erdr; });
+            html += '<div class="minor-card">';
+            html += '<div class="minor-card-num">' + (i + 1) + '</div>';
+            html += '<div class="minor-card-body">';
+            html += '<div class="minor-row"><strong>Возраст:</strong> ' + (p.age || "—") + ' лет</div>';
+            html += '<div class="minor-row"><strong>Пол:</strong> ' + (p.gender || "—") + '</div>';
+            html += '<div class="minor-row"><strong>Национальность:</strong> ' + (p.nationality || "—") + '</div>';
+            html += '<div class="minor-row"><strong>Образование:</strong> ' + (p.education || "—") + '</div>';
+            html += '<div class="minor-row"><strong>Род занятий:</strong> ' + (p.occupation || "—") + '</div>';
+            html += '<div class="minor-row"><strong>Место работы/учёбы:</strong> ' + (p.workplace || "—") + '</div>';
+            html += '<div class="minor-row"><strong>Семейное положение:</strong> ' + (p.maritalStatus || "—") + '</div>';
+            html += '<div class="minor-row"><strong>Место рождения:</strong> ' + [p.birthCity, p.birthDistrict, p.birthOblast].filter(Boolean).join(", ") + '</div>';
+            html += '<div class="minor-row"><strong>Гражданство:</strong> ' + (p.citizenship || "—") + '</div>';
+            html += '<div class="minor-row"><strong>Доп. сведения:</strong> ' + (p.additionalInfo || "—") + '</div>';
+            html += '<div class="minor-row"><strong>Доп. отметки:</strong> ' + (p.extraMarks || "—") + '</div>';
+            if (crime) {
+                html += '<div class="minor-crime">';
+                html += '<div class="minor-row"><strong>Статья:</strong> ' + (crime.article || "—") + '</div>';
+                html += '<div class="minor-row"><strong>Дата:</strong> ' + (crime.regDate || "—") + '</div>';
+                html += '<div class="minor-row"><strong>Адрес:</strong> ' + (crime.street || "") + ' ' + (crime.place || "") + '</div>';
+                html += '<div class="minor-row"><strong>ЕРДР:</strong> ' + (p.erdr || "—") + '</div>';
+                html += '</div>';
+            }
+            html += '</div></div>';
+        });
+        html += '</div></div></div>';
+        document.body.insertAdjacentHTML("beforeend", html);
+        document.getElementById("minors-portrait-close").addEventListener("click", function () {
+            var ov = document.getElementById("minors-portrait-overlay");
+            if (ov) ov.remove();
+        });
+        document.getElementById("minors-portrait-overlay").addEventListener("click", function (e) {
+            if (e.target === this) this.remove();
+        });
     }
 
     function _statCard(val, label) {
@@ -1445,14 +1533,25 @@
     // Загрузить данные
     var crimeLoadingEl = document.getElementById("crime-loading-status");
 
-    initCrimeData(
-        null,
-        function () {
-            if (crimeLoadingEl) crimeLoadingEl.classList.add("hidden");
-            buildCrimeMarkers();
-            updateStats();
-        }
-    );
+    function _onCrimeDataReady() {
+        if (crimeLoadingEl) crimeLoadingEl.classList.add("hidden");
+        buildCrimeMarkers();
+        updateStats();
+    }
+    initCrimeData(null, _onCrimeDataReady);
+
+    // Автообновление данных из Google Sheets каждые 5 минут
+    setInterval(function () {
+        console.log("[auto-refresh] Обновление данных из Google Sheets...");
+        initCrimeData(null, function () {
+            _onCrimeDataReady();
+            // Если открыта аналитика — перерисовать
+            var ap = document.getElementById("analytics-panel");
+            if (ap && !ap.classList.contains("hidden") && typeof renderAnalytics === "function") {
+                renderAnalytics();
+            }
+        });
+    }, 5 * 60 * 1000);
 
     // ═══════════════════════════════════════════════════════
     //  ADMIN VIOLATIONS PANEL

@@ -134,7 +134,7 @@ function analyzeByStreet(crimes) {
 }
 
 function analyzeByGeoZone(crimes, radius) {
-    radius = radius || 0.003;
+    radius = radius || 0.005;
     var grid = {};
     crimes.forEach(function (c) {
         if (typeof c.lat !== "number" || isNaN(c.lat)) return;
@@ -861,23 +861,24 @@ function buildProsecutorBriefing(analysis, allCrimes, lang) {
     // ── Топ аймақтар по координатам (радиус ~300м) ──────────────
     var topGeoZones = (analysis.byGeoZone || []).slice(0, 10);
     html += '<div class="assistant-section">';
-    html += '<div class="assistant-section-title">📍 ' + tr("brief_geo_zones", "Топ районов по координатам") + '</div>';
-    html += '<div class="assistant-hint">' + tr("brief_geo_hint", "Группировка по координатам (радиус ~300м) — не зависит от названия улиц") + '</div>';
+    html += '<div class="assistant-section-title">📍 ' + tr("brief_geo_zones", "Топ зон по координатам") + '</div>';
+    html += '<div class="assistant-hint">' + tr("brief_geo_hint", "Группировка по координатам (радиус ~500м)") + '</div>';
     html += '<table class="assistant-table"><thead><tr>';
-    html += '<th>#</th><th>' + tr("brief_zone", "Район") + '</th>';
+    html += '<th>#</th>';
     html += '<th>' + tr("brief_coords", "Координаты") + '</th>';
     html += '<th>' + tr("brief_count", "Кол-во") + '</th>';
     html += '<th>' + tr("brief_main_art", "Осн. статья") + '</th>';
+    html += '<th></th>';
     html += '</tr></thead><tbody>';
     topGeoZones.forEach(function (z, i) {
         var topArts = Object.keys(z.articles).sort(function (x, y) { return z.articles[y] - z.articles[x]; })
             .slice(0, 3).map(function (a) { return a + " (" + z.articles[a] + ")"; }).join(", ");
         html += '<tr>';
         html += '<td>' + (i + 1) + '</td>';
-        html += '<td><strong>' + escH(z.label) + '</strong></td>';
-        html += '<td class="muted">' + escH(z.coords) + '</td>';
-        html += '<td>' + z.count + '</td>';
+        html += '<td>' + escH(z.coords) + '</td>';
+        html += '<td><strong>' + z.count + '</strong></td>';
         html += '<td class="muted">' + escH(topArts || "—") + '</td>';
+        html += '<td><button class="an-zone-map-btn" data-lat="' + z.lat + '" data-lng="' + z.lng + '">📍</button></td>';
         html += '</tr>';
     });
     html += '</tbody></table></div>';
