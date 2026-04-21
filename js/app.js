@@ -847,7 +847,7 @@
         renderHoursChart(analysis.byHour);
         renderDaysChart(analysis.byDayOfWeek);
         renderDangerTimes(analysis);
-        renderBarChart("an-streets-chart", analysis.byStreet.slice(0, 15), "purple");
+        renderBarChart("an-streets-chart", (analysis.byGeoZone || []).slice(0, 15), "purple");
         // Фильтруем зоны с аномально большим числом (дополнительная защита)
         var validZones = analysis.problemZones.filter(function (z) { return z.count <= 50; });
         renderZonesList(validZones);

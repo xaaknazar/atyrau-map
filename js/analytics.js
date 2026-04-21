@@ -963,8 +963,8 @@ function buildProsecutorBriefing(analysis, allCrimes, lang) {
     if (top3Hours.length > 0) {
         recs.push(tr("rec_patrol", "Усилить патрулирование в пиковые часы:") + " " + top3Hours.map(function (x) { return ("0" + x.h).slice(-2) + ":00"; }).join(", "));
     }
-    if (topStreets.length > 0) {
-        recs.push(tr("rec_streets", "Установить надзор на улицах:") + " " + topStreets.slice(0, 3).map(function (s) { return s.label; }).join(", "));
+    if (topGeoZones.length > 0) {
+        recs.push(tr("rec_streets", "Установить надзор в аймақтарда:") + " " + topGeoZones.slice(0, 3).map(function (z) { return z.label + " [" + z.coords + "]"; }).join(", "));
     }
     if (validZones.length > 0) {
         recs.push(tr("rec_cameras", "Рассмотреть установку камер видеонаблюдения в горячих зонах #1–#") + (Math.min(3, validZones.length)));
