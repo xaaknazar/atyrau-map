@@ -1424,7 +1424,7 @@
         document.getElementById("crime-modal-address").innerHTML =
             '<strong>' + t("crime_address") + ':</strong> ' + buildCrimeAddress(crime);
         document.getElementById("crime-modal-crime-date").innerHTML =
-            '<strong>' + t("crime_date_committed") + ':</strong> ' + crime.crimeDate + ' ' + (crime.crimeTime || '');
+            '<strong>' + t("crime_date_committed") + ':</strong> ' + formatDateOnly(crime.crimeDate) + ' ' + formatTimeOnly(crime.crimeTime);
         document.getElementById("crime-modal-description").textContent = crime.description;
 
         // Показать связанных лиц
