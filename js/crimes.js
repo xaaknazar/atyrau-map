@@ -680,3 +680,20 @@ function formatCrimeDate(isoStr) {
     var mins = ("0" + d.getMinutes()).slice(-2);
     return day + "." + month + "." + year + " " + hours + ":" + mins;
 }
+
+function formatDateOnly(isoStr) {
+    if (!isoStr) return "—";
+    var d = new Date(isoStr);
+    if (isNaN(d.getTime())) return String(isoStr).replace(/T.*/, "");
+    return ("0" + d.getDate()).slice(-2) + "." + ("0" + (d.getMonth() + 1)).slice(-2) + "." + d.getFullYear();
+}
+
+function formatTimeOnly(isoStr) {
+    if (!isoStr) return "";
+    var d = new Date(isoStr);
+    if (isNaN(d.getTime())) {
+        var m = String(isoStr).match(/(\d{2}):(\d{2})/);
+        return m ? m[1] + ":" + m[2] : "";
+    }
+    return ("0" + d.getHours()).slice(-2) + ":" + ("0" + d.getMinutes()).slice(-2);
+}

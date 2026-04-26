@@ -969,7 +969,7 @@
             html += '<div class="cp-grid">';
             html += '<div class="minor-row"><strong>Возраст:</strong> ' + (p.age || "—") + '</div>';
             html += '<div class="minor-row"><strong>Пол:</strong> ' + (p.gender || "—") + '</div>';
-            if (p.birthDate) html += '<div class="minor-row"><strong>Дата рождения:</strong> ' + p.birthDate + '</div>';
+            if (p.birthDate) html += '<div class="minor-row"><strong>Дата рождения:</strong> ' + formatDateOnly(p.birthDate) + '</div>';
             html += '<div class="minor-row"><strong>Национальность:</strong> ' + (p.nationality || "—") + '</div>';
             html += '<div class="minor-row"><strong>Гражданство:</strong> ' + (p.citizenship || "—") + '</div>';
             html += '<div class="minor-row"><strong>Образование:</strong> ' + (p.education || "—") + '</div>';
@@ -991,7 +991,7 @@
                 html += '<div class="minor-crime">';
                 html += '<div class="minor-row"><strong>Статья:</strong> ' + (p.article || (crime && crime.article) || "—") + '</div>';
                 if (p.crimeDescription) html += '<div class="minor-row"><strong>Описание:</strong> ' + p.crimeDescription + '</div>';
-                html += '<div class="minor-row"><strong>Дата совершения:</strong> ' + (p.crimeDate || "—") + ' ' + (p.crimeTime || '') + '</div>';
+                html += '<div class="minor-row"><strong>Дата совершения:</strong> ' + formatDateOnly(p.crimeDate) + ' ' + formatTimeOnly(p.crimeTime) + '</div>';
                 if (crime) html += '<div class="minor-row"><strong>Адрес:</strong> ' + (crime.street || "") + ' ' + (crime.place || "") + '</div>';
                 html += '<div class="minor-row"><strong>ЕРДР:</strong> ' + (p.erdr || "—") + '</div>';
                 html += '</div>';
@@ -1443,7 +1443,7 @@
                         h += '<div class="cp-grid">';
                         if (p.age) h += '<div class="cp-row"><span class="cp-label">Возраст:</span> ' + p.age + '</div>';
                         if (p.gender) h += '<div class="cp-row"><span class="cp-label">Пол:</span> ' + p.gender + '</div>';
-                        if (p.birthDate) h += '<div class="cp-row"><span class="cp-label">Дата рождения:</span> ' + p.birthDate + '</div>';
+                        if (p.birthDate) h += '<div class="cp-row"><span class="cp-label">Дата рождения:</span> ' + formatDateOnly(p.birthDate) + '</div>';
                         if (p.nationality) h += '<div class="cp-row"><span class="cp-label">Национальность:</span> ' + p.nationality + '</div>';
                         if (p.citizenship) h += '<div class="cp-row"><span class="cp-label">Гражданство:</span> ' + p.citizenship + '</div>';
                         if (p.education) h += '<div class="cp-row"><span class="cp-label">Образование:</span> ' + p.education + '</div>';
