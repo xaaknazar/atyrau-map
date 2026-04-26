@@ -961,25 +961,38 @@
             '<div class="minors-portrait-list">';
         minors.forEach(function (p, i) {
             var crime = crimeIncidents.find(function (c) { return c.erdr === p.erdr; });
+            var fio = [p.lastName, p.firstName, p.patronymic].filter(Boolean).join(" ");
             html += '<div class="minor-card">';
             html += '<div class="minor-card-num">' + (i + 1) + '</div>';
             html += '<div class="minor-card-body">';
-            html += '<div class="minor-row"><strong>Возраст:</strong> ' + (p.age || "—") + ' лет</div>';
+            if (fio) html += '<div class="minor-row" style="font-size:14px;font-weight:700;color:#e74c3c;margin-bottom:6px;">' + fio + '</div>';
+            html += '<div class="cp-grid">';
+            html += '<div class="minor-row"><strong>Возраст:</strong> ' + (p.age || "—") + '</div>';
             html += '<div class="minor-row"><strong>Пол:</strong> ' + (p.gender || "—") + '</div>';
+            if (p.birthDate) html += '<div class="minor-row"><strong>Дата рождения:</strong> ' + p.birthDate + '</div>';
             html += '<div class="minor-row"><strong>Национальность:</strong> ' + (p.nationality || "—") + '</div>';
+            html += '<div class="minor-row"><strong>Гражданство:</strong> ' + (p.citizenship || "—") + '</div>';
             html += '<div class="minor-row"><strong>Образование:</strong> ' + (p.education || "—") + '</div>';
             html += '<div class="minor-row"><strong>Род занятий:</strong> ' + (p.occupation || "—") + '</div>';
             html += '<div class="minor-row"><strong>Место работы/учёбы:</strong> ' + (p.workplace || "—") + '</div>';
-            html += '<div class="minor-row"><strong>Семейное положение:</strong> ' + (p.maritalStatus || "—") + '</div>';
-            html += '<div class="minor-row"><strong>Место рождения:</strong> ' + [p.birthCity, p.birthDistrict, p.birthOblast].filter(Boolean).join(", ") + '</div>';
-            html += '<div class="minor-row"><strong>Гражданство:</strong> ' + (p.citizenship || "—") + '</div>';
-            html += '<div class="minor-row"><strong>Доп. сведения:</strong> ' + (p.additionalInfo || "—") + '</div>';
-            html += '<div class="minor-row"><strong>Доп. отметки:</strong> ' + (p.extraMarks || "—") + '</div>';
-            if (crime) {
+            html += '<div class="minor-row"><strong>Сем. положение:</strong> ' + (p.maritalStatus || "—") + '</div>';
+            var birthPlace = [p.birthCity, p.birthDistrict, p.birthOblast].filter(Boolean).join(", ");
+            if (birthPlace) html += '<div class="minor-row"><strong>Место рождения:</strong> ' + birthPlace + '</div>';
+            var addr = [p.addrCity, p.addrStreet, p.addrHouse].filter(Boolean).join(", ");
+            if (addr) html += '<div class="minor-row"><strong>Адрес:</strong> ' + addr + '</div>';
+            if (p.intoxication) html += '<div class="minor-row"><strong>В состоянии:</strong> ' + p.intoxication + '</div>';
+            if (p.previousCrime) html += '<div class="minor-row"><strong>Ранее совершивший:</strong> ' + p.previousCrime + '</div>';
+            if (p.conviction) html += '<div class="minor-row"><strong>Судимость:</strong> ' + p.conviction + '</div>';
+            if (p.registeredAccount) html += '<div class="minor-row"><strong>На учёте:</strong> ' + p.registeredAccount + '</div>';
+            if (p.additionalInfo) html += '<div class="minor-row"><strong>Доп. сведения:</strong> ' + p.additionalInfo + '</div>';
+            if (p.decision) html += '<div class="minor-row"><strong>Решение:</strong> ' + p.decision + '</div>';
+            html += '</div>';
+            if (crime || p.article) {
                 html += '<div class="minor-crime">';
-                html += '<div class="minor-row"><strong>Статья:</strong> ' + (crime.article || "—") + '</div>';
-                html += '<div class="minor-row"><strong>Дата:</strong> ' + (crime.regDate || "—") + '</div>';
-                html += '<div class="minor-row"><strong>Адрес:</strong> ' + (crime.street || "") + ' ' + (crime.place || "") + '</div>';
+                html += '<div class="minor-row"><strong>Статья:</strong> ' + (p.article || (crime && crime.article) || "—") + '</div>';
+                if (p.crimeDescription) html += '<div class="minor-row"><strong>Описание:</strong> ' + p.crimeDescription + '</div>';
+                html += '<div class="minor-row"><strong>Дата совершения:</strong> ' + (p.crimeDate || "—") + ' ' + (p.crimeTime || '') + '</div>';
+                if (crime) html += '<div class="minor-row"><strong>Адрес:</strong> ' + (crime.street || "") + ' ' + (crime.place || "") + '</div>';
                 html += '<div class="minor-row"><strong>ЕРДР:</strong> ' + (p.erdr || "—") + '</div>';
                 html += '</div>';
             }
@@ -1421,17 +1434,38 @@
             if (people.length > 0) {
                 peopleEl.innerHTML = '<h3 style="margin:12px 0 8px;color:#5dade2;">Лица (' + people.length + ')</h3>' +
                     people.map(function (p, i) {
-                        var parts = [];
-                        if (p.gender) parts.push(p.gender);
-                        if (p.age) parts.push(p.age + " лет");
-                        if (p.nationality) parts.push(p.nationality);
-                        if (p.education) parts.push(p.education);
-                        if (p.occupation) parts.push(p.occupation);
-                        if (p.maritalStatus) parts.push(p.maritalStatus);
-                        if (p.isMinor && p.isMinor.toLowerCase().indexOf("да") !== -1) parts.push("несовершеннолетний");
-                        return '<div class="crime-person-card">' +
-                            '<strong>Лицо ' + (i + 1) + ':</strong> ' + parts.join(", ") +
-                            '</div>';
+                        var fio = [p.lastName, p.firstName, p.patronymic].filter(Boolean).join(" ");
+                        var isMin = p.isMinor && p.isMinor.toLowerCase().indexOf("да") !== -1;
+                        var h = '<div class="crime-person-card' + (isMin ? ' is-minor' : '') + '">';
+                        h += '<div class="cp-header"><strong>Лицо ' + (i + 1) + (fio ? ': ' + fio : '') + '</strong>';
+                        if (isMin) h += ' <span class="cp-minor-badge">несовершеннолетний</span>';
+                        h += '</div>';
+                        h += '<div class="cp-grid">';
+                        if (p.age) h += '<div class="cp-row"><span class="cp-label">Возраст:</span> ' + p.age + '</div>';
+                        if (p.gender) h += '<div class="cp-row"><span class="cp-label">Пол:</span> ' + p.gender + '</div>';
+                        if (p.birthDate) h += '<div class="cp-row"><span class="cp-label">Дата рождения:</span> ' + p.birthDate + '</div>';
+                        if (p.nationality) h += '<div class="cp-row"><span class="cp-label">Национальность:</span> ' + p.nationality + '</div>';
+                        if (p.citizenship) h += '<div class="cp-row"><span class="cp-label">Гражданство:</span> ' + p.citizenship + '</div>';
+                        if (p.education) h += '<div class="cp-row"><span class="cp-label">Образование:</span> ' + p.education + '</div>';
+                        if (p.maritalStatus) h += '<div class="cp-row"><span class="cp-label">Сем. положение:</span> ' + p.maritalStatus + '</div>';
+                        if (p.occupation) h += '<div class="cp-row"><span class="cp-label">Род занятий:</span> ' + p.occupation + '</div>';
+                        if (p.workplace) h += '<div class="cp-row"><span class="cp-label">Место работы/учёбы:</span> ' + p.workplace + '</div>';
+                        if (p.position) h += '<div class="cp-row"><span class="cp-label">Должность:</span> ' + p.position + '</div>';
+                        var birthPlace = [p.birthCity, p.birthDistrict, p.birthOblast].filter(Boolean).join(", ");
+                        if (birthPlace) h += '<div class="cp-row"><span class="cp-label">Место рождения:</span> ' + birthPlace + '</div>';
+                        var addr = [p.addrCity, p.addrStreet, p.addrHouse].filter(Boolean).join(", ");
+                        if (addr) h += '<div class="cp-row"><span class="cp-label">Адрес:</span> ' + addr + '</div>';
+                        if (p.residencePlace) h += '<div class="cp-row"><span class="cp-label">По месту проживания:</span> ' + p.residencePlace + '</div>';
+                        if (p.intoxication) h += '<div class="cp-row"><span class="cp-label">В состоянии:</span> ' + p.intoxication + '</div>';
+                        if (p.inGroup) h += '<div class="cp-row"><span class="cp-label">В группе:</span> ' + p.inGroup + '</div>';
+                        if (p.participationType) h += '<div class="cp-row"><span class="cp-label">Вид соучастия:</span> ' + p.participationType + '</div>';
+                        if (p.previousCrime) h += '<div class="cp-row"><span class="cp-label">Ранее совершивший:</span> ' + p.previousCrime + '</div>';
+                        if (p.conviction) h += '<div class="cp-row"><span class="cp-label">Судимость:</span> ' + p.conviction + '</div>';
+                        if (p.registeredAccount) h += '<div class="cp-row"><span class="cp-label">Состоял на учёте:</span> ' + p.registeredAccount + '</div>';
+                        if (p.additionalInfo) h += '<div class="cp-row"><span class="cp-label">Доп. сведения:</span> ' + p.additionalInfo + '</div>';
+                        if (p.decision) h += '<div class="cp-row"><span class="cp-label">Решение:</span> ' + p.decision + '</div>';
+                        h += '</div></div>';
+                        return h;
                     }).join("");
             } else {
                 peopleEl.innerHTML = "";

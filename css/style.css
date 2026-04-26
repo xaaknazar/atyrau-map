@@ -4540,6 +4540,27 @@ body {
     border-left: 3px solid #e74c3c; border-radius: 0 6px 6px 0;
 }
 
+/* Crime modal — person portrait */
+.crime-person-card {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-left: 3px solid #5dade2;
+    border-radius: 8px;
+    padding: 12px 14px;
+    margin-bottom: 10px;
+}
+.crime-person-card.is-minor { border-left-color: #e74c3c; }
+.cp-header { margin-bottom: 8px; font-size: 14px; color: #e0e6f0; }
+.cp-minor-badge {
+    display: inline-block; padding: 2px 8px; border-radius: 999px;
+    background: rgba(231,76,60,0.2); color: #e74c3c;
+    font-size: 11px; font-weight: 700; margin-left: 6px;
+}
+.cp-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 16px; }
+.cp-row { font-size: 12.5px; color: #c0c8e0; }
+.cp-label { color: #8892b0; }
+@media (max-width: 520px) { .cp-grid { grid-template-columns: 1fr; } }
+
 /* ═══════════════════════════════════════════════════════════
    RESPONSIVE REFINEMENTS — Reports & Akimat (tablet & mobile)
    Дополнительные правки под телефоны / планшеты / узкие экраны.
