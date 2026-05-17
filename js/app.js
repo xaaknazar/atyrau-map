@@ -2119,19 +2119,20 @@
     document.querySelectorAll("[data-filter]").forEach(function (cb) {
         cb.addEventListener("change", function () {
             var f = this.getAttribute("data-filter");
-            if (f === "crime" && crimeArticleDiv) {
+            if (f === "crime" && crimeArticleDiv && isStaff) {
                 crimeArticleDiv.style.display = this.checked ? "" : "none";
                 if (!this.checked) { sidebarCrimeArticle = ""; if (crimeArticleSelect) crimeArticleSelect.value = ""; }
             }
-            if (f === "admin-violations" && avArticleDiv) {
+            if (f === "admin-violations" && avArticleDiv && isStaff) {
                 avArticleDiv.style.display = this.checked ? "" : "none";
                 if (!this.checked) { sidebarAvArticle = ""; if (avArticleSelect) avArticleSelect.value = ""; }
             }
         });
     });
 
-    // Показать фильтры при загрузке если чекбоксы включены
+    // Показать фильтры при загрузке если чекбоксы включены (только для staff)
     setTimeout(function () {
+        if (!isStaff) return;
         var crimeCb = document.querySelector("[data-filter='crime']");
         var avCb = document.querySelector("[data-filter='admin-violations']");
         if (crimeCb && crimeCb.checked && crimeArticleDiv) crimeArticleDiv.style.display = "";
