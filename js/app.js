@@ -1839,7 +1839,7 @@
         console.log("[app] Админ. правонарушения: " + adminViolations.length);
         buildAVMarkers();
         updateStats();
-        if (avArticleSelect) _buildArticleOptions(adminViolations, avArticleSelect);
+        // AV article filter filled later (avArticleSelect may not exist yet)
     });
 
     // ── Камеры на карте ────────────────────────────────────
@@ -2107,9 +2107,12 @@
         });
     }
 
-    // Заполнить crime-фильтр после загрузки
+    // Заполнить фильтры после загрузки данных
     onCrimesReady(function () {
         if (crimeArticleSelect) _buildArticleOptions(crimeIncidents, crimeArticleSelect);
+    });
+    onAdminViolationsReady(function () {
+        if (avArticleSelect) _buildArticleOptions(adminViolations, avArticleSelect);
     });
 
     // Показ/скрытие фильтра при переключении чекбокса категории
