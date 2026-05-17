@@ -1838,6 +1838,7 @@
         console.log("[app] Админ. правонарушения: " + adminViolations.length);
         buildAVMarkers();
         updateStats();
+        if (avArticleSelect) _buildArticleOptions(adminViolations, avArticleSelect);
     });
 
     // ── Камеры на карте ────────────────────────────────────
@@ -2073,53 +2074,63 @@
         });
     });
 
-    // ── Фильтр по статьям (sidebar) ──────────────────────────
+    // ── Фильтр по статьям (в легенде) ─────────────────────────
     var sidebarCrimeArticle = "";
     var sidebarAvArticle = "";
     var crimeArticleSelect = document.getElementById("sidebar-crime-article");
     var avArticleSelect = document.getElementById("sidebar-av-article");
+    var crimeArticleDiv = document.getElementById("crime-article-filter");
+    var avArticleDiv = document.getElementById("av-article-filter");
 
     function _extractNum(art) {
         var m = String(art || "").match(/(\d{2,4})/);
         return m ? m[1] : "";
     }
 
-    function populateArticleFilters() {
-        if (!crimeArticleSelect || !avArticleSelect) return;
-        // Crime articles
-        var crimeArts = {};
-        crimeIncidents.forEach(function (c) {
-            if (c.article) {
-                var n = _extractNum(c.article);
-                var key = n || c.article;
-                if (!crimeArts[key]) crimeArts[key] = { label: c.article, count: 0 };
-                crimeArts[key].count++;
-            }
+    function _buildArticleOptions(items, selectEl) {
+        var arts = {};
+        items.forEach(function (c) {
+            if (!c.article) return;
+            var num = _extractNum(c.article);
+            if (!num) return;
+            if (!arts[num]) arts[num] = 0;
+            arts[num]++;
         });
-        var crimeList = Object.values(crimeArts).sort(function (a, b) { return b.count - a.count; });
-        crimeArticleSelect.innerHTML = '<option value="">Все статьи (' + crimeIncidents.length + ')</option>';
-        crimeList.forEach(function (a) {
-            crimeArticleSelect.innerHTML += '<option value="' + _extractNum(a.label) + '">' + a.label + ' (' + a.count + ')</option>';
-        });
-
-        // AV articles
-        var avArts = {};
-        adminViolations.forEach(function (v) {
-            if (v.article) {
-                var n = _extractNum(v.article);
-                var key = n || v.article;
-                if (!avArts[key]) avArts[key] = { label: v.article, count: 0 };
-                avArts[key].count++;
-            }
-        });
-        var avList = Object.values(avArts).sort(function (a, b) { return b.count - a.count; });
-        avArticleSelect.innerHTML = '<option value="">Все статьи (' + adminViolations.length + ')</option>';
-        avList.forEach(function (a) {
-            avArticleSelect.innerHTML += '<option value="' + _extractNum(a.label) + '">' + a.label + ' (' + a.count + ')</option>';
+        var list = Object.keys(arts).map(function (n) { return { num: n, count: arts[n] }; })
+            .sort(function (a, b) { return b.count - a.count; });
+        selectEl.innerHTML = '<option value="">Все статьи (' + items.length + ')</option>';
+        list.forEach(function (a) {
+            selectEl.innerHTML += '<option value="' + a.num + '">ст. ' + a.num + ' (' + a.count + ')</option>';
         });
     }
 
-    onCrimesReady(populateArticleFilters);
+    // Заполнить crime-фильтр после загрузки
+    onCrimesReady(function () {
+        if (crimeArticleSelect) _buildArticleOptions(crimeIncidents, crimeArticleSelect);
+    });
+
+    // Показ/скрытие фильтра при переключении чекбокса категории
+    document.querySelectorAll("[data-filter]").forEach(function (cb) {
+        cb.addEventListener("change", function () {
+            var f = this.getAttribute("data-filter");
+            if (f === "crime" && crimeArticleDiv) {
+                crimeArticleDiv.style.display = this.checked ? "" : "none";
+                if (!this.checked) { sidebarCrimeArticle = ""; if (crimeArticleSelect) crimeArticleSelect.value = ""; }
+            }
+            if (f === "admin-violations" && avArticleDiv) {
+                avArticleDiv.style.display = this.checked ? "" : "none";
+                if (!this.checked) { sidebarAvArticle = ""; if (avArticleSelect) avArticleSelect.value = ""; }
+            }
+        });
+    });
+
+    // Показать фильтры при загрузке если чекбоксы включены
+    setTimeout(function () {
+        var crimeCb = document.querySelector("[data-filter='crime']");
+        var avCb = document.querySelector("[data-filter='admin-violations']");
+        if (crimeCb && crimeCb.checked && crimeArticleDiv) crimeArticleDiv.style.display = "";
+        if (avCb && avCb.checked && avArticleDiv) avArticleDiv.style.display = "";
+    }, 100);
 
     if (crimeArticleSelect) {
         crimeArticleSelect.addEventListener("change", function () {
