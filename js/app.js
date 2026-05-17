@@ -2685,13 +2685,18 @@
         loginOverlay.classList.add("hidden");
     }
 
-    document.getElementById("admin-toggle-btn").addEventListener("click", function () {
-        if (isAdmin) {
-            exitAdmin();
-        } else {
-            openLoginModal();
-        }
-    });
+    var adminToggleBtn = document.getElementById("admin-toggle-btn");
+    if (adminToggleBtn) {
+        adminToggleBtn.addEventListener("click", function () {
+            if (isAdmin) exitAdmin(); else openLoginModal();
+        });
+    }
+
+    // Автовход из /admin
+    if (sessionStorage.getItem("atyrau-admin-enter") === "yes") {
+        sessionStorage.removeItem("atyrau-admin-enter");
+        setTimeout(function () { enterAdmin(); }, 500);
+    }
 
     document.getElementById("login-close").addEventListener("click", closeLoginModal);
     loginOverlay.addEventListener("click", function (e) {
@@ -2718,8 +2723,7 @@
         isAdmin = true;
         adminBar.classList.remove("hidden");
         document.body.classList.add("admin-mode");
-        document.getElementById("admin-toggle-btn").setAttribute("data-i18n", "admin_exit");
-        document.getElementById("admin-toggle-btn").textContent = t("admin_exit");
+        if (adminToggleBtn) { adminToggleBtn.setAttribute("data-i18n", "admin_exit"); adminToggleBtn.textContent = t("admin_exit"); }
         map.getContainer().style.cursor = "crosshair";
 
         // Update admin bar hint to include drag info
@@ -2737,8 +2741,7 @@
         isAdmin = false;
         adminBar.classList.add("hidden");
         document.body.classList.remove("admin-mode");
-        document.getElementById("admin-toggle-btn").setAttribute("data-i18n", "admin_login");
-        document.getElementById("admin-toggle-btn").textContent = t("admin_login");
+        if (adminToggleBtn) { adminToggleBtn.setAttribute("data-i18n", "admin_login"); adminToggleBtn.textContent = t("admin_login"); }
         map.getContainer().style.cursor = "";
 
         // Restore admin bar hint

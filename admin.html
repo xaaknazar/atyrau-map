@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Вход администратора — Карта прокуратуры</title>
+    <style>
+        * { box-sizing: border-box; }
+        html, body { margin: 0; height: 100%; background: #0f1a2e; color: #e0e6f0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        .page { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px; }
+        .card { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); border-radius: 14px; padding: 36px; text-align: center; width: 100%; max-width: 380px; }
+        .card img { width: 64px; height: 64px; border-radius: 50%; object-fit: cover; margin-bottom: 16px; border: 2px solid rgba(255,255,255,0.1); }
+        .card h1 { font-size: 18px; margin: 0 0 6px; }
+        .card p { color: #8892b0; font-size: 13px; margin: 0 0 24px; }
+        .field { margin-bottom: 16px; text-align: left; }
+        .field label { display: block; font-size: 12px; font-weight: 600; color: #8892b0; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.4px; }
+        .field input { width: 100%; padding: 11px 14px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); border-radius: 8px; color: #fff; font-size: 15px; letter-spacing: 2px; outline: none; }
+        .field input:focus { border-color: #3498db; }
+        .btn { width: 100%; padding: 12px; background: #3498db; color: #fff; border: none; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; }
+        .btn:hover { background: #2980b9; }
+        .err { color: #e74c3c; font-size: 13px; margin-top: 10px; min-height: 18px; }
+        .back { display: inline-block; margin-top: 20px; color: #8892b0; text-decoration: none; font-size: 13px; }
+        .back:hover { color: #e0e6f0; }
+    </style>
+</head>
+<body>
+    <div class="page">
+        <div class="card">
+            <img src="images/placeholders/logos.jpeg" alt="" />
+            <h1>Вход администратора</h1>
+            <p>Управление точками на карте</p>
+            <div class="field">
+                <label>Пароль</label>
+                <input type="password" id="pwd" autocomplete="off" />
+            </div>
+            <button class="btn" id="submit">Войти</button>
+            <div class="err" id="err"></div>
+            <a href="/" class="back">← На карту</a>
+        </div>
+    </div>
+    <script>
+        var PASSWORD = "prokuratura2025";
+        function go() {
+            var v = document.getElementById("pwd").value;
+            if (v === PASSWORD) {
+                sessionStorage.setItem("atyrau-admin-enter", "yes");
+                window.location.href = "/";
+            } else {
+                document.getElementById("err").textContent = "Неверный пароль";
+                document.getElementById("pwd").value = "";
+                document.getElementById("pwd").focus();
+            }
+        }
+        document.getElementById("submit").addEventListener("click", go);
+        document.getElementById("pwd").addEventListener("keydown", function (e) { if (e.key === "Enter") go(); });
+        document.getElementById("pwd").focus();
+    </script>
+</body>
+</html>
