@@ -876,6 +876,42 @@
         </div>
     </div>
 
+    <!-- Citizen instruction modal before reporting -->
+    <div id="suggest-intro-overlay" class="hidden">
+        <div id="suggest-intro-modal">
+            <button id="suggest-intro-close" aria-label="Закрыть">&times;</button>
+            <div class="suggest-intro-icon">📍</div>
+            <h2 data-i18n="suggest_intro_title">Как сообщить о проблеме?</h2>
+            <div class="suggest-intro-steps">
+                <div class="suggest-intro-step">
+                    <span class="si-num">1</span>
+                    <div>
+                        <strong data-i18n="suggest_intro_step1">Укажите место на карте</strong>
+                        <p data-i18n="suggest_intro_step1_desc">Нажмите на точку на карте, где находится проблема</p>
+                    </div>
+                </div>
+                <div class="suggest-intro-step">
+                    <span class="si-num">2</span>
+                    <div>
+                        <strong data-i18n="suggest_intro_step2">Выберите тип проблемы</strong>
+                        <p data-i18n="suggest_intro_step2_desc">Слепая зона (нет камеры), заброшенное здание или неосвещённая улица</p>
+                    </div>
+                </div>
+                <div class="suggest-intro-step">
+                    <span class="si-num">3</span>
+                    <div>
+                        <strong data-i18n="suggest_intro_step3">Приложите фото</strong>
+                        <p data-i18n="suggest_intro_step3_desc">Сфотографируйте проблему — это ускорит решение</p>
+                    </div>
+                </div>
+            </div>
+            <div class="suggest-intro-warning" data-i18n="suggest_intro_warning">
+                Пожалуйста, сообщайте только о реальных проблемах. Ложные заявки замедляют работу служб и могут повлечь ответственность.
+            </div>
+            <button id="suggest-intro-start" class="suggest-intro-start-btn" data-i18n="suggest_intro_start">Указать место на карте</button>
+        </div>
+    </div>
+
     <!-- Citizen suggestion form modal -->
     <div id="suggest-overlay" class="hidden">
         <div id="suggest-modal">

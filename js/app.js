@@ -2832,18 +2832,41 @@
 
     onSuggestionsChanged(buildPendingMarkers);
 
-    // Suggest button click → enable map picking mode
+    // Suggest button click → show intro modal first
+    var suggestIntroOverlay = document.getElementById("suggest-intro-overlay");
+
     suggestBtn.addEventListener("click", function () {
         if (isSuggestPicking) {
             cancelSuggestPicking();
             return;
         }
+        if (suggestIntroOverlay) {
+            suggestIntroOverlay.classList.remove("hidden");
+        } else {
+            _startSuggestPicking();
+        }
+    });
+
+    function _startSuggestPicking() {
         isSuggestPicking = true;
         suggestBtn.classList.add("picking");
         suggestBtn.textContent = t("suggest_pick_location");
         map.getContainer().style.cursor = "crosshair";
         closeMobileSidebar();
-    });
+    }
+
+    if (suggestIntroOverlay) {
+        document.getElementById("suggest-intro-start").addEventListener("click", function () {
+            suggestIntroOverlay.classList.add("hidden");
+            _startSuggestPicking();
+        });
+        document.getElementById("suggest-intro-close").addEventListener("click", function () {
+            suggestIntroOverlay.classList.add("hidden");
+        });
+        suggestIntroOverlay.addEventListener("click", function (e) {
+            if (e.target === suggestIntroOverlay) suggestIntroOverlay.classList.add("hidden");
+        });
+    }
 
     function cancelSuggestPicking() {
         isSuggestPicking = false;
