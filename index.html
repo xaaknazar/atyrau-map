@@ -1064,6 +1064,12 @@
         }
     })();
     </script>
+    <!-- Service Worker registration -->
+    <script>
+    if ("serviceWorker" in navigator) {
+        navigator.serviceWorker.register("/sw.js").catch(function () {});
+    }
+    </script>
     <!-- PWA install prompt -->
     <script>
     (function () {
@@ -1077,34 +1083,31 @@
 
         if (isStandalone) return;
 
-        if (isIos) {
+        window.addEventListener("beforeinstallprompt", function (e) {
+            e.preventDefault();
+            deferredPrompt = e;
             btn.style.display = "";
-            btn.addEventListener("click", function () {
-                alert(
-                    "iPhone/iPad-қа орнату:\n\n" +
-                    "1. Төменгі панельдегі «Бөлісу» (Share) батырмасын басыңыз\n" +
-                    "2. «Басты экранға қосу» (Add to Home Screen) таңдаңыз\n\n" +
-                    "Установка на iPhone/iPad:\n\n" +
-                    "1. Нажмите кнопку «Поделиться» внизу экрана\n" +
-                    "2. Выберите «На экран Домой»"
-                );
-            });
-        } else {
-            if (isAndroid) btn.style.display = "";
-            window.addEventListener("beforeinstallprompt", function (e) {
-                e.preventDefault();
-                deferredPrompt = e;
-                btn.style.display = "";
-            });
-            btn.addEventListener("click", function () {
-                if (deferredPrompt) {
-                    deferredPrompt.prompt();
-                    deferredPrompt.userChoice.then(function () { deferredPrompt = null; btn.style.display = "none"; });
-                } else if (isAndroid) {
-                    alert("Браузер мәзірінен «Басты экранға қосу» таңдаңыз\n\nВ меню браузера выберите «Добавить на главный экран»");
-                }
-            });
-        }
+        });
+
+        if (isIos || isAndroid) btn.style.display = "";
+
+        btn.addEventListener("click", function () {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then(function () { deferredPrompt = null; btn.style.display = "none"; });
+            } else if (isIos) {
+                var d = document.createElement("div");
+                d.className = "pwa-ios-hint";
+                d.innerHTML = '<div class="pwa-ios-card">' +
+                    '<b>Safari-де орнату / Установить в Safari:</b><br><br>' +
+                    '1. Төменде ⬆️ «Бөлісу» батырмасын басыңыз<br>' +
+                    '&nbsp;&nbsp;&nbsp;&nbsp;Нажмите ⬆️ «Поделиться» внизу<br><br>' +
+                    '2. «Басты экранға қосу» таңдаңыз<br>' +
+                    '&nbsp;&nbsp;&nbsp;&nbsp;Выберите «На экран Домой»<br><br>' +
+                    '<button onclick="this.parentNode.parentNode.remove()">OK</button></div>';
+                document.body.appendChild(d);
+            }
+        });
 
         window.addEventListener("appinstalled", function () { btn.style.display = "none"; });
     })();

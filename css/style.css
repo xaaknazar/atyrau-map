@@ -428,6 +428,19 @@ body {
     background: rgba(52,152,219,0.2);
     border-color: rgba(52,152,219,0.5);
 }
+.pwa-ios-hint {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 99999;
+    display: flex; align-items: flex-end; justify-content: center; padding: 20px;
+}
+.pwa-ios-card {
+    background: #fff; color: #111; border-radius: 16px; padding: 24px;
+    max-width: 340px; width: 100%; font-size: 14px; line-height: 1.5;
+    box-shadow: 0 -4px 20px rgba(0,0,0,0.3); text-align: center;
+}
+.pwa-ios-card button {
+    margin-top: 12px; padding: 10px 40px; background: #007aff; color: #fff;
+    border: none; border-radius: 10px; font-size: 16px; font-weight: 600; cursor: pointer;
+}
 
 #suggest-btn {
     width: 100%;
