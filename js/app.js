@@ -2192,7 +2192,7 @@
                     (c.street || "") + " " + (c.place || ""), c.placeType || "", c.isPublic ? "Да" : "Нет",
                     formatDateOnly(c.crimeDate) + " " + formatTimeOnly(c.crimeTime), c.description || ""];
         });
-        _exportXlsx(headers, rows, "ERDR_" + new Date().toISOString().slice(0, 10) + ".xlsx");
+        _exportXlsx(headers, rows, "ERDR_" + new Date().toISOString().slice(0, 10) + ".xls");
     });
 
     // АП — экспорт списка
@@ -2203,7 +2203,7 @@
                     v.podrazdelenie || "", v.authorFio || "", v.place || "",
                     [v.lastName, v.firstName, v.patronymic].filter(Boolean).join(" "), v.fabula || ""];
         });
-        _exportXlsx(headers, rows, "Admin_violations_" + new Date().toISOString().slice(0, 10) + ".xlsx");
+        _exportXlsx(headers, rows, "Admin_violations_" + new Date().toISOString().slice(0, 10) + ".xls");
     });
 
     // ЕРДР Аналитика — экспорт (статьи + зоны + лица)
@@ -2214,7 +2214,7 @@
         var rows = (a.byArticle || []).map(function (art) {
             return [art.label, art.count, a.total > 0 ? Math.round(art.count / a.total * 100) : 0];
         });
-        _exportXlsx(headers, rows, "ERDR_analytics_" + new Date().toISOString().slice(0, 10) + ".xlsx");
+        _exportXlsx(headers, rows, "ERDR_analytics_" + new Date().toISOString().slice(0, 10) + ".xls");
     });
 
     // АП Аналитика — экспорт
@@ -2229,7 +2229,7 @@
         });
         var rows = Object.keys(arts).sort(function (a, b) { return arts[b] - arts[a]; })
             .map(function (n) { return ["ст. " + n, arts[n]]; });
-        _exportXlsx(headers, rows, "AV_analytics_" + new Date().toISOString().slice(0, 10) + ".xlsx");
+        _exportXlsx(headers, rows, "AV_analytics_" + new Date().toISOString().slice(0, 10) + ".xls");
     });
 
     // ── Language switch ─────────────────────────────────────
