@@ -165,7 +165,32 @@
 
         <!-- Citizen feedback button (only for guests) -->
         <div class="suggest-section guest-only">
-            <button id="suggest-btn" data-i18n="suggest_btn">Предложить точку</button>
+            <div class="guest-hero">
+                <div class="guest-hero-title" data-i18n="guest_hero_title">Қалаңыздағы мәселені хабарлаңыз</div>
+                <div class="guest-hero-sub" data-i18n="guest_hero_sub">Сообщите о проблеме в вашем городе</div>
+            </div>
+            <button id="suggest-btn" class="guest-suggest-btn" data-i18n="suggest_btn">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+                Хабарлау / Сообщить
+            </button>
+            <div class="guest-categories">
+                <div class="guest-cat"><span class="legend-dot" style="background:#3498db"></span> Камера жоқ аймақтар / Слепые зоны</div>
+                <div class="guest-cat"><span class="legend-dot" style="background:#8e44ad"></span> Қараусыз ғимараттар / Заброшенные здания</div>
+                <div class="guest-cat"><span class="legend-dot" style="background:#f39c12"></span> Жарықсыз көшелер / Неосвещённые улицы</div>
+            </div>
+        </div>
+
+        <!-- QR + Install -->
+        <div class="guest-bottom guest-only">
+            <div class="guest-qr-section">
+                <div class="guest-qr-title" data-i18n="guest_share">Достарыңызбен бөлісіңіз / Поделитесь</div>
+                <canvas id="guest-qr-canvas" width="140" height="140"></canvas>
+                <div class="guest-qr-hint">atyrau-map.vercel.app</div>
+            </div>
+            <button id="pwa-install-btn" class="pwa-install-btn" style="display:none;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                Қосымша ретінде орнату / Установить
+            </button>
         </div>
 
         <!-- Prosecutor: monitoring panel (only for staff) -->
@@ -1014,5 +1039,49 @@
     <script src="js/analytics.js?v=4"></script>
     <script src="js/data.js?v=2"></script>
     <script src="js/app.js?v=10"></script>
+    <!-- QR code generator (lightweight) -->
+    <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
+    <script>
+    (function () {
+        var c = document.getElementById("guest-qr-canvas");
+        if (!c || typeof qrcode === "undefined") return;
+        var qr = qrcode(0, "M");
+        qr.addData("https://atyrau-map.vercel.app");
+        qr.make();
+        var ctx = c.getContext("2d");
+        var size = c.width;
+        var cells = qr.getModuleCount();
+        var cellSize = size / cells;
+        ctx.fillStyle = "#fff";
+        ctx.fillRect(0, 0, size, size);
+        ctx.fillStyle = "#16213e";
+        for (var r = 0; r < cells; r++) {
+            for (var col = 0; col < cells; col++) {
+                if (qr.isDark(r, col)) {
+                    ctx.fillRect(col * cellSize, r * cellSize, cellSize + 0.5, cellSize + 0.5);
+                }
+            }
+        }
+    })();
+    </script>
+    <!-- PWA install prompt -->
+    <script>
+    (function () {
+        var deferredPrompt = null;
+        var btn = document.getElementById("pwa-install-btn");
+        if (!btn) return;
+        window.addEventListener("beforeinstallprompt", function (e) {
+            e.preventDefault();
+            deferredPrompt = e;
+            btn.style.display = "";
+        });
+        btn.addEventListener("click", function () {
+            if (!deferredPrompt) return;
+            deferredPrompt.prompt();
+            deferredPrompt.userChoice.then(function () { deferredPrompt = null; btn.style.display = "none"; });
+        });
+        window.addEventListener("appinstalled", function () { btn.style.display = "none"; });
+    })();
+    </script>
 </body>
 </html>

@@ -324,8 +324,108 @@ body {
 
 /* ── Citizen suggest section in sidebar ── */
 .suggest-section {
-    padding: 16px 24px 0;
+    padding: 20px 24px 0;
     border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+/* Guest hero block */
+.guest-hero {
+    text-align: center;
+    margin-bottom: 16px;
+}
+.guest-hero-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: #fff;
+    line-height: 1.3;
+}
+.guest-hero-sub {
+    font-size: 12px;
+    color: #8892b0;
+    margin-top: 4px;
+}
+.guest-suggest-btn {
+    width: 100%;
+    padding: 14px 16px;
+    background: linear-gradient(135deg, #27ae60, #2ecc71);
+    border: none;
+    color: #fff;
+    font-size: 15px;
+    font-weight: 700;
+    border-radius: 10px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.15s;
+    box-shadow: 0 2px 8px rgba(39,174,96,0.3);
+}
+.guest-suggest-btn:hover {
+    background: linear-gradient(135deg, #229954, #27ae60);
+    box-shadow: 0 4px 12px rgba(39,174,96,0.4);
+}
+.guest-suggest-btn svg { flex-shrink: 0; }
+.guest-categories {
+    margin-top: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+.guest-cat {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11.5px;
+    color: #c0c8e0;
+}
+.guest-cat .legend-dot { flex-shrink: 0; }
+
+/* Guest bottom: QR + Install */
+.guest-bottom {
+    padding: 16px 24px 20px;
+    border-top: 1px solid rgba(255,255,255,0.06);
+    margin-top: 16px;
+}
+.guest-qr-section { text-align: center; margin-bottom: 12px; }
+.guest-qr-title {
+    font-size: 12px;
+    color: #8892b0;
+    margin-bottom: 10px;
+    font-weight: 600;
+}
+#guest-qr-canvas {
+    border-radius: 8px;
+    background: #fff;
+    padding: 6px;
+}
+.guest-qr-hint {
+    font-size: 10.5px;
+    color: #5a6a8a;
+    margin-top: 6px;
+    font-family: monospace;
+}
+
+/* PWA Install button */
+.pwa-install-btn {
+    width: 100%;
+    padding: 12px;
+    background: rgba(52,152,219,0.12);
+    border: 1px solid rgba(52,152,219,0.3);
+    color: #5dade2;
+    font-size: 13px;
+    font-weight: 600;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.15s;
+}
+.pwa-install-btn:hover {
+    background: rgba(52,152,219,0.2);
+    border-color: rgba(52,152,219,0.5);
 }
 
 #suggest-btn {
