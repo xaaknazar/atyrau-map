@@ -2101,7 +2101,9 @@
             .sort(function (a, b) { return b.count - a.count; });
         selectEl.innerHTML = '<option value="">Все статьи (' + items.length + ')</option>';
         list.forEach(function (a) {
-            selectEl.innerHTML += '<option value="' + a.num + '">ст. ' + a.num + ' (' + a.count + ')</option>';
+            var hidden = !!HIDDEN_MAP_ARTICLES[parseInt(a.num, 10)];
+            var label = 'ст. ' + a.num + ' (' + a.count + ')' + (hidden ? ' — нет на карте' : '');
+            selectEl.innerHTML += '<option value="' + a.num + '"' + (hidden ? ' style="color:#8892b0"' : '') + '>' + label + '</option>';
         });
     }
 
