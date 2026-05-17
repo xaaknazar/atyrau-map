@@ -2017,6 +2017,7 @@
         crimeFiltered.forEach(function (c) {
             if (typeof c.lat !== "number" || isNaN(c.lat)) return;
             if (_isHiddenArticle(c.article)) return;
+            if (sidebarCrimeArticle && _extractNum(c.article) !== sidebarCrimeArticle) return;
             var marker = L.circleMarker([c.lat, c.lng], {
                 radius: 3.5,
                 color: "rgba(255,255,255,0.8)",
@@ -2045,15 +2046,20 @@
         avFiltered.forEach(function (v) {
             if (v.lat === null || v.lng === null) return;
             if (_isHiddenArticle(v.article)) return;
+            if (sidebarAvArticle && _extractNum(v.article) !== sidebarAvArticle) return;
             avLayer.addLayer(_createAVCircle(v));
         });
 
         // Update sidebar counts
         document.getElementById("count-crime").textContent = crimeFiltered.filter(function (c) {
-            return typeof c.lat === "number" && !isNaN(c.lat);
+            if (typeof c.lat !== "number" || isNaN(c.lat)) return false;
+            if (sidebarCrimeArticle && _extractNum(c.article) !== sidebarCrimeArticle) return false;
+            return true;
         }).length;
         document.getElementById("count-av").textContent = avFiltered.filter(function (v) {
-            return v.lat !== null;
+            if (v.lat === null) return false;
+            if (sidebarAvArticle && _extractNum(v.article) !== sidebarAvArticle) return false;
+            return true;
         }).length;
     }
 
@@ -2066,6 +2072,67 @@
             applySidebarPeriod();
         });
     });
+
+    // ── Фильтр по статьям (sidebar) ──────────────────────────
+    var sidebarCrimeArticle = "";
+    var sidebarAvArticle = "";
+    var crimeArticleSelect = document.getElementById("sidebar-crime-article");
+    var avArticleSelect = document.getElementById("sidebar-av-article");
+
+    function _extractNum(art) {
+        var m = String(art || "").match(/(\d{2,4})/);
+        return m ? m[1] : "";
+    }
+
+    function populateArticleFilters() {
+        if (!crimeArticleSelect || !avArticleSelect) return;
+        // Crime articles
+        var crimeArts = {};
+        crimeIncidents.forEach(function (c) {
+            if (c.article) {
+                var n = _extractNum(c.article);
+                var key = n || c.article;
+                if (!crimeArts[key]) crimeArts[key] = { label: c.article, count: 0 };
+                crimeArts[key].count++;
+            }
+        });
+        var crimeList = Object.values(crimeArts).sort(function (a, b) { return b.count - a.count; });
+        crimeArticleSelect.innerHTML = '<option value="">Все статьи (' + crimeIncidents.length + ')</option>';
+        crimeList.forEach(function (a) {
+            crimeArticleSelect.innerHTML += '<option value="' + _extractNum(a.label) + '">' + a.label + ' (' + a.count + ')</option>';
+        });
+
+        // AV articles
+        var avArts = {};
+        adminViolations.forEach(function (v) {
+            if (v.article) {
+                var n = _extractNum(v.article);
+                var key = n || v.article;
+                if (!avArts[key]) avArts[key] = { label: v.article, count: 0 };
+                avArts[key].count++;
+            }
+        });
+        var avList = Object.values(avArts).sort(function (a, b) { return b.count - a.count; });
+        avArticleSelect.innerHTML = '<option value="">Все статьи (' + adminViolations.length + ')</option>';
+        avList.forEach(function (a) {
+            avArticleSelect.innerHTML += '<option value="' + _extractNum(a.label) + '">' + a.label + ' (' + a.count + ')</option>';
+        });
+    }
+
+    onCrimesReady(populateArticleFilters);
+
+    if (crimeArticleSelect) {
+        crimeArticleSelect.addEventListener("change", function () {
+            sidebarCrimeArticle = this.value;
+            applySidebarPeriod();
+        });
+    }
+    if (avArticleSelect) {
+        avArticleSelect.addEventListener("change", function () {
+            sidebarAvArticle = this.value;
+            applySidebarPeriod();
+        });
+    }
 
     // ── Language switch ─────────────────────────────────────
     document.querySelectorAll(".lang-btn").forEach(function (btn) {
