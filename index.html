@@ -44,7 +44,7 @@
 
         <div class="legend">
             <h3 data-i18n="categories">Категории</h3>
-            <label class="legend-item no-akimat">
+            <label class="legend-item staff-only">
                 <input type="checkbox" checked data-filter="crime" />
                 <span class="legend-dot" style="background: #e74c3c;"></span>
                 <span data-i18n="cat_crime">Преступность</span>
@@ -1070,16 +1070,42 @@
         var deferredPrompt = null;
         var btn = document.getElementById("pwa-install-btn");
         if (!btn) return;
-        window.addEventListener("beforeinstallprompt", function (e) {
-            e.preventDefault();
-            deferredPrompt = e;
+
+        var isIos = /iphone|ipad|ipod/i.test(navigator.userAgent);
+        var isStandalone = window.matchMedia("(display-mode: standalone)").matches || navigator.standalone;
+        var isAndroid = /android/i.test(navigator.userAgent);
+
+        if (isStandalone) return;
+
+        if (isIos) {
             btn.style.display = "";
-        });
-        btn.addEventListener("click", function () {
-            if (!deferredPrompt) return;
-            deferredPrompt.prompt();
-            deferredPrompt.userChoice.then(function () { deferredPrompt = null; btn.style.display = "none"; });
-        });
+            btn.addEventListener("click", function () {
+                alert(
+                    "iPhone/iPad-қа орнату:\n\n" +
+                    "1. Төменгі панельдегі «Бөлісу» (Share) батырмасын басыңыз\n" +
+                    "2. «Басты экранға қосу» (Add to Home Screen) таңдаңыз\n\n" +
+                    "Установка на iPhone/iPad:\n\n" +
+                    "1. Нажмите кнопку «Поделиться» внизу экрана\n" +
+                    "2. Выберите «На экран Домой»"
+                );
+            });
+        } else {
+            if (isAndroid) btn.style.display = "";
+            window.addEventListener("beforeinstallprompt", function (e) {
+                e.preventDefault();
+                deferredPrompt = e;
+                btn.style.display = "";
+            });
+            btn.addEventListener("click", function () {
+                if (deferredPrompt) {
+                    deferredPrompt.prompt();
+                    deferredPrompt.userChoice.then(function () { deferredPrompt = null; btn.style.display = "none"; });
+                } else if (isAndroid) {
+                    alert("Браузер мәзірінен «Басты экранға қосу» таңдаңыз\n\nВ меню браузера выберите «Добавить на главный экран»");
+                }
+            });
+        }
+
         window.addEventListener("appinstalled", function () { btn.style.display = "none"; });
     })();
     </script>
