@@ -370,13 +370,13 @@
 
         // Преступность — количество из ЕРДР с координатами (на карте)
         var crimeOnMap = crimeIncidents.filter(function (c) {
-            return typeof c.lat === "number" && !isNaN(c.lat) && !_isHiddenArticle(c.article);
+            return typeof c.lat === "number" && !isNaN(c.lat);
         }).length;
         document.getElementById("count-crime").textContent = crimeOnMap;
         document.getElementById("count-blind-spots").textContent = counts["blind-spots"];
         document.getElementById("count-abandoned").textContent = counts["abandoned"];
         document.getElementById("count-unlit").textContent = counts["unlit"];
-        var avOnMap = adminViolations.filter(function (v) { return v.lat !== null && !_isHiddenArticle(v.article); }).length;
+        var avOnMap = adminViolations.filter(function (v) { return v.lat !== null; }).length;
         document.getElementById("count-av").textContent = avOnMap;
         document.getElementById("count-cameras").textContent = cameraPoints.length;
         document.getElementById("count-police").textContent = policePoints.length;
