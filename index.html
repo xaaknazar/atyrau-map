@@ -207,45 +207,68 @@
                 </svg>
                 <span>Назад к карте</span>
             </button>
-            <h2>Отчеты</h2>
         </div>
-        <div class="report-selector-cards">
-            <div class="report-card" id="report-card-erdr">
-                <div class="report-card-icon" style="background:rgba(231,76,60,0.2);color:#e74c3c;">
-                    <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm-1 7V3.5L18.5 9H13zM6 20V4h5v7h7v9H6z"/></svg>
-                </div>
-                <div class="report-card-body">
-                    <h3>Зарегистрированные правонарушения</h3>
-                    <p>ЕРДР — уголовные правонарушения</p>
-                    <span class="report-card-count" id="report-count-erdr">0 записей</span>
+        <div class="report-selector-body">
+            <div class="report-official-header">
+                <img src="images/placeholders/logos.jpeg" alt="" class="report-logo" />
+                <div>
+                    <div class="report-org">Атырау қаласы прокуратурасы</div>
+                    <div class="report-org-sub">Прокуратура города Атырау</div>
                 </div>
             </div>
-            <div class="report-card" id="report-card-erdr-analytics">
-                <div class="report-card-icon" style="background:rgba(231,76,60,0.2);color:#e74c3c;">
-                    <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/></svg>
-                </div>
-                <div class="report-card-body">
-                    <h3>Аналитика преступлений</h3>
-                    <p>Анализ зарегистрированных правонарушений</p>
+            <h2 class="report-main-title">Отчёты и аналитика</h2>
+
+            <div class="report-section">
+                <div class="report-section-label">Уголовные правонарушения (ЕРДР)</div>
+                <div class="report-cards-row">
+                    <div class="report-card" id="report-card-erdr">
+                        <div class="rc-icon rc-red">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm-1 7V3.5L18.5 9H13zM6 20V4h5v7h7v9H6z"/></svg>
+                        </div>
+                        <div class="rc-body">
+                            <div class="rc-title">Реестр правонарушений</div>
+                            <div class="rc-desc">Зарегистрированные уголовные правонарушения</div>
+                            <div class="rc-count" id="report-count-erdr">0 записей</div>
+                        </div>
+                        <div class="rc-arrow">›</div>
+                    </div>
+                    <div class="report-card" id="report-card-erdr-analytics">
+                        <div class="rc-icon rc-red">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/></svg>
+                        </div>
+                        <div class="rc-body">
+                            <div class="rc-title">Аналитика преступлений</div>
+                            <div class="rc-desc">Статистический анализ и ИИ-помощник прокурора</div>
+                        </div>
+                        <div class="rc-arrow">›</div>
+                    </div>
                 </div>
             </div>
-            <div class="report-card" id="report-card-av">
-                <div class="report-card-icon" style="background:rgba(52,152,219,0.2);color:#3498db;">
-                    <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm-1 7V3.5L18.5 9H13zM6 20V4h5v7h7v9H6z"/></svg>
-                </div>
-                <div class="report-card-body">
-                    <h3>Административные правонарушения</h3>
-                    <p>Список административных правонарушений</p>
-                    <span class="report-card-count" id="report-count-av">0 записей</span>
-                </div>
-            </div>
-            <div class="report-card" id="report-card-av-analytics">
-                <div class="report-card-icon" style="background:rgba(52,152,219,0.2);color:#3498db;">
-                    <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/></svg>
-                </div>
-                <div class="report-card-body">
-                    <h3>Аналитика административных правонарушений</h3>
-                    <p>Анализ административных правонарушений</p>
+
+            <div class="report-section">
+                <div class="report-section-label">Административные правонарушения</div>
+                <div class="report-cards-row">
+                    <div class="report-card" id="report-card-av">
+                        <div class="rc-icon rc-blue">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm-1 7V3.5L18.5 9H13zM6 20V4h5v7h7v9H6z"/></svg>
+                        </div>
+                        <div class="rc-body">
+                            <div class="rc-title">Реестр правонарушений</div>
+                            <div class="rc-desc">Список административных правонарушений</div>
+                            <div class="rc-count" id="report-count-av">0 записей</div>
+                        </div>
+                        <div class="rc-arrow">›</div>
+                    </div>
+                    <div class="report-card" id="report-card-av-analytics">
+                        <div class="rc-icon rc-blue">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/></svg>
+                        </div>
+                        <div class="rc-body">
+                            <div class="rc-title">Аналитика правонарушений</div>
+                            <div class="rc-desc">Статистический анализ административных правонарушений</div>
+                        </div>
+                        <div class="rc-arrow">›</div>
+                    </div>
                 </div>
             </div>
         </div>
