@@ -1540,6 +1540,7 @@
             if (typeof c.lat !== "number" || typeof c.lng !== "number") return;
             if (isNaN(c.lat) || isNaN(c.lng)) return;
             if (_isHiddenArticle(c.article)) return;
+            if (sidebarCrimeArticle && _extractNum(c.article) !== sidebarCrimeArticle) return;
 
             var marker = L.circleMarker([c.lat, c.lng], {
                 radius: 3.5,

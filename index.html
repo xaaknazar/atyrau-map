@@ -973,8 +973,8 @@
                 input.focus();
             }
         }
-        btn.addEventListener("click", tryLogin);
-        input.addEventListener("keydown", function(e) {
+        if (btn) btn.addEventListener("click", tryLogin);
+        if (input) input.addEventListener("keydown", function(e) {
             if (e.key === "Enter") tryLogin();
         });
     })();
