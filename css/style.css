@@ -409,7 +409,8 @@ body {
 /* PWA Install button */
 .pwa-install-btn {
     width: 100%;
-    padding: 12px;
+    padding: 11px 14px;
+    margin-top: 10px;
     background: rgba(52,152,219,0.12);
     border: 1px solid rgba(52,152,219,0.3);
     color: #5dade2;
