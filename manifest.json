@@ -3,6 +3,7 @@
     "short_name": "Карта Атырау",
     "description": "Мониторинг безопасности городской среды — Атырау қаласы прокуратурасының цифрлік картасы",
     "start_url": ".",
+    "scope": "/",
     "display": "standalone",
     "background_color": "#1a1a2e",
     "theme_color": "#16213e",
@@ -19,6 +20,26 @@
             "sizes": "512x512",
             "type": "image/png",
             "purpose": "any maskable"
+        }
+    ],
+    "shortcuts": [
+        {
+            "name": "Вход (Прокуратура / Акимат)",
+            "short_name": "Кіру",
+            "url": "/login",
+            "icons": [{"src": "images/icon-192x192.png", "sizes": "192x192"}]
+        },
+        {
+            "name": "Акимат — заявки",
+            "short_name": "Акимат",
+            "url": "/akimat",
+            "icons": [{"src": "images/icon-192x192.png", "sizes": "192x192"}]
+        },
+        {
+            "name": "ИИ-мониторинг мошенничества",
+            "short_name": "Insta",
+            "url": "/insta",
+            "icons": [{"src": "images/icon-192x192.png", "sizes": "192x192"}]
         }
     ]
 }
