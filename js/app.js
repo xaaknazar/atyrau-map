@@ -2152,31 +2152,24 @@
         });
     }
 
-    // ── XLSX Export ────────────────────────────────────────
-    function _escXml(s) { return String(s == null ? "" : s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
-    function _exportXlsx(headers, rows, filename) {
-        var xml = '<?xml version="1.0" encoding="UTF-8"?>\n' +
-            '<?mso-application progid="Excel.Sheet"?>\n' +
-            '<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"\n' +
-            ' xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet">\n' +
-            '<Styles><Style ss:ID="hdr"><Font ss:Bold="1"/><Interior ss:Color="#D9E1F2" ss:Pattern="Solid"/></Style></Styles>\n' +
-            '<Worksheet ss:Name="Data"><Table>\n';
-        xml += '<Row>';
-        headers.forEach(function (h) { xml += '<Cell ss:StyleID="hdr"><Data ss:Type="String">' + _escXml(h) + '</Data></Cell>'; });
-        xml += '</Row>\n';
+    // ── CSV Export ─────────────────────────────────────────
+    function _csvEscape(s) {
+        var v = String(s == null ? "" : s).replace(/\r?\n/g, " ");
+        if (v.indexOf(",") !== -1 || v.indexOf('"') !== -1 || v.indexOf(";") !== -1) {
+            return '"' + v.replace(/"/g, '""') + '"';
+        }
+        return v;
+    }
+    function _exportCsv(headers, rows, filename) {
+        var lines = [];
+        lines.push(headers.map(_csvEscape).join(","));
         rows.forEach(function (row) {
-            xml += '<Row>';
-            row.forEach(function (cell) {
-                var v = cell == null ? "" : String(cell);
-                var type = v && !isNaN(v) && v.trim() !== "" ? "Number" : "String";
-                xml += '<Cell><Data ss:Type="' + type + '">' + _escXml(v) + '</Data></Cell>';
-            });
-            xml += '</Row>\n';
+            lines.push(row.map(_csvEscape).join(","));
         });
-        xml += '</Table></Worksheet></Workbook>';
-        var blob = new Blob([xml], { type: 'application/vnd.ms-excel' });
+        var csv = "﻿" + lines.join("\r\n");
+        var blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
         var url = URL.createObjectURL(blob);
-        var a = document.createElement('a');
+        var a = document.createElement("a");
         a.href = url;
         a.download = filename;
         document.body.appendChild(a);
@@ -2193,7 +2186,7 @@
                     (c.street || "") + " " + (c.place || ""), c.placeType || "", c.isPublic ? "Да" : "Нет",
                     formatDateOnly(c.crimeDate) + " " + formatTimeOnly(c.crimeTime), c.description || ""];
         });
-        _exportXlsx(headers, rows, "ERDR_" + new Date().toISOString().slice(0, 10) + ".xls");
+        _exportCsv(headers, rows, "ERDR_" + new Date().toISOString().slice(0, 10) + ".csv");
     });
 
     // АП — экспорт списка
@@ -2204,7 +2197,7 @@
                     v.podrazdelenie || "", v.authorFio || "", v.place || "",
                     [v.lastName, v.firstName, v.patronymic].filter(Boolean).join(" "), v.fabula || ""];
         });
-        _exportXlsx(headers, rows, "Admin_violations_" + new Date().toISOString().slice(0, 10) + ".xls");
+        _exportCsv(headers, rows, "Admin_violations_" + new Date().toISOString().slice(0, 10) + ".csv");
     });
 
     // ЕРДР Аналитика — экспорт (статьи + зоны + лица)
@@ -2215,7 +2208,7 @@
         var rows = (a.byArticle || []).map(function (art) {
             return [art.label, art.count, a.total > 0 ? Math.round(art.count / a.total * 100) : 0];
         });
-        _exportXlsx(headers, rows, "ERDR_analytics_" + new Date().toISOString().slice(0, 10) + ".xls");
+        _exportCsv(headers, rows, "ERDR_analytics_" + new Date().toISOString().slice(0, 10) + ".csv");
     });
 
     // АП Аналитика — экспорт
@@ -2230,7 +2223,7 @@
         });
         var rows = Object.keys(arts).sort(function (a, b) { return arts[b] - arts[a]; })
             .map(function (n) { return ["ст. " + n, arts[n]]; });
-        _exportXlsx(headers, rows, "AV_analytics_" + new Date().toISOString().slice(0, 10) + ".xls");
+        _exportCsv(headers, rows, "AV_analytics_" + new Date().toISOString().slice(0, 10) + ".csv");
     });
 
     // ── Language switch ─────────────────────────────────────
