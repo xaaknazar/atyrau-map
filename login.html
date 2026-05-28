@@ -238,6 +238,13 @@
 
     <script src="js/i18n.js?v=3"></script>
     <script>
+        // Если уже залогинен — сразу редирект
+        (function () {
+            var role = localStorage.getItem("atyrau-auth-role");
+            if (role === "staff") { window.location.href = "/"; return; }
+            if (role === "akimat") { window.location.href = "/akimat"; return; }
+        })();
+
         (function () {
             var saved = localStorage.getItem("atyrau-map-lang") || "ru";
             setLanguage(saved);
