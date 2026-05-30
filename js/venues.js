@@ -1,106 +1,120 @@
-var venuePoints = [
-{name:"Beer House Bavarius",addr:"мкр. Авангард-4, 12а",lat:47.078440,lng:51.905663},
-{name:"Chechil Pub",addr:"ул. Бактыгерея Кулманова, 113б",lat:47.100918,lng:51.916843},
-{name:"Port GURYEV",addr:"пр-т Султана Сатпаева, 5г",lat:47.097561,lng:51.918451},
-{name:"Prospect Pub",addr:"пр-т Султана Бейбарыса, 69",lat:47.135064,lng:51.904225},
-{name:"City Brew",addr:"ул. Владимирского, 20",lat:47.086205,lng:51.911352},
-{name:"Bierhof",addr:"ул. Кайыргали Смагулова, 56а",lat:47.116120,lng:51.922150},
-{name:"Draft Bar & Grill",addr:"ул. Курмангазы, 9",lat:47.097632,lng:51.913541},
-{name:"Dublin Irish Pub",addr:"Студенческий пр-т, 2",lat:47.102140,lng:51.915230},
-{name:"BarBQ",addr:"ул. Сапара Карымсакова, 1б",lat:47.094812,lng:51.901840},
-{name:"Zavod Pub",addr:"ул. Гани Муратбаева, 30",lat:47.115631,lng:51.909240},
-{name:"Пинта Pub",addr:"ул. Бактыгерея Кулманова, 107",lat:47.100530,lng:51.917120},
-{name:"SULO Pub & Grill",addr:"ул. Абулхаир хана, 11",lat:47.114132,lng:51.906154},
-{name:"Celtic Dragon Resto Pub",addr:"ул. Малика Темірханова, 8",lat:47.112841,lng:51.914835},
-{name:"Pivnoy Bar Tsekh (Цех)",addr:"пр-т Мухтара Ауэзова, 76",lat:47.106935,lng:51.915011},
-{name:"English Pub",addr:"ул. Бактыгерея Кулманова, 105а",lat:47.100140,lng:51.917530},
-{name:"Harats Irish pub",addr:"пр-т Каныша Сатпаева, 2 (отель Marriott)",lat:47.094850,lng:51.918940},
-{name:"BARMA Atyrau",addr:"пр-т Азаттык, 2",lat:47.114705,lng:51.921319},
-{name:"Vokzal Gastrobar",addr:"ул. Курмангазы, 12",lat:47.098481,lng:51.914282},
-{name:"Smoky Loft Bar Urban",addr:"ул. Сапара Карымсакова, 1а",lat:47.094553,lng:51.901614},
-{name:"MARMELAD Lounge Bar",addr:"ул. Курмангазы, 40",lat:47.100224,lng:51.917192},
-{name:"Restobar Lift",addr:"Студенческий пр-т, 52",lat:47.104257,lng:51.914207},
-{name:"ZanZee Bar & Lounge",addr:"пр-т Исатая Тайманова, 48 (блок D)",lat:47.100912,lng:51.905641},
-{name:"The Tochka",addr:"ул. Отешкали Атамбаева, 5/2",lat:47.112108,lng:51.916120},
-{name:"LOFT BAR (Армада)",addr:"ул. Курмангазы, 12",lat:47.098481,lng:51.914282},
-{name:"Djos Lounge",addr:"ул. Достык, 5а",lat:47.098553,lng:51.933215},
-{name:"Be Cloud Asia",addr:"пр-т Исатая Тайманова, 42а (ЖК Altyn Zaman)",lat:47.100344,lng:51.907124},
-{name:"Bunin bar",addr:"ул. Бактыгерея Кулманова, 35 (ЖК Арман)",lat:47.093122,lng:51.919241},
-{name:"Lavanda with love",addr:"ул. Кайыргали Смагулова, 52в",lat:47.115814,lng:51.921310},
-{name:"MYATA Premium Lounge",addr:"ул. Абая, 1а",lat:47.102140,lng:51.909840},
-{name:"Zillion Lounge",addr:"ул. Абая, 2",lat:47.103011,lng:51.910245},
-{name:"Hookah Place Atyrau",addr:"ул. Кулманова, 154а",lat:47.105421,lng:51.912340},
-{name:"Shishka Lounge",addr:"ул. Абая, 10в",lat:47.103112,lng:51.908950},
-{name:"SOHO Lounge Bar",addr:"ул. Кайыргали Смагулова, 56",lat:47.116240,lng:51.921950},
-{name:"Cloud 9 Lounge",addr:"ул. Владимирского, 26",lat:47.085431,lng:51.912410},
-{name:"Prosecco Bar",addr:"пр-т Азаттык, 5",lat:47.115120,lng:51.922110},
-{name:"The GREY",addr:"ул. Шокана Валиханова, 19",lat:47.111240,lng:51.913520},
-{name:"SKY BAR",addr:"ул. Адмирала Владимирского, 45",lat:47.087110,lng:51.914560},
-{name:"Black and White Loft Bar",addr:"пр-т Азаттык, 97",lat:47.132140,lng:51.941250},
-{name:"Sunkar Bar",addr:"пр-т Абулхаир Хана, 9",lat:47.113850,lng:51.905430},
-{name:"The Tower",addr:"пр-т Азаттык, 48",lat:47.121120,lng:51.926410},
-{name:"Beef & Brut",addr:"ул. Бактыгерея Кулманова, 111",lat:47.100410,lng:51.916920},
-{name:"Harvey's Club",addr:"мкр. Авангард-2, 11б",lat:47.081120,lng:51.909540},
-{name:"A4 Cafe, Pub & Karaoke",addr:"ул. Абая, 21б",lat:47.104381,lng:51.910243},
-{name:"Janym SOUL",addr:"ул. Максима Горького, 102",lat:47.110534,lng:51.928731},
-{name:"Tooman Lounge",addr:"ул. Абая, 26а",lat:47.104612,lng:51.911132},
-{name:"Шишка-Premium Karaoke",addr:"ул. Мусы Баймуханова, 16/2",lat:47.127814,lng:51.915840},
-{name:"Bretzel Grill bar karaoke",addr:"Студенческий пр-т, 248",lat:47.108420,lng:51.912530},
-{name:"Foros Restaurant & Bar",addr:"ул. Бактыгерея Кулманова, 117/1",lat:47.101851,lng:51.916012},
-{name:"Караоке клуб Cash",addr:"ул. Бактыгерея Кулманова, 135а",lat:47.103410,lng:51.914210},
-{name:"BalyqBar",addr:"мкр. Авангард-2, 23а",lat:47.082410,lng:51.910120},
-{name:"Beerloga Караоке-бар",addr:"пр-т Султана Бейбарыса, 411",lat:47.142510,lng:51.898420},
-{name:"Три кота",addr:"пр-т Мухтара Ауэзова, 42",lat:47.102140,lng:51.918450},
-{name:"Eho nightbar",addr:"ул. Мусы Баймуханова, 59",lat:47.136120,lng:51.911240},
-{name:"Sound Bar Караоке",addr:"ул. Мусы Баймуханова, 59",lat:47.136150,lng:51.911260},
-{name:"Bonasera karaoke & restaurant",addr:"ул. Айтеке би, 75",lat:47.111420,lng:51.912150},
-{name:"Paulaner Brauhaus",addr:"пр-т Абулхайыр Хана, 69 (Блок 2)",lat:47.110530,lng:51.902140},
-{name:"Bungalow",addr:"ул. Курмангазы, 9А",lat:47.097510,lng:51.913120},
-{name:"Ginza Resto-Bar",addr:"ул. Бактыгерея Кулманова, 4",lat:47.091120,lng:51.921340},
-{name:"Talisman Cafe & Bar",addr:"ул. Каныша Сатпаева, 5Д",lat:47.097210,lng:51.918110},
-{name:"Pinta Grill & Bar",addr:"ул. Владимирского, 101",lat:47.084120,lng:51.915230},
-{name:"Hops Beer Bar",addr:"Студенческий проспект, 12",lat:47.103140,lng:51.914560},
-{name:"Baron Pub",addr:"пр-т Азаттык, 65",lat:47.124120,lng:51.929540},
-{name:"Old Town Bar",addr:"ул. Айтеке Би, 39",lat:47.112140,lng:51.919240},
-{name:"Guryev Craft Beer",addr:"ул. Владимирского, 24А",lat:47.085810,lng:51.912110},
-{name:"Dublin Pub (Филиал)",addr:"мкр. Алмагуль, 18",lat:47.121140,lng:51.901120},
-{name:"Local Pub & Grill",addr:"ул. Бактыгерея Кулманова, 55",lat:47.095410,lng:51.918120},
-{name:"Bier Haus (Новый)",addr:"ул. Каныша Сатпаева, 19",lat:47.096120,lng:51.921430},
-{name:"Top Smoke Premium",addr:"Студенческий проспект, 2Б",lat:47.102340,lng:51.915430},
-{name:"Grizzly Den Lounge",addr:"ул. Шокана Валиханова, 8Б",lat:47.111140,lng:51.914120},
-{name:"Amber Lounge Bar",addr:"пр-т Абулхайыр Хана, 42",lat:47.112140,lng:51.904250},
-{name:"Be-Cloud Lounge (Филиал)",addr:"ул. Курмангазы, 12",lat:47.098481,lng:51.914282},
-{name:"Myata Premium (Филиал 2)",addr:"пр-т Азаттык, 11",lat:47.116240,lng:51.923410},
-{name:"Chicha Lounge",addr:"ул. Сапара Карымсакова, 3",lat:47.094120,lng:51.902140},
-{name:"Hookah Place (Филиал Сатпаева)",addr:"пр-т Сатпаева, 2А",lat:47.095120,lng:51.918140},
-{name:"Insomnia Lounge Bar",addr:"ул. Малика Темірханова, 14",lat:47.113120,lng:51.915230},
-{name:"Oblako Lounge",addr:"ул. Абая, 15",lat:47.103410,lng:51.909120},
-{name:"Shisha Edition",addr:"ул. Абая, 26А",lat:47.104612,lng:51.911132},
-{name:"Level Lounge Bar",addr:"Студенческий проспект, 54",lat:47.104510,lng:51.914110},
-{name:"Zanzibar Lounge",addr:"ул. Бактыгерея Кулманова, 121",lat:47.102140,lng:51.915430},
-{name:"Atmosphere Lounge",addr:"ул. Кайыргали Смагулова, 48",lat:47.115120,lng:51.920140},
-{name:"High Loft Bar",addr:"пр-т Исатая Тайманова, 56",lat:47.102140,lng:51.904120},
-{name:"Smoke & Mirrors",addr:"ул. Владимирского, 18",lat:47.086430,lng:51.911110},
-{name:"Vozduh Lounge",addr:"ул. Гани Муратбаева, 24",lat:47.114810,lng:51.910120},
-{name:"Mята Go",addr:"пр-т Султана Бейбарыса, 55",lat:47.134120,lng:51.905140},
-{name:"Chillout Lounge Bar",addr:"ул. Достык, 3",lat:47.099120,lng:51.932140},
-{name:"The Roof Top Bar",addr:"пр-т Азаттык, 2Б",lat:47.114910,lng:51.921450},
-{name:"Artist Karaoke Bar",addr:"пр-т Султана Бейбарыса, 51",lat:47.133120,lng:51.906140},
-{name:"Le Roi Karaoke (Азаттык)",addr:"пр-т Азаттык, 65А",lat:47.124510,lng:51.930120},
-{name:"Le Roi Karaoke (Амандосова)",addr:"ул. Каныша Амандосова, 40",lat:47.119120,lng:51.889140},
-{name:"Arnau Karaoke & Resto",addr:"ул. Бактыгерея Кулманова, 1Б",lat:47.090120,lng:51.922410},
-{name:"Friends Resto-Bar & Karaoke",addr:"ул. Бактыгерея Кулманова, 131",lat:47.103120,lng:51.914810},
-{name:"Chicago Resto-Bar",addr:"ул. Курмангазы, 12",lat:47.098481,lng:51.914282},
-{name:"Armada Club",addr:"ул. Курмангазы, 12",lat:47.098481,lng:51.914282},
-{name:"Harlem Night Club",addr:"ул. Малика Темірханова, 10",lat:47.113110,lng:51.914950},
-{name:"Voice Karaoke Bar",addr:"ул. Абая, 12",lat:47.103430,lng:51.908540},
-{name:"Symphony Karaoke",addr:"пр-т Мухтара Ауэзова, 38",lat:47.101850,lng:51.918120},
-{name:"Black Pearl Club",addr:"пр-т Азаттык, 115",lat:47.133140,lng:51.942110},
-{name:"Solo Karaoke Lounge",addr:"ул. Мусы Баймуханова, 22",lat:47.129140,lng:51.915120},
-{name:"Status Resto-Bar",addr:"ул. Шокана Валиханова, 21",lat:47.111450,lng:51.913210},
-{name:"Bravissimo Karaoke",addr:"Студенческий проспект, 4",lat:47.102350,lng:51.915110},
-{name:"Retro Bar & Club",addr:"пр-т Мухтара Ауэзова, 44",lat:47.102430,lng:51.918650},
-{name:"Music Hall Karaoke",addr:"ул. Абулхаир Хана, 67",lat:47.111120,lng:51.902540},
-{name:"Opera Karaoke Lounge",addr:"ул. Кайыргали Смагулова, 54",lat:47.115950,lng:51.921650},
-{name:"DoReMi Karaoke Bar",addr:"мкр. Авангард-3, 42",lat:47.079140,lng:51.908120}
-];
+var venuePoints = [];
+var _venuesReady = false;
+var _venueCallbacks = [];
+
+function onVenuesReady(fn) {
+    if (_venuesReady) { fn(); return; }
+    _venueCallbacks.push(fn);
+}
+
+function _notifyVenuesReady() {
+    _venuesReady = true;
+    _venueCallbacks.forEach(function (fn) { fn(); });
+}
+
+var VENUES_SHEET_ID = "1W7J6c7rM3Skd5cJbv_95J3d5fM_6X5mBNQBvhxhLkBU";
+var VENUES_GID = "1361292445";
+var VENUES_CSV_URL = "https://docs.google.com/spreadsheets/d/" + VENUES_SHEET_ID +
+    "/export?format=csv&gid=" + VENUES_GID;
+var VENUES_CACHE_KEY = "atyrau-venues-cache-v1";
+
+function _parseVenuesCSV(text) {
+    var rows = [];
+    var lines = text.split(/\r?\n/);
+    for (var i = 0; i < lines.length; i++) {
+        var line = lines[i];
+        if (!line.trim()) continue;
+        // Simple CSV parse handling quoted fields with commas
+        var cells = [];
+        var cur = "", inQ = false;
+        for (var j = 0; j < line.length; j++) {
+            var ch = line[j];
+            if (ch === '"') {
+                if (inQ && line[j + 1] === '"') { cur += '"'; j++; }
+                else inQ = !inQ;
+            } else if (ch === "," && !inQ) {
+                cells.push(cur); cur = "";
+            } else {
+                cur += ch;
+            }
+        }
+        cells.push(cur);
+        rows.push(cells.map(function (c) { return c.trim(); }));
+    }
+    if (rows.length < 2) return [];
+
+    // Find columns (header row)
+    var h = rows[0].map(function (s) { return s.toLowerCase(); });
+    function findCol(parts) {
+        for (var k = 0; k < h.length; k++) {
+            var hit = true;
+            for (var p = 0; p < parts.length; p++) {
+                if (h[k].indexOf(parts[p]) === -1) { hit = false; break; }
+            }
+            if (hit) return k;
+        }
+        return -1;
+    }
+    var iName = findCol(["назван"]);
+    var iAddr = findCol(["адрес"]);
+    var iCoord = findCol(["координат"]);
+    var iLat = findCol(["широт"]);
+    if (iLat === -1) iLat = findCol(["lat"]);
+    var iLng = findCol(["долгот"]);
+    if (iLng === -1) iLng = findCol(["lng"]);
+    if (iLng === -1) iLng = findCol(["lon"]);
+    if (iName === -1) iName = 0;
+    if (iAddr === -1) iAddr = 1;
+
+    var items = [];
+    for (var r = 1; r < rows.length; r++) {
+        var c = rows[r];
+        var name = c[iName] || "";
+        if (!name) continue;
+        var addr = c[iAddr] || "";
+        var lat = null, lng = null;
+        if (iCoord !== -1 && c[iCoord]) {
+            var m = c[iCoord].match(/(-?\d+\.?\d*)\s*[,;]\s*(-?\d+\.?\d*)/);
+            if (m) { lat = parseFloat(m[1]); lng = parseFloat(m[2]); }
+        }
+        if ((lat === null || lng === null) && iLat !== -1 && iLng !== -1) {
+            lat = parseFloat((c[iLat] || "").replace(",", "."));
+            lng = parseFloat((c[iLng] || "").replace(",", "."));
+        }
+        if (isNaN(lat) || isNaN(lng) || lat === null || lng === null) continue;
+        if (lat < 40 || lat > 55 || lng < 45 || lng > 60) continue;
+        items.push({ name: name, addr: addr, lat: lat, lng: lng });
+    }
+    return items;
+}
+
+function loadVenues(onDone) {
+    var cacheLoaded = false;
+    try {
+        var cached = localStorage.getItem(VENUES_CACHE_KEY);
+        if (cached) {
+            venuePoints = JSON.parse(cached);
+            cacheLoaded = true;
+            console.log("[venues] Из кэша: " + venuePoints.length);
+            if (onDone) onDone();
+            _notifyVenuesReady();
+        }
+    } catch (e) {}
+
+    fetch(VENUES_CSV_URL)
+        .then(function (r) { return r.text(); })
+        .then(function (txt) {
+            var parsed = _parseVenuesCSV(txt);
+            if (parsed.length > 0) {
+                venuePoints = parsed;
+                try { localStorage.setItem(VENUES_CACHE_KEY, JSON.stringify(venuePoints)); } catch (e) {}
+                console.log("[venues] Загружено: " + venuePoints.length);
+                if (!_venuesReady) { if (onDone) onDone(); _notifyVenuesReady(); }
+                else if (onDone) onDone();
+            }
+        })
+        .catch(function (err) {
+            console.warn("[venues] Ошибка загрузки:", err);
+            if (!_venuesReady && !cacheLoaded) { _notifyVenuesReady(); }
+        });
+}

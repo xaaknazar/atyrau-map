@@ -2106,14 +2106,18 @@
             marker.bindPopup(
                 '<div style="min-width:160px;">' +
                 '<div style="font-weight:700;font-size:14px;color:#e91e63;margin-bottom:4px;">' + v.name + '</div>' +
-                '<div style="font-size:12px;color:#888;">' + v.addr + '</div>' +
+                '<div style="font-size:12px;color:#888;">' + (v.addr || "") + '</div>' +
                 '</div>', { maxWidth: 240 }
             );
             venueLayer.addLayer(marker);
         });
         console.log("[map] Заведений: " + venuePoints.length);
     }
-    buildVenueMarkers();
+    if (typeof loadVenues === "function") {
+        loadVenues(function () { buildVenueMarkers(); });
+    } else {
+        buildVenueMarkers();
+    }
 
     // ── Административные правонарушения на карте ───────────
     var avLayer = L.layerGroup();
