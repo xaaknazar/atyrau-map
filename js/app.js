@@ -839,6 +839,7 @@
         var erdrSet = {};
         filtered.forEach(function (c) { if (c.erdr) erdrSet[c.erdr] = true; });
         var filteredPeople = crimePeople.filter(function (p) { return erdrSet[p.erdr]; });
+        window._lastFilteredPeople = filteredPeople;
         var analysis = runFullAnalysis(filtered, filteredPeople);
 
         renderOverviewStats(analysis, filtered);
@@ -1016,8 +1017,11 @@
         }).join("");
         if (prev) sel.value = prev;
     }
+    function _getPeopleSource() {
+        return window._lastFilteredPeople || (typeof crimePeople !== "undefined" ? crimePeople : []);
+    }
     function _initPeopleFilters() {
-        var people = (typeof crimePeople !== "undefined") ? crimePeople : [];
+        var people = _getPeopleSource();
 
         // Обновляем селекты каждый раз — могут появиться новые значения
         _fillSelectKeep("an-people-gender-filter", _uniqValues(people, "gender"));
@@ -1053,7 +1057,7 @@
     }
 
     function _getFilteredPeople() {
-        var people = (typeof crimePeople !== "undefined") ? crimePeople : [];
+        var people = _getPeopleSource();
         if (!people.length) return [];
         var qEl = document.getElementById("an-people-search");
         var ageEl = document.getElementById("an-people-age-filter");
