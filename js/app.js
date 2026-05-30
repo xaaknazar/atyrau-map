@@ -1979,9 +1979,9 @@
         venuePoints.forEach(function (v) {
             var icon = L.divIcon({
                 className: "venue-marker-wrap",
-                html: '<div class="venue-marker">🍺</div>',
-                iconSize: [26, 26],
-                iconAnchor: [13, 13]
+                html: '<div class="venue-marker"></div>',
+                iconSize: [24, 24],
+                iconAnchor: [12, 12]
             });
             var marker = L.marker([v.lat, v.lng], { icon: icon });
             marker.bindTooltip(v.name, { direction: "top", offset: [0, -14], className: "marker-tooltip" });
