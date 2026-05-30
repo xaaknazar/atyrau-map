@@ -1074,6 +1074,8 @@
         var occ = oEl ? oEl.value : "";
 
         return people.filter(function (p) {
+            // Пропускаем лица без ФИО
+            if (!p.lastName && !p.firstName && !p.patronymic) return false;
             if (q) {
                 var fio = [p.lastName, p.firstName, p.patronymic].filter(Boolean).join(" ").toLowerCase();
                 if (fio.indexOf(q) === -1 && (!p.iin || p.iin.indexOf(q) === -1)) return false;
