@@ -1018,7 +1018,8 @@
         if (prev) sel.value = prev;
     }
     function _getPeopleSource() {
-        return window._lastFilteredPeople || (typeof crimePeople !== "undefined" ? crimePeople : []);
+        // Всегда полный список — независимо от периода преступлений
+        return (typeof crimePeople !== "undefined") ? crimePeople : [];
     }
     function _initPeopleFilters() {
         var people = _getPeopleSource();
