@@ -1024,6 +1024,7 @@
     }
     function _initPeopleFilters() {
         var people = _getPeopleSource();
+        console.log("[people-filter] _initPeopleFilters called, people.length =", people.length);
 
         // Обновляем селекты каждый раз — могут появиться новые значения
         _fillSelectKeep("an-people-gender-filter", _uniqValues(people, "gender"));
@@ -1095,10 +1096,17 @@
 
     function _renderFilteredPeople() {
         var list = _getFilteredPeople();
-        document.getElementById("an-people-count-val").textContent = list.length;
+        var countEl = document.getElementById("an-people-count-val");
         var container = document.getElementById("an-people-list");
+        if (!container || !countEl) return;
+        console.log("[people-filter] _renderFilteredPeople — filtered:", list.length, "source:", _getPeopleSource().length);
+        countEl.textContent = list.length;
         if (list.length === 0) {
-            container.innerHTML = '<div class="an-empty">По заданным фильтрам ничего не найдено</div>';
+            container.innerHTML = '<div class="an-empty">' +
+                (_getPeopleSource().length === 0
+                    ? "Данные о лицах ещё загружаются..."
+                    : "По заданным фильтрам ничего не найдено") +
+                '</div>';
             return;
         }
         container.innerHTML = list.slice(0, 200).map(function (p) {

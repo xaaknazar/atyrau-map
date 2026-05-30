@@ -44,8 +44,8 @@ var CRIMES_SHEET_CSV_URL =
     "2PACX-1vRdNcnBVsk8JV3lsjicAt9erR4jAmaq8Pj4AsC5eIcqGqR_q3OLkU2Eujn9eG99WEdzMUzA1OEHf7wE" +
     "/pub?gid=0&single=true&output=csv";
 
-var CRIMES_DATA_CACHE_KEY = "atyrau-crimes-data-cache";
-var PEOPLE_DATA_CACHE_KEY = "atyrau-people-data-cache";
+var CRIMES_DATA_CACHE_KEY = "atyrau-crimes-data-cache-v2";
+var PEOPLE_DATA_CACHE_KEY = "atyrau-people-data-cache-v2";
 
 // ══════════════════════════════════════════════════════════════
 //  Глобальные переменные
