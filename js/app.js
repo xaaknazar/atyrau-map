@@ -914,7 +914,125 @@
                     }, 100);
                 });
             });
+
+            // ── Экспорт кнопки в брифинге ──
+            assistantBody.querySelectorAll("[data-export]").forEach(function (btn) {
+                btn.addEventListener("click", function () {
+                    _handleBriefExport(this.getAttribute("data-export"), analysis);
+                });
+            });
+
+            // ── Поиск по лицам ──
+            var pSearch = document.getElementById("brief-people-search");
+            if (pSearch) {
+                pSearch.addEventListener("input", function () {
+                    var q = this.value.trim().toLowerCase();
+                    if (q.length < 2) return;
+                    var found = crimePeople.filter(function (p) {
+                        var fio = [p.lastName, p.firstName, p.patronymic].filter(Boolean).join(" ").toLowerCase();
+                        return fio.indexOf(q) !== -1 || (p.iin && p.iin.indexOf(q) !== -1);
+                    }).slice(0, 30);
+                    if (found.length > 0) _showPeopleResults(found);
+                });
+            }
         }
+    }
+
+    function _handleBriefExport(type, a) {
+        if (type === "articles") {
+            var h = ["#", "Статья", "Кол-во", "Доля %"];
+            var r = (a.byArticle || []).map(function (art, i) {
+                return [i + 1, art.label, art.count, a.total > 0 ? Math.round(art.count / a.total * 100) : 0];
+            });
+            _exportXlsx(h, r, "Articles_" + new Date().toISOString().slice(0, 10) + ".xlsx");
+        } else if (type === "geozones") {
+            var h2 = ["#", "Координаты", "Кол-во", "Осн. статья"];
+            var r2 = (a.byGeoZone || []).map(function (z, i) {
+                return [i + 1, z.coords, z.count, z.topArticle || ""];
+            });
+            _exportXlsx(h2, r2, "GeoZones_" + new Date().toISOString().slice(0, 10) + ".xlsx");
+        } else if (type === "hotzones") {
+            var h3 = ["#", "Lat", "Lng", "Кол-во", "Осн. статья", "Пиковый час", "Уровень"];
+            var zones = (a.problemZones || []).filter(function (z) { return z.count <= 50; });
+            var r3 = zones.map(function (z, i) {
+                return [i + 1, z.lat.toFixed(4), z.lng.toFixed(4), z.count, z.topArticle || "",
+                    typeof z.peakHour === "number" ? ("0" + z.peakHour).slice(-2) + ":00" : "", z.dangerLevel];
+            });
+            _exportXlsx(h3, r3, "HotZones_" + new Date().toISOString().slice(0, 10) + ".xlsx");
+        } else if (type === "people") {
+            var h4 = ["#", "ФИО", "Возраст", "Пол", "Национальность", "Образование", "Род занятий", "Статья", "ЕРДР"];
+            var r4 = crimePeople.map(function (p, i) {
+                return [i + 1, [p.lastName, p.firstName, p.patronymic].filter(Boolean).join(" "),
+                    p.age || "", p.gender || "", p.nationality || "", p.education || "",
+                    p.occupation || "", p.article || "", p.erdr || ""];
+            });
+            _exportXlsx(h4, r4, "People_" + new Date().toISOString().slice(0, 10) + ".xlsx");
+        } else if (type === "allpeople") {
+            _showPeopleResults(crimePeople.slice(0, 50));
+        } else if (type === "showallzones") {
+            var zones2 = (a.problemZones || []).filter(function (z) { return z.count <= 50; }).slice(0, 10);
+            hideAnalyticsPanel();
+            setTimeout(function () {
+                map.invalidateSize();
+                if (window._hotZoneCircles) window._hotZoneCircles.forEach(function (c) { map.removeLayer(c); });
+                window._hotZoneCircles = [];
+                var bounds = [];
+                zones2.forEach(function (z, i) {
+                    var c = L.circle([z.lat, z.lng], {
+                        radius: 500, color: '#e74c3c', fillColor: '#e74c3c',
+                        fillOpacity: 0.12, weight: 2, dashArray: '6,4'
+                    }).addTo(map);
+                    c.bindPopup('<strong>#' + (i + 1) + '</strong> — ' + z.count + ' случаев<br>' + z.lat.toFixed(4) + ', ' + z.lng.toFixed(4));
+                    window._hotZoneCircles.push(c);
+                    bounds.push([z.lat, z.lng]);
+                });
+                if (bounds.length > 0) map.fitBounds(bounds, { padding: [40, 40] });
+                setTimeout(function () {
+                    if (window._hotZoneCircles) window._hotZoneCircles.forEach(function (c2) { map.removeLayer(c2); });
+                    window._hotZoneCircles = [];
+                }, 60000);
+            }, 100);
+        }
+    }
+
+    function _showPeopleResults(people) {
+        var h = '<div class="minors-portrait-overlay" id="minors-portrait-overlay">' +
+            '<div class="minors-portrait-modal">' +
+            '<div class="minors-portrait-header">' +
+            '<h2>Лица (' + people.length + (people.length >= 50 ? '+' : '') + ')</h2>' +
+            '<button class="minors-portrait-close" id="minors-portrait-close">&times;</button>' +
+            '</div><div class="minors-portrait-list">';
+        people.forEach(function (p, i) {
+            var fio = [p.lastName, p.firstName, p.patronymic].filter(Boolean).join(" ");
+            var crime = crimeIncidents.find(function (c) { return c.erdr === p.erdr; });
+            h += '<div class="minor-card"><div class="minor-card-num">' + (i + 1) + '</div><div class="minor-card-body">';
+            if (fio) h += '<div style="font-weight:700;margin-bottom:4px;">' + fio + '</div>';
+            h += '<div class="cp-grid">';
+            if (p.age) h += '<div class="minor-row"><strong>Возраст:</strong> ' + p.age + '</div>';
+            if (p.gender) h += '<div class="minor-row"><strong>Пол:</strong> ' + p.gender + '</div>';
+            if (p.nationality) h += '<div class="minor-row"><strong>Национальность:</strong> ' + p.nationality + '</div>';
+            if (p.education) h += '<div class="minor-row"><strong>Образование:</strong> ' + p.education + '</div>';
+            if (p.occupation) h += '<div class="minor-row"><strong>Род занятий:</strong> ' + p.occupation + '</div>';
+            if (p.conviction) h += '<div class="minor-row"><strong>Судимость:</strong> ' + p.conviction + '</div>';
+            h += '</div>';
+            if (crime || p.article) {
+                h += '<div class="minor-crime">';
+                h += '<div class="minor-row"><strong>Статья:</strong> ' + (p.article || (crime && crime.article) || "") + '</div>';
+                h += '<div class="minor-row"><strong>ЕРДР:</strong> ' + (p.erdr || "") + '</div>';
+                h += '</div>';
+            }
+            h += '</div></div>';
+        });
+        h += '</div></div></div>';
+        var old = document.getElementById("minors-portrait-overlay");
+        if (old) old.remove();
+        document.body.insertAdjacentHTML("beforeend", h);
+        document.getElementById("minors-portrait-close").addEventListener("click", function () {
+            document.getElementById("minors-portrait-overlay").remove();
+        });
+        document.getElementById("minors-portrait-overlay").addEventListener("click", function (e) {
+            if (e.target === this) this.remove();
+        });
     }
 
     function renderOverviewStats(a, filtered) {

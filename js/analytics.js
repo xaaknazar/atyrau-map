@@ -856,7 +856,9 @@ function buildProsecutorBriefing(analysis, allCrimes, lang) {
         html += '<td class="muted">' + escH(streetText) + '</td>';
         html += '</tr>';
     });
-    html += '</tbody></table></div>';
+    html += '</tbody></table>';
+    html += '<button class="brief-export-btn" data-export="articles">📥 Excel</button>';
+    html += '</div>';
 
     // ── Топ аймақтар по координатам (радиус ~300м) ──────────────
     var topGeoZones = (analysis.byGeoZone || []).slice(0, 10);
@@ -881,7 +883,9 @@ function buildProsecutorBriefing(analysis, allCrimes, lang) {
         html += '<td><button class="an-zone-map-btn" data-lat="' + z.lat + '" data-lng="' + z.lng + '">📍</button></td>';
         html += '</tr>';
     });
-    html += '</tbody></table></div>';
+    html += '</tbody></table>';
+    html += '<button class="brief-export-btn" data-export="geozones">📥 Excel</button>';
+    html += '</div>';
 
     // ── Горячие зоны (радиус ~500м) ────────────────────────────
     var validZones = (analysis.problemZones || []).filter(function (z) { return z.count <= 50; });
@@ -903,6 +907,10 @@ function buildProsecutorBriefing(analysis, allCrimes, lang) {
             html += '</div>';
             html += '</div>';
         });
+        html += '<div style="display:flex;gap:8px;margin-top:12px;">';
+        html += '<button class="brief-export-btn" data-export="hotzones">📥 Excel</button>';
+        html += '<button class="brief-export-btn an-zone-map-btn" data-export="showallzones">📍 ' + tr("an_show_map", "Показать на карте") + '</button>';
+        html += '</div>';
         html += '</div>';
     }
 
@@ -956,6 +964,11 @@ function buildProsecutorBriefing(analysis, allCrimes, lang) {
         if (p.byGender && p.byGender[0]) html += '<div><strong>' + tr("brief_gender", "Преобл. пол") + ':</strong> ' + escH(p.byGender[0].label) + ' (' + p.byGender[0].count + ')</div>';
         if (p.byAge && p.byAge[0]) html += '<div><strong>' + tr("brief_age_group", "Возрастная группа") + ':</strong> ' + escH(p.byAge[0].label) + '</div>';
         if (p.byOccupation && p.byOccupation[0]) html += '<div><strong>' + tr("brief_occupation", "Род занятий") + ':</strong> ' + escH(p.byOccupation[0].label) + '</div>';
+        html += '</div>';
+        html += '<div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;">';
+        html += '<button class="brief-export-btn" data-export="people">📥 Excel</button>';
+        html += '<button class="brief-export-btn" data-export="allpeople">👤 ' + tr("brief_all_persons", "Все лица") + '</button>';
+        html += '<div class="brief-search-wrap"><input type="text" id="brief-people-search" class="brief-search-input" placeholder="' + tr("brief_search_person", "Поиск по ФИО...") + '" /></div>';
         html += '</div></div>';
     }
 

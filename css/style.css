@@ -247,6 +247,34 @@ body {
 .legend-article-select option { background: #16213e; color: #e0e6f0; }
 
 /* Export XLSX button */
+/* Brief section export/action buttons */
+.brief-export-btn {
+    padding: 6px 12px;
+    background: rgba(39,174,96,0.12);
+    border: 1px solid rgba(39,174,96,0.35);
+    border-radius: 6px;
+    color: #27ae60;
+    font-size: 11.5px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 8px;
+    transition: all 0.15s;
+}
+.brief-export-btn:hover { background: rgba(39,174,96,0.22); }
+.brief-search-wrap { flex: 1; min-width: 140px; }
+.brief-search-input {
+    width: 100%;
+    padding: 6px 10px;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 6px;
+    color: #e0e6f0;
+    font-size: 12px;
+    outline: none;
+}
+.brief-search-input:focus { border-color: rgba(52,152,219,0.5); }
+.brief-search-input::placeholder { color: #5a6a8a; }
+
 .export-xlsx-btn {
     padding: 5px 12px;
     background: rgba(39,174,96,0.15);
