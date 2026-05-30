@@ -1506,11 +1506,11 @@
         showCoverageOnHover: false,
         iconCreateFunction: function (cluster) {
             var count = cluster.getChildCount();
-            var size = count < 10 ? 26 : count < 50 ? 32 : 40;
+            var size = count < 10 ? 20 : count < 50 ? 26 : 32;
             return L.divIcon({
                 html: '<div style="background:rgba(231,76,60,0.85);width:' + size + 'px;height:' + size + 'px;' +
                     'border-radius:50%;display:flex;align-items:center;justify-content:center;' +
-                    'color:#fff;font-weight:700;font-size:12px;border:2px solid rgba(255,255,255,0.6);">' + count + '</div>',
+                    'color:#fff;font-weight:700;font-size:10px;border:2px solid rgba(255,255,255,0.6);">' + count + '</div>',
                 className: 'erdr-cluster',
                 iconSize: L.point(size, size)
             });
@@ -1896,9 +1896,9 @@
             var marker = L.marker([p.lat, p.lng], {
                 icon: L.icon({
                     iconUrl: "images/police-icon.png",
-                    iconSize: [36, 36],
-                    iconAnchor: [18, 18],
-                    popupAnchor: [0, -18]
+                    iconSize: [24, 24],
+                    iconAnchor: [12, 12],
+                    popupAnchor: [0, -12]
                 })
             });
 
