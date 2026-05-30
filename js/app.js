@@ -865,7 +865,6 @@
             renderBarChart("an-people-marital-chart", analysis.people.byMaritalStatus, "blue");
             renderBarChart("an-people-nationality-chart", analysis.people.byNationality.slice(0, 10), "green");
             _initPeopleFilters();
-            if (_peopleFiltersInit) _renderFilteredPeople();
         }
 
         // Store for AI
@@ -998,67 +997,76 @@
     }
 
     // ── People tab filters ──
-    var _peopleFiltersInit = false;
+    var _peopleListenersBound = false;
+    function _uniqValues(items, key) {
+        var set = {};
+        items.forEach(function (p) {
+            var v = (p[key] || "").trim();
+            if (v) set[v] = (set[v] || 0) + 1;
+        });
+        return Object.keys(set).sort(function (a, b) { return set[b] - set[a]; });
+    }
+    function _fillSelectKeep(id, vals) {
+        var sel = document.getElementById(id);
+        if (!sel) return;
+        var prev = sel.value;
+        var first = sel.options[0].outerHTML;
+        sel.innerHTML = first + vals.map(function (v) {
+            return '<option value="' + v.replace(/"/g, "&quot;") + '">' + v + '</option>';
+        }).join("");
+        if (prev) sel.value = prev;
+    }
     function _initPeopleFilters() {
-        if (_peopleFiltersInit) return;
-        _peopleFiltersInit = true;
+        var people = (typeof crimePeople !== "undefined") ? crimePeople : [];
 
-        function _uniq(items, key) {
-            var set = {};
-            items.forEach(function (p) {
-                var v = (p[key] || "").trim();
-                if (v) set[v] = (set[v] || 0) + 1;
+        // Обновляем селекты каждый раз — могут появиться новые значения
+        _fillSelectKeep("an-people-gender-filter", _uniqValues(people, "gender"));
+        _fillSelectKeep("an-people-edu-filter", _uniqValues(people, "education"));
+        _fillSelectKeep("an-people-occ-filter", _uniqValues(people, "occupation"));
+
+        // Слушатели вешаем один раз
+        if (!_peopleListenersBound) {
+            _peopleListenersBound = true;
+            ["an-people-search", "an-people-age-filter", "an-people-gender-filter",
+             "an-people-edu-filter", "an-people-occ-filter"].forEach(function (id) {
+                var el = document.getElementById(id);
+                if (!el) return;
+                var ev = el.tagName === "INPUT" ? "input" : "change";
+                el.addEventListener(ev, _renderFilteredPeople);
             });
-            return Object.keys(set).sort(function (a, b) { return set[b] - set[a]; });
-        }
-
-        function fillSelect(id, vals) {
-            var sel = document.getElementById(id);
-            if (!sel) return;
-            var first = sel.options[0].outerHTML;
-            sel.innerHTML = first + vals.map(function (v) {
-                return '<option value="' + v.replace(/"/g, "&quot;") + '">' + v + '</option>';
-            }).join("");
-        }
-
-        fillSelect("an-people-gender-filter", _uniq(crimePeople, "gender"));
-        fillSelect("an-people-edu-filter", _uniq(crimePeople, "education"));
-        fillSelect("an-people-occ-filter", _uniq(crimePeople, "occupation"));
-
-        ["an-people-search", "an-people-age-filter", "an-people-gender-filter",
-         "an-people-edu-filter", "an-people-occ-filter"].forEach(function (id) {
-            var el = document.getElementById(id);
-            if (!el) return;
-            var ev = el.tagName === "INPUT" ? "input" : "change";
-            el.addEventListener(ev, _renderFilteredPeople);
-        });
-
-        var exp = document.getElementById("an-people-export");
-        if (exp) exp.addEventListener("click", function () {
-            var filtered = _getFilteredPeople();
-            var h = ["#", "ФИО", "ИИН", "Возраст", "Пол", "Национальность", "Образование", "Род занятий", "Адрес", "Статья", "ЕРДР", "Судимость"];
-            var r = filtered.map(function (p, i) {
-                return [i + 1,
-                    [p.lastName, p.firstName, p.patronymic].filter(Boolean).join(" "),
-                    p.iin || "", p.age || "", p.gender || "", p.nationality || "",
-                    p.education || "", p.occupation || "",
-                    [p.addrCity, p.addrStreet, p.addrHouse].filter(Boolean).join(", "),
-                    p.article || "", p.erdr || "", p.conviction || ""];
+            var exp = document.getElementById("an-people-export");
+            if (exp) exp.addEventListener("click", function () {
+                var filtered = _getFilteredPeople();
+                var h = ["#", "ФИО", "ИИН", "Возраст", "Пол", "Национальность", "Образование", "Род занятий", "Адрес", "Статья", "ЕРДР", "Судимость"];
+                var r = filtered.map(function (p, i) {
+                    return [i + 1,
+                        [p.lastName, p.firstName, p.patronymic].filter(Boolean).join(" "),
+                        p.iin || "", p.age || "", p.gender || "", p.nationality || "",
+                        p.education || "", p.occupation || "",
+                        [p.addrCity, p.addrStreet, p.addrHouse].filter(Boolean).join(", "),
+                        p.article || "", p.erdr || "", p.conviction || ""];
+                });
+                _exportXlsx(h, r, "People_filtered_" + new Date().toISOString().slice(0, 10) + ".xlsx");
             });
-            _exportXlsx(h, r, "People_filtered_" + new Date().toISOString().slice(0, 10) + ".xlsx");
-        });
-
+        }
         _renderFilteredPeople();
     }
 
     function _getFilteredPeople() {
-        var q = (document.getElementById("an-people-search").value || "").trim().toLowerCase();
-        var age = document.getElementById("an-people-age-filter").value;
-        var gender = document.getElementById("an-people-gender-filter").value;
-        var edu = document.getElementById("an-people-edu-filter").value;
-        var occ = document.getElementById("an-people-occ-filter").value;
+        var people = (typeof crimePeople !== "undefined") ? crimePeople : [];
+        if (!people.length) return [];
+        var qEl = document.getElementById("an-people-search");
+        var ageEl = document.getElementById("an-people-age-filter");
+        var gEl = document.getElementById("an-people-gender-filter");
+        var eEl = document.getElementById("an-people-edu-filter");
+        var oEl = document.getElementById("an-people-occ-filter");
+        var q = qEl ? (qEl.value || "").trim().toLowerCase() : "";
+        var age = ageEl ? ageEl.value : "";
+        var gender = gEl ? gEl.value : "";
+        var edu = eEl ? eEl.value : "";
+        var occ = oEl ? oEl.value : "";
 
-        return crimePeople.filter(function (p) {
+        return people.filter(function (p) {
             if (q) {
                 var fio = [p.lastName, p.firstName, p.patronymic].filter(Boolean).join(" ").toLowerCase();
                 if (fio.indexOf(q) === -1 && (!p.iin || p.iin.indexOf(q) === -1)) return false;
