@@ -44,6 +44,11 @@ var CRIMES_SHEET_CSV_URL =
     "2PACX-1vRdNcnBVsk8JV3lsjicAt9erR4jAmaq8Pj4AsC5eIcqGqR_q3OLkU2Eujn9eG99WEdzMUzA1OEHf7wE" +
     "/pub?gid=0&single=true&output=csv";
 
+var PEOPLE_SHEET_ID = "1W7J6c7rM3Skd5cJbv_95J3d5fM_6X5mBNQBvhxhLkBU";
+var PEOPLE_GID = "187886123";
+var PEOPLE_CSV_URL = "https://docs.google.com/spreadsheets/d/" + PEOPLE_SHEET_ID +
+    "/export?format=csv&gid=" + PEOPLE_GID;
+
 var CRIMES_DATA_CACHE_KEY = "atyrau-crimes-data-cache-v2";
 var PEOPLE_DATA_CACHE_KEY = "atyrau-people-data-cache-v2";
 
@@ -604,16 +609,74 @@ function _tryLoadFromCache() {
 /**
  * Полная инициализация.
  */
+function _loadPeopleCSV(callback) {
+    console.log("[crimes] Загрузка людей из CSV...");
+    fetch(PEOPLE_CSV_URL)
+        .then(function (r) { return r.text(); })
+        .then(function (txt) {
+            var lines = txt.split(/\r?\n/);
+            if (lines.length < 2) { callback(); return; }
+            var headers = _parseCSVLine(lines[0]);
+            var people = [];
+            for (var i = 1; i < lines.length; i++) {
+                if (!lines[i].trim()) continue;
+                var cols = _parseCSVLine(lines[i]);
+                var row = {};
+                for (var j = 0; j < headers.length; j++) {
+                    row[headers[j]] = cols[j] || "";
+                }
+                var person = jsonRowToPerson(row, i - 1);
+                if (person && person.erdr) people.push(person);
+            }
+            if (people.length > 0) {
+                crimePeople = people;
+                _buildPeopleIndex();
+                _saveCrimesCache();
+                console.log("[crimes] Людей из CSV: " + crimePeople.length);
+            }
+            callback();
+        })
+        .catch(function (err) {
+            console.warn("[crimes] Ошибка загрузки людей CSV:", err);
+            callback();
+        });
+}
+
+function _parseCSVLine(line) {
+    var cells = [];
+    var cur = "", inQ = false;
+    for (var i = 0; i < line.length; i++) {
+        var ch = line[i];
+        if (ch === '"') {
+            if (inQ && line[i + 1] === '"') { cur += '"'; i++; }
+            else inQ = !inQ;
+        } else if (ch === "," && !inQ) {
+            cells.push(cur.trim()); cur = "";
+        } else {
+            cur += ch;
+        }
+    }
+    cells.push(cur.trim());
+    return cells;
+}
+
 function initCrimeData(onProgress, onDone) {
     loadCrimesFromSheet(function () {
         var withCoords = crimeIncidents.filter(function (c) {
             return typeof c.lat === "number" && !isNaN(c.lat);
         }).length;
         console.log("[crimes] С координатами: " + withCoords + " из " + crimeIncidents.length);
-
         _saveCrimesCache();
-        if (onDone) onDone();
-        _notifyCrimesReady();
+
+        if (crimePeople.length === 0) {
+            _loadPeopleCSV(function () {
+                if (onDone) onDone();
+                _notifyCrimesReady();
+            });
+        } else {
+            if (onDone) onDone();
+            _notifyCrimesReady();
+        }
     });
 }
 
