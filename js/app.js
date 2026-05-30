@@ -864,6 +864,8 @@
             renderBarChart("an-people-occupation-chart", analysis.people.byOccupation.slice(0, 15), "orange");
             renderBarChart("an-people-marital-chart", analysis.people.byMaritalStatus, "blue");
             renderBarChart("an-people-nationality-chart", analysis.people.byNationality.slice(0, 10), "green");
+            _initPeopleFilters();
+            if (_peopleFiltersInit) _renderFilteredPeople();
         }
 
         // Store for AI
@@ -993,6 +995,119 @@
                 }, 60000);
             }, 100);
         }
+    }
+
+    // ── People tab filters ──
+    var _peopleFiltersInit = false;
+    function _initPeopleFilters() {
+        if (_peopleFiltersInit) return;
+        _peopleFiltersInit = true;
+
+        function _uniq(items, key) {
+            var set = {};
+            items.forEach(function (p) {
+                var v = (p[key] || "").trim();
+                if (v) set[v] = (set[v] || 0) + 1;
+            });
+            return Object.keys(set).sort(function (a, b) { return set[b] - set[a]; });
+        }
+
+        function fillSelect(id, vals) {
+            var sel = document.getElementById(id);
+            if (!sel) return;
+            var first = sel.options[0].outerHTML;
+            sel.innerHTML = first + vals.map(function (v) {
+                return '<option value="' + v.replace(/"/g, "&quot;") + '">' + v + '</option>';
+            }).join("");
+        }
+
+        fillSelect("an-people-gender-filter", _uniq(crimePeople, "gender"));
+        fillSelect("an-people-edu-filter", _uniq(crimePeople, "education"));
+        fillSelect("an-people-occ-filter", _uniq(crimePeople, "occupation"));
+
+        ["an-people-search", "an-people-age-filter", "an-people-gender-filter",
+         "an-people-edu-filter", "an-people-occ-filter"].forEach(function (id) {
+            var el = document.getElementById(id);
+            if (!el) return;
+            var ev = el.tagName === "INPUT" ? "input" : "change";
+            el.addEventListener(ev, _renderFilteredPeople);
+        });
+
+        var exp = document.getElementById("an-people-export");
+        if (exp) exp.addEventListener("click", function () {
+            var filtered = _getFilteredPeople();
+            var h = ["#", "ФИО", "ИИН", "Возраст", "Пол", "Национальность", "Образование", "Род занятий", "Адрес", "Статья", "ЕРДР", "Судимость"];
+            var r = filtered.map(function (p, i) {
+                return [i + 1,
+                    [p.lastName, p.firstName, p.patronymic].filter(Boolean).join(" "),
+                    p.iin || "", p.age || "", p.gender || "", p.nationality || "",
+                    p.education || "", p.occupation || "",
+                    [p.addrCity, p.addrStreet, p.addrHouse].filter(Boolean).join(", "),
+                    p.article || "", p.erdr || "", p.conviction || ""];
+            });
+            _exportXlsx(h, r, "People_filtered_" + new Date().toISOString().slice(0, 10) + ".xlsx");
+        });
+
+        _renderFilteredPeople();
+    }
+
+    function _getFilteredPeople() {
+        var q = (document.getElementById("an-people-search").value || "").trim().toLowerCase();
+        var age = document.getElementById("an-people-age-filter").value;
+        var gender = document.getElementById("an-people-gender-filter").value;
+        var edu = document.getElementById("an-people-edu-filter").value;
+        var occ = document.getElementById("an-people-occ-filter").value;
+
+        return crimePeople.filter(function (p) {
+            if (q) {
+                var fio = [p.lastName, p.firstName, p.patronymic].filter(Boolean).join(" ").toLowerCase();
+                if (fio.indexOf(q) === -1 && (!p.iin || p.iin.indexOf(q) === -1)) return false;
+            }
+            if (age) {
+                var a = p.age || 0;
+                if (age === "minor" && a >= 18) return false;
+                if (age === "18-25" && (a < 18 || a > 25)) return false;
+                if (age === "26-35" && (a < 26 || a > 35)) return false;
+                if (age === "36-45" && (a < 36 || a > 45)) return false;
+                if (age === "46-55" && (a < 46 || a > 55)) return false;
+                if (age === "56+" && a < 56) return false;
+            }
+            if (gender && p.gender !== gender) return false;
+            if (edu && p.education !== edu) return false;
+            if (occ && p.occupation !== occ) return false;
+            return true;
+        });
+    }
+
+    function _renderFilteredPeople() {
+        var list = _getFilteredPeople();
+        document.getElementById("an-people-count-val").textContent = list.length;
+        var container = document.getElementById("an-people-list");
+        if (list.length === 0) {
+            container.innerHTML = '<div class="an-empty">По заданным фильтрам ничего не найдено</div>';
+            return;
+        }
+        container.innerHTML = list.slice(0, 200).map(function (p) {
+            var fio = [p.lastName, p.firstName, p.patronymic].filter(Boolean).join(" ") || "—";
+            var isMinor = p.age && p.age < 18;
+            var meta = [];
+            if (p.age) meta.push('<span><strong>' + p.age + '</strong> лет</span>');
+            if (p.gender) meta.push('<span>' + p.gender + '</span>');
+            if (p.article) meta.push('<span>📋 ' + p.article + '</span>');
+            if (p.occupation) meta.push('<span>💼 ' + p.occupation + '</span>');
+            return '<div class="an-people-card' + (isMinor ? ' minor' : '') + '" data-erdr="' + (p.erdr || "") + '">' +
+                '<div class="an-people-card-fio">' + fio + '</div>' +
+                '<div class="an-people-card-meta">' + meta.join("") + '</div>' +
+                '</div>';
+        }).join("") + (list.length > 200 ? '<div class="an-empty">Показаны первые 200. Уточните поиск.</div>' : "");
+
+        container.querySelectorAll(".an-people-card").forEach(function (card) {
+            card.addEventListener("click", function () {
+                var erdr = this.getAttribute("data-erdr");
+                var p = crimePeople.find(function (x) { return x.erdr === erdr; });
+                if (p) _showPeopleResults([p]);
+            });
+        });
     }
 
     function _showPeopleResults(people) {
@@ -1151,8 +1266,34 @@
 
     function renderBarChart(containerId, items, color) {
         var el = document.getElementById(containerId);
-        if (!el || items.length === 0) return;
-        el.innerHTML = _renderBars(items, color);
+        if (!el) return;
+        if (!items || items.length === 0) { el.innerHTML = '<div class="an-empty">Нет данных</div>'; return; }
+        el.innerHTML = _renderAnalyticsTable(items);
+    }
+
+    function _renderAnalyticsTable(items) {
+        var total = items.reduce(function (s, it) { return s + (it.count || 0); }, 0);
+        var max = items[0].count || 1;
+        var html = '<table class="an-table"><thead><tr>' +
+            '<th class="an-th-num">#</th>' +
+            '<th>Категория</th>' +
+            '<th class="an-th-count">Кол-во</th>' +
+            '<th class="an-th-share">Доля</th>' +
+            '<th class="an-th-bar">Распределение</th>' +
+            '</tr></thead><tbody>';
+        items.forEach(function (it, i) {
+            var pct = Math.round((it.count || 0) / max * 100);
+            var sharePct = total > 0 ? Math.round((it.count || 0) / total * 100) : 0;
+            html += '<tr>' +
+                '<td class="an-th-num">' + (i + 1) + '</td>' +
+                '<td>' + (it.label || "") + '</td>' +
+                '<td class="an-th-count"><strong>' + it.count + '</strong></td>' +
+                '<td class="an-th-share">' + sharePct + '%</td>' +
+                '<td class="an-th-bar"><div class="an-mini-bar"><div class="an-mini-bar-fill" style="width:' + pct + '%;"></div></div></td>' +
+                '</tr>';
+        });
+        html += '</tbody></table>';
+        return html;
     }
 
     function renderExpandableChart(containerId, allItems, initialCount, color) {

@@ -666,6 +666,36 @@
             <!-- Таб: Лица -->
             <div class="analytics-tab-content" data-tab="people">
                 <div class="an-stats-grid" id="an-people-stats"></div>
+
+                <!-- Search + filters -->
+                <div class="an-section">
+                    <h3>Список лиц с поиском и фильтрами</h3>
+                    <div class="an-people-toolbar">
+                        <input type="text" id="an-people-search" placeholder="🔍 Поиск по ФИО или ИИН..." />
+                        <select id="an-people-age-filter">
+                            <option value="">Возраст: все</option>
+                            <option value="minor">До 18 лет</option>
+                            <option value="18-25">18–25</option>
+                            <option value="26-35">26–35</option>
+                            <option value="36-45">36–45</option>
+                            <option value="46-55">46–55</option>
+                            <option value="56+">56+</option>
+                        </select>
+                        <select id="an-people-gender-filter">
+                            <option value="">Пол: все</option>
+                        </select>
+                        <select id="an-people-edu-filter">
+                            <option value="">Образование: все</option>
+                        </select>
+                        <select id="an-people-occ-filter">
+                            <option value="">Род занятий: все</option>
+                        </select>
+                        <button id="an-people-export" class="export-xlsx-btn">📥 Excel</button>
+                    </div>
+                    <div class="an-people-count">Показано: <strong id="an-people-count-val">0</strong></div>
+                    <div class="an-people-list" id="an-people-list"></div>
+                </div>
+
                 <div class="an-section">
                     <h3 data-i18n="an_h_age">По возрасту</h3>
                     <div id="an-people-age-chart" class="an-bar-chart"></div>
