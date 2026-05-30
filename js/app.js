@@ -1192,15 +1192,27 @@
     function renderPeopleStats(pa) {
         var el = document.getElementById("an-people-stats");
         if (!el) return;
+        // Используем полный список лиц с ФИО (не period-filtered)
+        var allPeople = (typeof crimePeople !== "undefined" ? crimePeople : [])
+            .filter(function (p) { return p.lastName || p.firstName || p.patronymic; });
+        var totalCount = allPeople.length;
+        var minorsCount = allPeople.filter(function (p) { return p.age && p.age < 18; }).length;
+        var nationalities = {}, educations = {}, occupations = {};
+        allPeople.forEach(function (p) {
+            if (p.nationality) nationalities[p.nationality] = 1;
+            if (p.education) educations[p.education] = 1;
+            if (p.occupation) occupations[p.occupation] = 1;
+        });
+
         el.innerHTML =
-            _statCard(pa.total, "Всего лиц") +
-            '<div class="an-stat-card an-stat-clickable" id="an-minors-card"><div class="an-stat-val">' + pa.minors + '</div><div class="an-stat-lbl">Несовершеннолетних ▸</div></div>' +
-            _statCard(pa.byNationality.length, "Национальностей") +
-            _statCard(pa.byEducation.length, "Уровней образ.") +
-            _statCard(pa.byOccupation.length, "Родов занятий");
+            _statCard(totalCount, "Всего лиц") +
+            '<div class="an-stat-card an-stat-clickable" id="an-minors-card"><div class="an-stat-val">' + minorsCount + '</div><div class="an-stat-lbl">Несовершеннолетних ▸</div></div>' +
+            _statCard(Object.keys(nationalities).length, "Национальностей") +
+            _statCard(Object.keys(educations).length, "Уровней образ.") +
+            _statCard(Object.keys(occupations).length, "Родов занятий");
 
         var minorsCard = document.getElementById("an-minors-card");
-        if (minorsCard && pa.minors > 0) {
+        if (minorsCard && minorsCount > 0) {
             minorsCard.addEventListener("click", function () {
                 showMinorsPortrait();
             });
