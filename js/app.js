@@ -404,6 +404,9 @@
             } else if (cat === "schools") {
                 if (this.checked) map.addLayer(schoolLayer);
                 else map.removeLayer(schoolLayer);
+            } else if (cat === "venues") {
+                if (this.checked) map.addLayer(venueLayer);
+                else map.removeLayer(venueLayer);
             } else {
                 if (this.checked) map.addLayer(layers[cat]);
                 else map.removeLayer(layers[cat]);
@@ -1967,6 +1970,33 @@
         updateStats();
     });
 
+    // ── Заведения (бары, пабы, лаунжи) на карте ────────────
+    var venueLayer = L.layerGroup();
+
+    function buildVenueMarkers() {
+        venueLayer.clearLayers();
+        if (typeof venuePoints === "undefined") return;
+        venuePoints.forEach(function (v) {
+            var icon = L.divIcon({
+                className: "venue-marker-wrap",
+                html: '<div class="venue-marker">🍺</div>',
+                iconSize: [26, 26],
+                iconAnchor: [13, 13]
+            });
+            var marker = L.marker([v.lat, v.lng], { icon: icon });
+            marker.bindTooltip(v.name, { direction: "top", offset: [0, -14], className: "marker-tooltip" });
+            marker.bindPopup(
+                '<div style="min-width:160px;">' +
+                '<div style="font-weight:700;font-size:14px;color:#e91e63;margin-bottom:4px;">' + v.name + '</div>' +
+                '<div style="font-size:12px;color:#888;">' + v.addr + '</div>' +
+                '</div>', { maxWidth: 240 }
+            );
+            venueLayer.addLayer(marker);
+        });
+        console.log("[map] Заведений: " + venuePoints.length);
+    }
+    buildVenueMarkers();
+
     // ── Административные правонарушения на карте ───────────
     var avLayer = L.layerGroup();
     if (isStaff) map.addLayer(avLayer);
@@ -2604,11 +2634,13 @@
             if (typeof cameraLayer !== "undefined" && map.hasLayer(cameraLayer)) map.removeLayer(cameraLayer);
             if (typeof policeLayer !== "undefined" && map.hasLayer(policeLayer)) map.removeLayer(policeLayer);
             if (typeof schoolLayer !== "undefined" && map.hasLayer(schoolLayer)) map.removeLayer(schoolLayer);
+            if (typeof venueLayer !== "undefined" && map.hasLayer(venueLayer)) map.removeLayer(venueLayer);
         } else if (!isStaff) {
             var crimeCb = document.querySelector('[data-filter="crime"]');
             if (!crimeCb || crimeCb.checked) map.addLayer(crimeErdrLayer);
             map.removeLayer(avLayer);
             map.removeLayer(cameraLayer);
+            if (typeof venueLayer !== "undefined" && map.hasLayer(venueLayer)) map.removeLayer(venueLayer);
         }
 
         // Перестроить попапы школ (разный контент для гостя/сотрудника)
