@@ -2640,7 +2640,6 @@
             if (!crimeCb || crimeCb.checked) map.addLayer(crimeErdrLayer);
             map.removeLayer(avLayer);
             map.removeLayer(cameraLayer);
-            if (typeof venueLayer !== "undefined" && map.hasLayer(venueLayer)) map.removeLayer(venueLayer);
         }
 
         // Перестроить попапы школ (разный контент для гостя/сотрудника)

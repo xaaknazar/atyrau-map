@@ -25,6 +25,7 @@ var I18N = {
         stat_schools: "Школы:",
         legend_police: "Участковые пункты",
         legend_schools: "Школы",
+        cat_venues: "Заведения",
         stat_total: "Всего точек:",
 
         // Footer
@@ -376,6 +377,7 @@ var I18N = {
         stat_schools: "Мектептер:",
         legend_police: "Учаскелік пункттер",
         legend_schools: "Мектептер",
+        cat_venues: "Мекемелер",
         stat_total: "Барлық нүктелер:",
 
         // Footer
