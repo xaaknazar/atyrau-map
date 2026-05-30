@@ -865,8 +865,9 @@
             renderBarChart("an-people-occupation-chart", analysis.people.byOccupation.slice(0, 15), "orange");
             renderBarChart("an-people-marital-chart", analysis.people.byMaritalStatus, "blue");
             renderBarChart("an-people-nationality-chart", analysis.people.byNationality.slice(0, 10), "green");
-            _initPeopleFilters();
         }
+        // Список лиц — всегда (независимо от analysis.people)
+        _initPeopleFilters();
 
         // Store for AI
         window._lastAnalysis = analysis;
@@ -1850,6 +1851,8 @@
         if (crimeLoadingEl) crimeLoadingEl.classList.add("hidden");
         buildCrimeMarkers();
         updateStats();
+        // Обновить список лиц если аналитика открыта
+        if (typeof _initPeopleFilters === "function") _initPeopleFilters();
     }
     initCrimeData(null, _onCrimeDataReady);
 
