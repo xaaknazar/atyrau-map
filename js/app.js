@@ -1247,9 +1247,13 @@
         var peopleSection = document.getElementById("an-people-section");
         if (totalCard && peopleSection) {
             totalCard.addEventListener("click", function () {
-                peopleSection.style.display = "";
-                _renderFilteredPeople();
-                peopleSection.scrollIntoView({ behavior: "smooth" });
+                if (peopleSection.style.display === "none") {
+                    peopleSection.style.display = "";
+                    _renderFilteredPeople();
+                    peopleSection.scrollIntoView({ behavior: "smooth" });
+                } else {
+                    peopleSection.style.display = "none";
+                }
             });
         }
         var closeListBtn = document.getElementById("an-people-close-list");
