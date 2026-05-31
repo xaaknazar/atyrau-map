@@ -49,6 +49,11 @@
                 <span class="legend-dot" style="background: #e74c3c;"></span>
                 <span data-i18n="cat_crime">Преступность</span>
             </label>
+            <div id="crime-article-filter" class="legend-article-filter staff-only" style="display:none;">
+                <select id="sidebar-crime-article" class="legend-article-select">
+                    <option value="" data-i18n="all_articles">Все статьи</option>
+                </select>
+            </div>
             <label class="legend-item">
                 <input type="checkbox" checked data-filter="blind-spots" />
                 <span class="legend-dot" style="background: #3498db;"></span>
@@ -67,12 +72,22 @@
             <label class="legend-item staff-only">
                 <input type="checkbox" checked data-filter="admin-violations" />
                 <span class="legend-dot" style="background: #e67e22;"></span>
-                <span>Адм. правонарушения</span>
+                <span data-i18n="cat_av">Адм. правонарушения</span>
             </label>
+            <div id="av-article-filter" class="legend-article-filter staff-only" style="display:none;">
+                <select id="sidebar-av-article" class="legend-article-select">
+                    <option value="" data-i18n="all_articles">Все статьи</option>
+                </select>
+            </div>
             <label class="legend-item staff-only">
                 <input type="checkbox" checked data-filter="cameras" />
                 <span class="legend-dot" style="background: #2ecc71;"></span>
                 <span>Камеры</span>
+            </label>
+            <label class="legend-item">
+                <input type="checkbox" data-filter="venues" />
+                <span class="legend-dot" style="background: #e91e63;"></span>
+                <span data-i18n="cat_venues">Заведения</span>
             </label>
             <label class="legend-item">
                 <input type="checkbox" checked data-filter="police" />
@@ -99,6 +114,7 @@
             </div>
             <span id="sidebar-period-hint" class="period-hint"></span>
         </div>
+
 
         <!-- Crime incidents (ЕРДР) — кнопка переключения на панель -->
         <div class="crime-incidents-section staff-only">
@@ -131,7 +147,7 @@
                 <span class="stat-value" id="count-cameras">0</span>
             </div>
             <div class="stat-row staff-only">
-                <span class="stat-label">Адм. правонарушения:</span>
+                <span class="stat-label" data-i18n="stat_av">Адм. правонарушения:</span>
                 <span class="stat-value" id="count-av">0</span>
             </div>
             <div class="stat-row">
@@ -154,7 +170,32 @@
 
         <!-- Citizen feedback button (only for guests) -->
         <div class="suggest-section guest-only">
-            <button id="suggest-btn" data-i18n="suggest_btn">Предложить точку</button>
+            <div class="guest-hero">
+                <div class="guest-hero-title" data-i18n="guest_hero_title">Қалаңыздағы мәселені хабарлаңыз</div>
+                <div class="guest-hero-sub" data-i18n="guest_hero_sub">Сообщите о проблеме в вашем городе</div>
+            </div>
+            <button id="suggest-btn" class="guest-suggest-btn" data-i18n="suggest_btn">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+                <span data-i18n="guest_report_btn">Сообщить о проблеме</span>
+            </button>
+            <div class="guest-categories">
+                <div class="guest-cat"><span class="legend-dot" style="background:#3498db"></span> <span data-i18n="guest_cat_blind">Слепые зоны (нет камер)</span></div>
+                <div class="guest-cat"><span class="legend-dot" style="background:#8e44ad"></span> <span data-i18n="guest_cat_abandoned">Заброшенные здания</span></div>
+                <div class="guest-cat"><span class="legend-dot" style="background:#f39c12"></span> <span data-i18n="guest_cat_unlit">Неосвещённые улицы</span></div>
+            </div>
+            <button id="pwa-install-btn" class="pwa-install-btn" style="display:none;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                <span data-i18n="guest_install">Установить приложение</span>
+            </button>
+        </div>
+
+        <!-- QR -->
+        <div class="guest-bottom guest-only">
+            <div class="guest-qr-section">
+                <div class="guest-qr-title" data-i18n="guest_share">Поделитесь</div>
+                <canvas id="guest-qr-canvas" width="120" height="120"></canvas>
+                <div class="guest-qr-hint">atyrau-map.vercel.app</div>
+            </div>
         </div>
 
         <!-- Prosecutor: monitoring panel (only for staff) -->
@@ -165,11 +206,6 @@
         <!-- Akimat: panel link (only for akimat) -->
         <div class="akimat-panel-section akimat-only">
             <a id="akimat-panel-btn" href="/akimat" data-i18n="akimat_panel_btn">Заявки жителей</a>
-        </div>
-
-        <!-- Admin toggle (only for staff) -->
-        <div class="admin-section staff-only">
-            <button id="admin-toggle-btn" data-i18n="admin_login">Вход для админа</button>
         </div>
 
         <!-- Staff logout (only for staff) -->
@@ -192,6 +228,9 @@
 
     <div id="map"></div>
 
+    <!-- Кнопка возврата в аналитику (при переходе на карту из аналитики) -->
+    <button id="back-to-analytics" class="back-to-analytics-btn hidden">← Назад в аналитику</button>
+
     <!-- Report selector -->
     <div id="report-selector" class="hidden">
         <div class="report-selector-header">
@@ -201,45 +240,68 @@
                 </svg>
                 <span>Назад к карте</span>
             </button>
-            <h2>Отчеты</h2>
         </div>
-        <div class="report-selector-cards">
-            <div class="report-card" id="report-card-erdr">
-                <div class="report-card-icon" style="background:rgba(231,76,60,0.2);color:#e74c3c;">
-                    <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm-1 7V3.5L18.5 9H13zM6 20V4h5v7h7v9H6z"/></svg>
-                </div>
-                <div class="report-card-body">
-                    <h3>Зарегистрированные правонарушения</h3>
-                    <p>ЕРДР — уголовные правонарушения</p>
-                    <span class="report-card-count" id="report-count-erdr">0 записей</span>
+        <div class="report-selector-body">
+            <div class="report-official-header">
+                <img src="images/placeholders/logos.jpeg" alt="" class="report-logo" />
+                <div>
+                    <div class="report-org">Атырау қаласы прокуратурасы</div>
+                    <div class="report-org-sub">Прокуратура города Атырау</div>
                 </div>
             </div>
-            <div class="report-card" id="report-card-erdr-analytics">
-                <div class="report-card-icon" style="background:rgba(231,76,60,0.2);color:#e74c3c;">
-                    <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/></svg>
-                </div>
-                <div class="report-card-body">
-                    <h3>Аналитика преступлений</h3>
-                    <p>Анализ зарегистрированных правонарушений</p>
+            <h2 class="report-main-title">Отчёты и аналитика</h2>
+
+            <div class="report-section">
+                <div class="report-section-label">Уголовные правонарушения (ЕРДР)</div>
+                <div class="report-cards-row">
+                    <div class="report-card" id="report-card-erdr">
+                        <div class="rc-icon rc-red">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm-1 7V3.5L18.5 9H13zM6 20V4h5v7h7v9H6z"/></svg>
+                        </div>
+                        <div class="rc-body">
+                            <div class="rc-title">Реестр правонарушений</div>
+                            <div class="rc-desc">Зарегистрированные уголовные правонарушения</div>
+                            <div class="rc-count" id="report-count-erdr">0 записей</div>
+                        </div>
+                        <div class="rc-arrow">›</div>
+                    </div>
+                    <div class="report-card" id="report-card-erdr-analytics">
+                        <div class="rc-icon rc-red">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/></svg>
+                        </div>
+                        <div class="rc-body">
+                            <div class="rc-title">Аналитика преступлений</div>
+                            <div class="rc-desc">Статистический анализ и ИИ-помощник прокурора</div>
+                        </div>
+                        <div class="rc-arrow">›</div>
+                    </div>
                 </div>
             </div>
-            <div class="report-card" id="report-card-av">
-                <div class="report-card-icon" style="background:rgba(52,152,219,0.2);color:#3498db;">
-                    <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm-1 7V3.5L18.5 9H13zM6 20V4h5v7h7v9H6z"/></svg>
-                </div>
-                <div class="report-card-body">
-                    <h3>Административные правонарушения</h3>
-                    <p>Список административных правонарушений</p>
-                    <span class="report-card-count" id="report-count-av">0 записей</span>
-                </div>
-            </div>
-            <div class="report-card" id="report-card-av-analytics">
-                <div class="report-card-icon" style="background:rgba(52,152,219,0.2);color:#3498db;">
-                    <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/></svg>
-                </div>
-                <div class="report-card-body">
-                    <h3>Аналитика административных правонарушений</h3>
-                    <p>Анализ административных правонарушений</p>
+
+            <div class="report-section">
+                <div class="report-section-label">Административные правонарушения</div>
+                <div class="report-cards-row">
+                    <div class="report-card" id="report-card-av">
+                        <div class="rc-icon rc-blue">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm-1 7V3.5L18.5 9H13zM6 20V4h5v7h7v9H6z"/></svg>
+                        </div>
+                        <div class="rc-body">
+                            <div class="rc-title">Реестр правонарушений</div>
+                            <div class="rc-desc">Список административных правонарушений</div>
+                            <div class="rc-count" id="report-count-av">0 записей</div>
+                        </div>
+                        <div class="rc-arrow">›</div>
+                    </div>
+                    <div class="report-card" id="report-card-av-analytics">
+                        <div class="rc-icon rc-blue">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/></svg>
+                        </div>
+                        <div class="rc-body">
+                            <div class="rc-title">Аналитика правонарушений</div>
+                            <div class="rc-desc">Статистический анализ административных правонарушений</div>
+                        </div>
+                        <div class="rc-arrow">›</div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -307,7 +369,7 @@
                     <div class="crime-filter-group-inline">
                         <label>Статья:</label>
                         <select id="crime-filter-article" class="crime-select">
-                            <option value="">Все статьи</option>
+                            <option value="" data-i18n="all_articles">Все статьи</option>
                         </select>
                     </div>
                     <!-- Орган -->
@@ -346,6 +408,7 @@
             <!-- Показано записей -->
             <div class="crime-panel-results-bar">
                 <span>Показано: <strong id="crime-panel-count-value">0</strong></span>
+                <button id="crime-export-xlsx" class="export-xlsx-btn">📥 Выгрузить</button>
                 <button id="crime-reset-filters" class="crime-reset-btn">Сбросить фильтры</button>
             </div>
         </div>
@@ -410,7 +473,7 @@
                 <div class="crime-filter-row">
                     <div class="crime-filter-group-inline">
                         <label>Статья:</label>
-                        <select id="av-filter-article" class="crime-select"><option value="">Все статьи</option></select>
+                        <select id="av-filter-article" class="crime-select"><option value="" data-i18n="all_articles">Все статьи</option></select>
                     </div>
                     <div class="crime-filter-group-inline">
                         <label>Подразделение:</label>
@@ -431,6 +494,7 @@
 
             <div class="crime-panel-results-bar">
                 <span>Показано: <strong id="av-count-value">0</strong></span>
+                <button id="av-export-xlsx" class="export-xlsx-btn">📥 Выгрузить</button>
                 <button id="av-reset-filters" class="crime-reset-btn">Сбросить фильтры</button>
             </div>
         </div>
@@ -449,6 +513,7 @@
                     <span>Назад</span>
                 </button>
                 <h2>Аналитика административных правонарушений</h2>
+                <button id="av-analytics-export-xlsx" class="export-xlsx-btn">📥 Выгрузить</button>
             </div>
             <div class="analytics-period-row">
                 <span class="analytics-period-label">Период:</span>
@@ -504,16 +569,17 @@
                     </svg>
                     <span>Назад к карте</span>
                 </button>
-                <h2>Аналитика преступлений</h2>
+                <h2 data-i18n="an_title">Аналитика преступлений</h2>
+                <button id="crime-analytics-export-xlsx" class="export-xlsx-btn">📥 Выгрузить</button>
             </div>
             <!-- Период -->
             <div class="analytics-period-row">
-                <span class="analytics-period-label">Период:</span>
+                <span class="analytics-period-label" data-i18n="an_period">Период:</span>
                 <div class="crime-period-buttons">
-                    <button class="an-period-btn active" data-period="all">Все</button>
-                    <button class="an-period-btn" data-period="month">Месяц</button>
-                    <button class="an-period-btn" data-period="week">Неделя</button>
-                    <button class="an-period-btn" data-period="day">День</button>
+                    <button class="an-period-btn active" data-period="all" data-i18n="an_all">Все</button>
+                    <button class="an-period-btn" data-period="month" data-i18n="an_month">Месяц</button>
+                    <button class="an-period-btn" data-period="week" data-i18n="an_week">Неделя</button>
+                    <button class="an-period-btn" data-period="day" data-i18n="an_day">День</button>
                 </div>
                 <span id="analytics-period-hint" class="period-hint"></span>
             </div>
@@ -522,7 +588,7 @@
                 <button class="analytics-tab active" data-tab="assistant" data-i18n="an_tab_assistant">ИИ Помощник</button>
                 <button class="analytics-tab" data-tab="overview" data-i18n="an_tab_overview">Обзор</button>
                 <button class="analytics-tab" data-tab="time" data-i18n="an_tab_time">Время</button>
-                <button class="analytics-tab" data-tab="places" data-i18n="an_tab_places">Улицы</button>
+                <button class="analytics-tab" data-tab="places" data-i18n="an_tab_places">Районы</button>
                 <button class="analytics-tab" data-tab="people" data-i18n="an_tab_people">Лица</button>
                 <button class="analytics-tab" data-tab="zones" data-i18n="an_tab_zones">Зоны</button>
                 <button class="analytics-tab" data-tab="ai" data-i18n="an_tab_ai">AI-анализ</button>
@@ -554,23 +620,23 @@
             <div class="analytics-tab-content" data-tab="overview">
                 <div class="an-stats-grid" id="an-overview-stats"></div>
                 <div class="an-section">
-                    <h3>Топ статьи</h3>
+                    <h3 data-i18n="an_h_articles">Топ статьи</h3>
                     <div id="an-articles-chart" class="an-bar-chart"></div>
                 </div>
                 <div class="an-section">
-                    <h3>По месяцам (тренд)</h3>
+                    <h3 data-i18n="an_h_months">По месяцам (тренд)</h3>
                     <div id="an-months-chart" class="an-bar-chart"></div>
                 </div>
                 <div class="an-section">
-                    <h3>По органам регистрации</h3>
+                    <h3 data-i18n="an_h_organs">По органам регистрации</h3>
                     <div id="an-organs-chart" class="an-bar-chart"></div>
                 </div>
                 <div class="an-section">
-                    <h3>Способ совершения</h3>
+                    <h3 data-i18n="an_h_method">Способ совершения</h3>
                     <div id="an-method-chart" class="an-bar-chart"></div>
                 </div>
                 <div class="an-section">
-                    <h3>Тип места совершения</h3>
+                    <h3 data-i18n="an_h_place">Тип места совершения</h3>
                     <div id="an-place-chart" class="an-bar-chart"></div>
                 </div>
             </div>
@@ -578,16 +644,16 @@
             <!-- Таб: Время -->
             <div class="analytics-tab-content" data-tab="time">
                 <div class="an-section">
-                    <h3>По часам суток</h3>
-                    <p class="an-hint">Когда совершаются преступления</p>
+                    <h3 data-i18n="an_h_hours">По часам суток</h3>
+                    <p class="an-hint" data-i18n="an_hint_hours">Когда совершаются преступления</p>
                     <div id="an-hours-chart" class="an-bar-chart an-hours"></div>
                 </div>
                 <div class="an-section">
-                    <h3>По дням недели</h3>
+                    <h3 data-i18n="an_h_days">По дням недели</h3>
                     <div id="an-days-chart" class="an-bar-chart"></div>
                 </div>
                 <div class="an-section">
-                    <h3>Опасное время</h3>
+                    <h3 data-i18n="an_h_danger">Опасное время</h3>
                     <div id="an-danger-times" class="an-insight-cards"></div>
                 </div>
             </div>
@@ -595,7 +661,7 @@
             <!-- Таб: Места -->
             <div class="analytics-tab-content" data-tab="places">
                 <div class="an-section">
-                    <h3>Топ улиц по преступлениям</h3>
+                    <h3>Топ аймақтар бойынша қылмыс (координаталар)</h3>
                     <div id="an-streets-chart" class="an-bar-chart"></div>
                 </div>
             </div>
@@ -603,28 +669,61 @@
             <!-- Таб: Лица -->
             <div class="analytics-tab-content" data-tab="people">
                 <div class="an-stats-grid" id="an-people-stats"></div>
+
+                <!-- Список лиц (скрыт, появляется по клику на "Всего лиц") -->
+                <div id="an-people-section" class="an-section" style="display:none;">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+                        <h3>Список лиц</h3>
+                        <button id="an-people-close-list" class="crime-reset-btn">Скрыть список</button>
+                    </div>
+                    <div class="an-people-toolbar">
+                        <input type="text" id="an-people-search" placeholder="🔍 Поиск по ФИО или ИИН..." />
+                        <select id="an-people-age-filter">
+                            <option value="">Возраст: все</option>
+                            <option value="minor">До 18 лет</option>
+                            <option value="18-25">18–25</option>
+                            <option value="26-35">26–35</option>
+                            <option value="36-45">36–45</option>
+                            <option value="46-55">46–55</option>
+                            <option value="56+">56+</option>
+                        </select>
+                        <select id="an-people-gender-filter">
+                            <option value="">Пол: все</option>
+                        </select>
+                        <select id="an-people-edu-filter">
+                            <option value="">Образование: все</option>
+                        </select>
+                        <select id="an-people-occ-filter">
+                            <option value="">Род занятий: все</option>
+                        </select>
+                        <button id="an-people-export" class="export-xlsx-btn">📥 Excel</button>
+                    </div>
+                    <div class="an-people-count">Показано: <strong id="an-people-count-val">0</strong></div>
+                    <div class="an-people-list" id="an-people-list"></div>
+                </div>
+
                 <div class="an-section">
-                    <h3>По возрасту</h3>
+                    <h3 data-i18n="an_h_age">По возрасту</h3>
                     <div id="an-people-age-chart" class="an-bar-chart"></div>
                 </div>
                 <div class="an-section">
-                    <h3>По полу</h3>
+                    <h3 data-i18n="an_h_gender">По полу</h3>
                     <div id="an-people-gender-chart" class="an-bar-chart"></div>
                 </div>
                 <div class="an-section">
-                    <h3>По образованию</h3>
+                    <h3 data-i18n="an_h_edu">По образованию</h3>
                     <div id="an-people-education-chart" class="an-bar-chart"></div>
                 </div>
                 <div class="an-section">
-                    <h3>По роду занятий</h3>
+                    <h3 data-i18n="an_h_occup">По роду занятий</h3>
                     <div id="an-people-occupation-chart" class="an-bar-chart"></div>
                 </div>
                 <div class="an-section">
-                    <h3>По семейному положению</h3>
+                    <h3 data-i18n="an_h_marital">По семейному положению</h3>
                     <div id="an-people-marital-chart" class="an-bar-chart"></div>
                 </div>
                 <div class="an-section">
-                    <h3>По национальности</h3>
+                    <h3 data-i18n="an_h_nation">По национальности</h3>
                     <div id="an-people-nationality-chart" class="an-bar-chart"></div>
                 </div>
             </div>
@@ -632,23 +731,23 @@
             <!-- Таб: Зоны -->
             <div class="analytics-tab-content" data-tab="zones">
                 <div class="an-section">
-                    <h3>Проблемные зоны на карте</h3>
-                    <p class="an-hint">Зоны с наибольшей концентрацией преступлений (радиус ~500м)</p>
-                    <button id="an-show-zones-on-map" class="an-action-btn">Показать на карте</button>
+                    <h3 data-i18n="an_h_zones">Проблемные зоны на карте</h3>
+                    <p class="an-hint" data-i18n="an_hint_zones">Зоны с наибольшей концентрацией преступлений (радиус ~500м)</p>
+                    <button id="an-show-zones-on-map" class="an-action-btn" data-i18n="an_show_map">Показать на карте</button>
                 </div>
                 <div id="an-zones-list" class="an-zones-list"></div>
             </div>
 
-            <!-- Таб: AI-анализ -->
+            <!-- Таб: AI-талдау -->
             <div class="analytics-tab-content" data-tab="ai">
                 <div class="an-section an-ai-section">
-                    <h3>AI-анализ преступности</h3>
-                    <p class="an-hint">ИИ проанализирует все данные о преступлениях и подготовит аналитический отчёт с причинами, прогнозами и конкретными рекомендациями для прокуратуры</p>
+                    <h3 data-i18n="an_h_ai">AI-анализ преступности</h3>
+                    <p class="an-hint" data-i18n="an_hint_ai">ИИ проанализирует все данные и подготовит аналитический отчёт с причинами, прогнозами и рекомендациями</p>
                     <div class="an-ai-key-row">
                         <input type="password" id="an-ai-key" placeholder="OpenAI API ключ (sk-...)" class="an-ai-input" />
-                        <button id="an-ai-run" class="an-action-btn">Запустить анализ</button>
+                        <button id="an-ai-run" class="an-action-btn" data-i18n="an_ai_run">Запустить анализ</button>
                     </div>
-                    <div id="an-ai-status" class="an-ai-status hidden">Анализ выполняется...</div>
+                    <div id="an-ai-status" class="an-ai-status hidden" data-i18n="an_ai_status">Анализ выполняется...</div>
                     <div id="an-ai-result" class="an-ai-result"></div>
                 </div>
             </div>
@@ -818,6 +917,42 @@
         </div>
     </div>
 
+    <!-- Citizen instruction modal before reporting -->
+    <div id="suggest-intro-overlay" class="hidden">
+        <div id="suggest-intro-modal">
+            <button id="suggest-intro-close" aria-label="Закрыть">&times;</button>
+            <div class="suggest-intro-icon">📍</div>
+            <h2 data-i18n="suggest_intro_title">Как сообщить о проблеме?</h2>
+            <div class="suggest-intro-steps">
+                <div class="suggest-intro-step">
+                    <span class="si-num">1</span>
+                    <div>
+                        <strong data-i18n="suggest_intro_step1">Укажите место на карте</strong>
+                        <p data-i18n="suggest_intro_step1_desc">Нажмите на точку на карте, где находится проблема</p>
+                    </div>
+                </div>
+                <div class="suggest-intro-step">
+                    <span class="si-num">2</span>
+                    <div>
+                        <strong data-i18n="suggest_intro_step2">Выберите тип проблемы</strong>
+                        <p data-i18n="suggest_intro_step2_desc">Слепая зона (нет камеры), заброшенное здание или неосвещённая улица</p>
+                    </div>
+                </div>
+                <div class="suggest-intro-step">
+                    <span class="si-num">3</span>
+                    <div>
+                        <strong data-i18n="suggest_intro_step3">Приложите фото</strong>
+                        <p data-i18n="suggest_intro_step3_desc">Сфотографируйте проблему — это ускорит решение</p>
+                    </div>
+                </div>
+            </div>
+            <div class="suggest-intro-warning" data-i18n="suggest_intro_warning">
+                Пожалуйста, сообщайте только о реальных проблемах. Ложные заявки замедляют работу служб и могут повлечь ответственность.
+            </div>
+            <button id="suggest-intro-start" class="suggest-intro-start-btn" data-i18n="suggest_intro_start">Указать место на карте</button>
+        </div>
+    </div>
+
     <!-- Citizen suggestion form modal -->
     <div id="suggest-overlay" class="hidden">
         <div id="suggest-modal">
@@ -962,8 +1097,8 @@
                 input.focus();
             }
         }
-        btn.addEventListener("click", tryLogin);
-        input.addEventListener("keydown", function(e) {
+        if (btn) btn.addEventListener("click", tryLogin);
+        if (input) input.addEventListener("keydown", function(e) {
             if (e.key === "Enter") tryLogin();
         });
     })();
@@ -971,15 +1106,90 @@
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
     <script src="js/firebase-config.js?v=2"></script>
-    <script src="js/i18n.js?v=4"></script>
+    <script src="js/i18n.js?v=5"></script>
     <script src="js/photos.js?v=2"></script>
-    <script src="js/crimes.js?v=2"></script>
+    <script src="js/crimes.js?v=3"></script>
     <script src="js/cameras.js?v=2"></script>
     <script src="js/police.js?v=2"></script>
     <script src="js/admin-violations.js?v=2"></script>
     <script src="js/schools.js?v=1"></script>
-    <script src="js/analytics.js?v=4"></script>
+    <script src="js/venues.js?v=2"></script>
+    <script src="js/analytics.js?v=5"></script>
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.mini.min.js"></script>
     <script src="js/data.js?v=2"></script>
-    <script src="js/app.js?v=10"></script>
+    <script src="js/app.js?v=11"></script>
+    <!-- QR code generator (lightweight) -->
+    <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
+    <script>
+    (function () {
+        var c = document.getElementById("guest-qr-canvas");
+        if (!c || typeof qrcode === "undefined") return;
+        var qr = qrcode(0, "M");
+        qr.addData("https://atyrau-map.vercel.app");
+        qr.make();
+        var ctx = c.getContext("2d");
+        var size = c.width;
+        var cells = qr.getModuleCount();
+        var cellSize = size / cells;
+        ctx.fillStyle = "#fff";
+        ctx.fillRect(0, 0, size, size);
+        ctx.fillStyle = "#16213e";
+        for (var r = 0; r < cells; r++) {
+            for (var col = 0; col < cells; col++) {
+                if (qr.isDark(r, col)) {
+                    ctx.fillRect(col * cellSize, r * cellSize, cellSize + 0.5, cellSize + 0.5);
+                }
+            }
+        }
+    })();
+    </script>
+    <!-- Service Worker registration -->
+    <script>
+    if ("serviceWorker" in navigator) {
+        navigator.serviceWorker.register("/sw.js").catch(function () {});
+    }
+    </script>
+    <!-- PWA install prompt -->
+    <script>
+    (function () {
+        var deferredPrompt = null;
+        var btn = document.getElementById("pwa-install-btn");
+        if (!btn) return;
+
+        var isIos = /iphone|ipad|ipod/i.test(navigator.userAgent);
+        var isStandalone = window.matchMedia("(display-mode: standalone)").matches || navigator.standalone;
+        var isAndroid = /android/i.test(navigator.userAgent);
+
+        if (isStandalone) return;
+
+        window.addEventListener("beforeinstallprompt", function (e) {
+            e.preventDefault();
+            deferredPrompt = e;
+            btn.style.display = "";
+        });
+
+        if (isIos || isAndroid) btn.style.display = "";
+
+        btn.addEventListener("click", function () {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then(function () { deferredPrompt = null; btn.style.display = "none"; });
+            } else if (isIos) {
+                var d = document.createElement("div");
+                d.className = "pwa-ios-hint";
+                d.innerHTML = '<div class="pwa-ios-card">' +
+                    '<b>Safari-де орнату / Установить в Safari:</b><br><br>' +
+                    '1. Төменде ⬆️ «Бөлісу» батырмасын басыңыз<br>' +
+                    '&nbsp;&nbsp;&nbsp;&nbsp;Нажмите ⬆️ «Поделиться» внизу<br><br>' +
+                    '2. «Басты экранға қосу» таңдаңыз<br>' +
+                    '&nbsp;&nbsp;&nbsp;&nbsp;Выберите «На экран Домой»<br><br>' +
+                    '<button onclick="this.parentNode.parentNode.remove()">OK</button></div>';
+                document.body.appendChild(d);
+            }
+        });
+
+        window.addEventListener("appinstalled", function () { btn.style.display = "none"; });
+    })();
+    </script>
 </body>
 </html>

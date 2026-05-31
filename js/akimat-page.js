@@ -106,6 +106,8 @@
     var panelBody = document.getElementById("akimat-panel-body");
     var acceptOverlay = document.getElementById("akimat-accept-overlay");
     var rejectOverlay = document.getElementById("akimat-reject-overlay");
+    var resolveOverlay = document.getElementById("akimat-resolve-overlay");
+    var resolvePhotoBase64 = null;
 
     document.querySelectorAll(".akimat-tab").forEach(function (tab) {
         tab.addEventListener("click", function () {
@@ -142,7 +144,7 @@
                 var id = parseInt(this.getAttribute("data-id"), 10);
                 if (action === "accept") openAccept(id);
                 else if (action === "reject") openReject(id);
-                else if (action === "resolve") resolveApp(id);
+                else if (action === "resolve") openResolve(id);
                 else if (action === "show-on-map") {
                     var s = mapSuggestions.find(function (x) { return x.id === id; });
                     if (s) {
@@ -170,7 +172,11 @@
             responseHtml = '<div class="akimat-card-response"><strong>' + t("akimat_rejected_on") + '</strong> ' + _fmtDMY(s.akimatResponseAt) +
                 '<br><strong>' + t("akimat_reason") + '</strong> ' + escHtml(s.rejectReason || "") + '</div>';
         } else if (status === "resolved") {
-            responseHtml = '<div class="akimat-card-response"><strong>' + t("akimat_resolved_on") + '</strong> ' + _fmtDMY(s.resolvedAt) + '</div>';
+            var resolvedPhoto = s.resolvePhoto
+                ? '<div class="akimat-card-photo"><img src="' + s.resolvePhoto + '" alt="фото устранения" /></div>'
+                : '';
+            responseHtml = '<div class="akimat-card-response"><strong>' + t("akimat_resolved_on") + '</strong> ' + _fmtDMY(s.resolvedAt) + '</div>' +
+                resolvedPhoto;
         }
         var actions = "";
         if (status === "pending") {
@@ -241,14 +247,99 @@
         rejectOverlay.classList.add("hidden");
     });
 
-    function resolveApp(id) {
-        if (!confirm(t("akimat_resolve_confirm") + "?")) return;
-        var s = mapSuggestions.find(function (x) { return x.id === id; });
+    // ── Resolve flow: требует фото устранения ──
+    function compressPhoto(file, maxSize, quality) {
+        return new Promise(function (resolve, reject) {
+            if (!file) return reject(new Error("No file"));
+            var reader = new FileReader();
+            reader.onload = function (e) {
+                var img = new Image();
+                img.onload = function () {
+                    var w = img.width, h = img.height;
+                    if (w > h && w > maxSize) { h = Math.round(h * maxSize / w); w = maxSize; }
+                    else if (h > maxSize) { w = Math.round(w * maxSize / h); h = maxSize; }
+                    var canvas = document.createElement("canvas");
+                    canvas.width = w; canvas.height = h;
+                    canvas.getContext("2d").drawImage(img, 0, 0, w, h);
+                    resolve(canvas.toDataURL("image/jpeg", quality));
+                };
+                img.onerror = reject;
+                img.src = e.target.result;
+            };
+            reader.onerror = reject;
+            reader.readAsDataURL(file);
+        });
+    }
+
+    function _resetResolveModal() {
+        resolvePhotoBase64 = null;
+        var preview = document.getElementById("akimat-resolve-photo-preview");
+        if (preview) { preview.innerHTML = ""; preview.classList.add("hidden"); }
+        var input = document.getElementById("akimat-resolve-photo-input");
+        if (input) input.value = "";
+        var err = document.getElementById("akimat-resolve-err");
+        if (err) err.textContent = "";
+    }
+
+    function openResolve(id) {
+        currentAppId = id;
+        _resetResolveModal();
+        resolveOverlay.classList.remove("hidden");
+    }
+
+    var resolvePickBtn   = document.getElementById("akimat-resolve-photo-pick");
+    var resolvePhotoIn   = document.getElementById("akimat-resolve-photo-input");
+    var resolvePreview   = document.getElementById("akimat-resolve-photo-preview");
+    var resolveErrEl     = document.getElementById("akimat-resolve-err");
+
+    resolvePickBtn.addEventListener("click", function () { resolvePhotoIn.click(); });
+
+    resolvePhotoIn.addEventListener("change", function (e) {
+        var file = e.target.files && e.target.files[0];
+        if (!file) return;
+        resolveErrEl.textContent = "";
+        compressPhoto(file, 900, 0.75).then(function (base64) {
+            resolvePhotoBase64 = base64;
+            resolvePreview.innerHTML =
+                '<img src="' + base64 + '" alt="preview" />' +
+                '<button type="button" class="akimat-resolve-preview-remove" aria-label="Удалить">&times;</button>';
+            resolvePreview.classList.remove("hidden");
+            resolvePreview.querySelector(".akimat-resolve-preview-remove")
+                .addEventListener("click", function () {
+                    resolvePhotoBase64 = null;
+                    resolvePhotoIn.value = "";
+                    resolvePreview.innerHTML = "";
+                    resolvePreview.classList.add("hidden");
+                });
+        }).catch(function () {
+            resolveErrEl.textContent = "Не удалось обработать фото";
+        });
+    });
+
+    document.getElementById("akimat-resolve-close").addEventListener("click", function () {
+        resolveOverlay.classList.add("hidden");
+    });
+    document.getElementById("akimat-resolve-cancel").addEventListener("click", function () {
+        resolveOverlay.classList.add("hidden");
+    });
+    resolveOverlay.addEventListener("click", function (e) {
+        if (e.target === resolveOverlay) resolveOverlay.classList.add("hidden");
+    });
+
+    document.getElementById("akimat-resolve-submit").addEventListener("click", function () {
+        if (!resolvePhotoBase64) {
+            resolveErrEl.textContent = t("akimat_resolve_photo_required");
+            return;
+        }
+        var s = mapSuggestions.find(function (x) { return x.id === currentAppId; });
         if (!s) return;
         s.status = "resolved";
         s.resolvedAt = new Date().toISOString();
+        s.resolvePhoto = resolvePhotoBase64;
         saveSuggestion(s);
-    }
+        resolveOverlay.classList.add("hidden");
+        _resetResolveModal();
+    });
 
     // ── Wire up data listener ──
     onSuggestionsChanged(renderPanel);

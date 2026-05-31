@@ -4,7 +4,10 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
     <title>Вход — Карта прокуратуры г. Атырау</title>
-    <link rel="manifest" href="manifest.json" />
+    <link rel="manifest" href="manifest-login.json" />
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="Кіру / Вход">
+    <link rel="apple-touch-icon" href="images/icon-192x192.png">
     <style>
         * { box-sizing: border-box; }
         html, body {
@@ -238,6 +241,13 @@
 
     <script src="js/i18n.js?v=3"></script>
     <script>
+        // Если уже залогинен — сразу редирект
+        (function () {
+            var role = localStorage.getItem("atyrau-auth-role");
+            if (role === "staff") { window.location.href = "/"; return; }
+            if (role === "akimat") { window.location.href = "/akimat"; return; }
+        })();
+
         (function () {
             var saved = localStorage.getItem("atyrau-map-lang") || "ru";
             setLanguage(saved);
@@ -261,8 +271,8 @@
             });
         });
 
-        var STAFF_PASSWORD = "1345";
-        var AKIMAT_PASSWORD = "aa123";
+        var STAFF_PASSWORD = "1234";
+        var AKIMAT_PASSWORD = "1234";
 
         function tryStaff() {
             var pwd = document.getElementById("staff-pwd").value;

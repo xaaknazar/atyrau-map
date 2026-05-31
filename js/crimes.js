@@ -44,8 +44,13 @@ var CRIMES_SHEET_CSV_URL =
     "2PACX-1vRdNcnBVsk8JV3lsjicAt9erR4jAmaq8Pj4AsC5eIcqGqR_q3OLkU2Eujn9eG99WEdzMUzA1OEHf7wE" +
     "/pub?gid=0&single=true&output=csv";
 
-var CRIMES_DATA_CACHE_KEY = "atyrau-crimes-data-cache";
-var PEOPLE_DATA_CACHE_KEY = "atyrau-people-data-cache";
+var PEOPLE_SHEET_ID = "1W7J6c7rM3Skd5cJbv_95J3d5fM_6X5mBNQBvhxhLkBU";
+var PEOPLE_GID = "187886123";
+var PEOPLE_CSV_URL = "https://docs.google.com/spreadsheets/d/" + PEOPLE_SHEET_ID +
+    "/export?format=csv&gid=" + PEOPLE_GID;
+
+var CRIMES_DATA_CACHE_KEY = "atyrau-crimes-data-cache-v2";
+var PEOPLE_DATA_CACHE_KEY = "atyrau-people-data-cache-v2";
 
 // ══════════════════════════════════════════════════════════════
 //  Глобальные переменные
@@ -382,25 +387,49 @@ function jsonRowToPerson(row, idx) {
 
     return {
         id: idx + 1,
-        age: parseInt(_s(row["Возраст на момент совершения"])) || null,
-        gender: _s(row["Пол"]),
-        birthRepublic: _s(row["Место рождения Республика"]),
-        birthOblast: _s(row["Место рождения Область"]),
-        birthDistrict: _s(row["Место рождения Район"]),
-        birthCity: _s(row["Место рождения Населенный пункт"]),
-        citizenship: _s(row["Гражданство"]),
-        foreignCitizenship: _s(row["Гражданство иностранца"]),
-        nationality: _s(row["Национальность"]),
-        education: _s(row["Образование"]),
-        maritalStatus: _s(row["Семейное положение"]),
-        additionalInfo: _s(row["Дополнительные сведения"]),
-        isMinor: _s(row["Несовершеннолетний"]),
-        occupation: _s(row["Род занятий"]),
-        extraMarks: _s(row["Доп.отметки"]),
-        workplace: _s(row["Место работы (учебы)"]),
-        position: _s(row["Должность"]),
         erdr: _s(row["Номер ЕРДР"]),
-        regDate: _parseDate(row["Дата-время регистрации"])
+        regDate: _parseDate(row["Дата-время регистрации"]),
+        organ: _s(row["Орган регистрации"]),
+        article: _s(row["Квалификация"]),
+        articlePart: _s(row["Квалификация п.п."]),
+        crimeDescription: _s(row["Описание преступления/проступка"]),
+        crimeDate: _s(row["Дата совершения"]),
+        crimeTime: _s(row["время совершения"]),
+        iin: _s(row["ИИН"]),
+        lastName: _s(row["Фамилия"]),
+        firstName: _s(row["Имя"]),
+        patronymic: _s(row["Отчество"]),
+        birthDate: _s(row["Дата рождения"]),
+        age: parseInt(_s(row["5.1.Возраст на момент совершения"])) || parseInt(_s(row["Возраст на момент совершения"])) || null,
+        gender: _s(row["6.Пол"]) || _s(row["Пол"]),
+        birthRepublic: _s(row["7.Место рождения Республика"]) || _s(row["Место рождения Республика"]),
+        birthOblast: _s(row["7.Место рождения Область"]) || _s(row["Место рождения Область"]),
+        birthDistrict: _s(row["7.Место рождения Район"]) || _s(row["Место рождения Район"]),
+        birthCity: _s(row["7.Место рождения Населенный пункт"]) || _s(row["Место рождения Населенный пункт"]),
+        citizenship: _s(row["8.Гражданство"]) || _s(row["Гражданство"]),
+        foreignCitizenship: _s(row["8.1.Гражданство иностранца"]) || _s(row["Гражданство иностранца"]),
+        nationality: _s(row["9.Национальность"]) || _s(row["Национальность"]),
+        education: _s(row["11.Образование"]) || _s(row["Образование"]),
+        maritalStatus: _s(row["12.Семейное положение"]) || _s(row["Семейное положение"]),
+        additionalInfo: _s(row["13.Дополнительные сведения"]) || _s(row["Дополнительные сведения"]),
+        isMinor: _s(row["13.1.Несовершеннолетний"]) || _s(row["Несовершеннолетний"]),
+        residencePlace: _s(row["14.По месту проживания"]),
+        addrRepublic: _s(row["15.Адрес Республика"]),
+        addrOblast: _s(row["15.Адрес Область"]),
+        addrDistrict: _s(row["15.Адрес Район"]),
+        addrCity: _s(row["15.Адрес Населенный пункт"]),
+        addrStreet: _s(row["15.Адрес Улица"]),
+        addrHouse: _s(row["15.Адрес Дом"]),
+        occupation: _s(row["17.Род занятий"]) || _s(row["Род занятий"]),
+        workplace: _s(row["19.Место работы (учебы)"]) || _s(row["Место работы (учебы)"]),
+        position: _s(row["19.Должность"]) || _s(row["Должность"]),
+        previousCrime: _s(row["24.Ранее совершивший преступление"]),
+        intoxication: _s(row["20.В состоянии"]),
+        inGroup: _s(row["21.В группе"]),
+        participationType: _s(row["23.Вид соучастия"]),
+        conviction: _s(row["27.Судимость"]),
+        registeredAccount: _s(row["28.Лицо состояло на учете"]),
+        decision: _s(row["55.Решение в отношении лица"])
     };
 }
 
@@ -580,16 +609,74 @@ function _tryLoadFromCache() {
 /**
  * Полная инициализация.
  */
+function _loadPeopleCSV(callback) {
+    console.log("[crimes] Загрузка людей из CSV...");
+    fetch(PEOPLE_CSV_URL)
+        .then(function (r) { return r.text(); })
+        .then(function (txt) {
+            var lines = txt.split(/\r?\n/);
+            if (lines.length < 2) { callback(); return; }
+            var headers = _parseCSVLine(lines[0]);
+            var people = [];
+            for (var i = 1; i < lines.length; i++) {
+                if (!lines[i].trim()) continue;
+                var cols = _parseCSVLine(lines[i]);
+                var row = {};
+                for (var j = 0; j < headers.length; j++) {
+                    row[headers[j]] = cols[j] || "";
+                }
+                var person = jsonRowToPerson(row, i - 1);
+                if (person && person.erdr) people.push(person);
+            }
+            if (people.length > 0) {
+                crimePeople = people;
+                _buildPeopleIndex();
+                _saveCrimesCache();
+                console.log("[crimes] Людей из CSV: " + crimePeople.length);
+            }
+            callback();
+        })
+        .catch(function (err) {
+            console.warn("[crimes] Ошибка загрузки людей CSV:", err);
+            callback();
+        });
+}
+
+function _parseCSVLine(line) {
+    var cells = [];
+    var cur = "", inQ = false;
+    for (var i = 0; i < line.length; i++) {
+        var ch = line[i];
+        if (ch === '"') {
+            if (inQ && line[i + 1] === '"') { cur += '"'; i++; }
+            else inQ = !inQ;
+        } else if (ch === "," && !inQ) {
+            cells.push(cur.trim()); cur = "";
+        } else {
+            cur += ch;
+        }
+    }
+    cells.push(cur.trim());
+    return cells;
+}
+
 function initCrimeData(onProgress, onDone) {
     loadCrimesFromSheet(function () {
         var withCoords = crimeIncidents.filter(function (c) {
             return typeof c.lat === "number" && !isNaN(c.lat);
         }).length;
         console.log("[crimes] С координатами: " + withCoords + " из " + crimeIncidents.length);
-
         _saveCrimesCache();
-        if (onDone) onDone();
-        _notifyCrimesReady();
+
+        if (crimePeople.length === 0) {
+            _loadPeopleCSV(function () {
+                if (onDone) onDone();
+                _notifyCrimesReady();
+            });
+        } else {
+            if (onDone) onDone();
+            _notifyCrimesReady();
+        }
     });
 }
 
@@ -655,4 +742,21 @@ function formatCrimeDate(isoStr) {
     var hours = ("0" + d.getHours()).slice(-2);
     var mins = ("0" + d.getMinutes()).slice(-2);
     return day + "." + month + "." + year + " " + hours + ":" + mins;
+}
+
+function formatDateOnly(isoStr) {
+    if (!isoStr) return "—";
+    var d = new Date(isoStr);
+    if (isNaN(d.getTime())) return String(isoStr).replace(/T.*/, "");
+    return ("0" + d.getDate()).slice(-2) + "." + ("0" + (d.getMonth() + 1)).slice(-2) + "." + d.getFullYear();
+}
+
+function formatTimeOnly(isoStr) {
+    if (!isoStr) return "";
+    var d = new Date(isoStr);
+    if (isNaN(d.getTime())) {
+        var m = String(isoStr).match(/(\d{2}):(\d{2})/);
+        return m ? m[1] + ":" + m[2] : "";
+    }
+    return ("0" + d.getHours()).slice(-2) + ":" + ("0" + d.getMinutes()).slice(-2);
 }
