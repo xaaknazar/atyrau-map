@@ -344,9 +344,8 @@ body {
 .back-to-analytics-btn.hidden { display: none; }
 @media (max-width: 768px) {
     .back-to-analytics-btn {
-        left: auto;
-        right: 16px;
-        top: 16px;
+        left: 16px;
+        top: 76px;
         padding: 8px 12px;
         font-size: 12px;
         border-radius: 8px;
