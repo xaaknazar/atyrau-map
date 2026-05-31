@@ -806,12 +806,16 @@
     function hideAnalyticsPanelWithBack() {
         _cameFromAnalytics = true;
         hideAnalyticsPanel();
-        if (backToAnalyticsBtn) backToAnalyticsBtn.classList.remove("hidden");
+        console.log("[nav] hideAnalyticsPanelWithBack, btn exists:", !!backToAnalyticsBtn);
+        if (backToAnalyticsBtn) {
+            backToAnalyticsBtn.classList.remove("hidden");
+            backToAnalyticsBtn.style.display = "block";
+        }
     }
 
     function returnToAnalytics() {
         _cameFromAnalytics = false;
-        if (backToAnalyticsBtn) backToAnalyticsBtn.classList.add("hidden");
+        if (backToAnalyticsBtn) { backToAnalyticsBtn.classList.add("hidden"); backToAnalyticsBtn.style.display = ""; }
         // Убрать круги если есть
         if (window._geoZoneCircle) { map.removeLayer(window._geoZoneCircle); window._geoZoneCircle = null; }
         if (window._hotZoneCircles) { window._hotZoneCircles.forEach(function (c) { map.removeLayer(c); }); window._hotZoneCircles = []; }

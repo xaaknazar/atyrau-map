@@ -321,7 +321,7 @@ body {
     top: 16px;
     left: 50%;
     transform: translateX(-50%);
-    z-index: 1000;
+    z-index: 99999;
     padding: 10px 20px;
     background: #16213e;
     border: 1px solid rgba(52,152,219,0.5);
