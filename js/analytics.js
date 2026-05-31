@@ -1045,25 +1045,29 @@ function buildProsecutorBriefing(analysis, allCrimes, lang) {
 
 var _usynuCSS =
     '@page{size:A4;margin:2cm 1.5cm 2cm 3cm;}' +
-    'body{font-family:"Times New Roman",serif;font-size:14pt;line-height:1.5;margin:0;padding:0;color:#000;}' +
-    'p{text-align:justify;text-indent:1.25cm;margin:3pt 0;}' +
-    '.addr{text-align:right;margin-bottom:30pt;line-height:1.3;}' +
-    '.blank{border-bottom:1px solid #000;display:inline-block;min-width:250px;}' +
+    'body{font-family:"Times New Roman",serif;font-size:14pt;line-height:1.5;margin:2cm 1.5cm 2cm 3cm;padding:0;color:#000;}' +
+    'p{text-align:justify;text-indent:1.25cm;margin:4pt 0;}' +
+    '.addr{text-align:right;margin-bottom:30pt;line-height:1.4;}' +
+    '.blank{border-bottom:1px solid #000;display:inline-block;min-width:250px;height:18px;}' +
     '.title{text-align:center;font-weight:bold;font-size:14pt;margin:20pt 0 4pt;text-transform:uppercase;}' +
     '.subtitle{text-align:center;font-size:14pt;margin-bottom:20pt;}' +
     '.rec-title{text-align:center;font-weight:bold;font-size:14pt;margin:20pt 0 12pt;text-transform:uppercase;}' +
-    'ol,ul{margin-left:1.25cm;padding-left:0;}' +
+    'ol{margin-left:1.25cm;padding-left:0.5cm;}' +
+    'ul{margin-left:1.25cm;padding-left:0.5cm;list-style-type:disc;}' +
     'ol li,ul li{margin-bottom:6pt;text-align:justify;}' +
-    'ul{list-style-type:disc;}' +
     '.sign{margin-top:50pt;}' +
-    '.sign-row{display:block;margin-top:8pt;overflow:hidden;}' +
-    '.sign-l{float:left;}' +
-    '.sign-r{float:right;}' +
+    '.sign-table{width:100%;border:none;}' +
+    '.sign-table td{border:none;padding:4pt 0;vertical-align:bottom;}' +
+    '.sign-left{text-align:left;}' +
+    '.sign-right{text-align:right;}' +
     '.exec{margin-top:70pt;font-size:12pt;}' +
+    '.no-print{margin:10px;text-align:center;}' +
+    '@media print{.no-print{display:none;}body{margin:0;}}' +
     '.page-break{page-break-before:always;}';
 
 function _usynuStart() {
-    return '<!DOCTYPE html><html><head><meta charset="utf-8"><style>' + _usynuCSS + '</style></head><body>' +
+    return '<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>' + _usynuCSS + '</style></head><body>' +
+        '<div class="no-print"><button onclick="window.print()" style="padding:10px 30px;font-size:16px;cursor:pointer;background:#16213e;color:#fff;border:none;border-radius:8px;">Басып шығару / Печать (PDF)</button></div>' +
         '<div class="addr"><span class="blank">&nbsp;</span><br><span class="blank">&nbsp;</span></div>' +
         '<div class="title">ҰСЫНУ</div>' +
         '<div class="subtitle">заңдылықтың бұзылуын жою туралы</div>';
@@ -1078,22 +1082,21 @@ function _usynuSignature() {
     return '<li>Ұсынуды заңда көзделген мерзімде прокурордың қатысуымен қарап, нәтижесі туралы толықтай ақпаратты дәлелді құжаттарымен қоса қала прокуратурасына жолдауды.</li></ol>' +
         '<p>Қосымша: тізім «___» парақта.</p>' +
         '<div class="sign">' +
-        '<div class="sign-row"><span class="sign-l">Қала прокуроры</span><span class="sign-r"><span class="blank">&nbsp;</span></span></div>' +
+        '<table class="sign-table"><tr>' +
+        '<td class="sign-left">Қала прокуроры</td>' +
+        '<td class="sign-right"><span class="blank">&nbsp;</span></td>' +
+        '</tr></table>' +
         '</div>' +
         '<div class="exec">Орынд.: _________________<br>Тел.: _________________</div>' +
         '</body></html>';
 }
 
 function _usynuDownload(html, name) {
-    var blob = new Blob(['\ufeff' + html], { type: 'application/msword' });
-    var url = URL.createObjectURL(blob);
-    var a = document.createElement('a');
-    a.href = url;
-    a.download = 'Usynu_' + name + '_' + new Date().toISOString().slice(0, 10) + '.doc';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    var win = window.open("", "_blank");
+    if (!win) { alert("\u0420\u0430\u0437\u0440\u0435\u0448\u0438\u0442\u0435 \u0432\u0441\u043f\u043b\u044b\u0432\u0430\u044e\u0449\u0438\u0435 \u043e\u043a\u043d\u0430"); return; }
+    win.document.write(html);
+    win.document.close();
+    setTimeout(function () { win.print(); }, 300);
 }
 
 function _getMapCounts() {
