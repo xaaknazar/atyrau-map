@@ -512,7 +512,7 @@ function _parseAPIResponse(data) {
     crimePeople = [];
     for (var j = 0; j < peopleRows.length; j++) {
         var person = jsonRowToPerson(peopleRows[j], j);
-        if (person && person.erdr) {
+        if (person) {
             crimePeople.push(person);
         }
     }
@@ -626,7 +626,7 @@ function _loadPeopleCSV(callback) {
                     row[headers[j]] = cols[j] || "";
                 }
                 var person = jsonRowToPerson(row, i - 1);
-                if (person && person.erdr) people.push(person);
+                if (person) people.push(person);
             }
             if (people.length > 0) {
                 crimePeople = people;
