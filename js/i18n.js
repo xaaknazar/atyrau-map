@@ -26,6 +26,9 @@ var I18N = {
         legend_police: "Участковые пункты",
         legend_schools: "Школы",
         cat_venues: "Заведения",
+        cat_av: "Адм. правонарушения",
+        stat_av: "Адм. правонарушения:",
+        all_articles: "Все статьи",
         stat_total: "Всего точек:",
 
         // Footer
@@ -380,6 +383,9 @@ var I18N = {
         legend_police: "Учаскелік пункттер",
         legend_schools: "Мектептер",
         cat_venues: "Мекемелер",
+        cat_av: "Әкімшілік құқық бұзушылық",
+        stat_av: "Әкімшілік құқық бұзушылық:",
+        all_articles: "Барлық баптар",
         stat_total: "Барлық нүктелер:",
 
         // Footer

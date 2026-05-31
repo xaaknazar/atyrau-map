@@ -2485,10 +2485,12 @@
         });
         var list = Object.keys(arts).map(function (n) { return { num: n, count: arts[n] }; })
             .sort(function (a, b) { return b.count - a.count; });
-        selectEl.innerHTML = '<option value="">Все статьи (' + items.length + ')</option>';
+        var allLabel = (typeof currentLang !== "undefined" && currentLang === "kz") ? "Барлық баптар" : "Все статьи";
+        selectEl.innerHTML = '<option value="">' + allLabel + ' (' + items.length + ')</option>';
         list.forEach(function (a) {
             var hidden = !!HIDDEN_MAP_ARTICLES[parseInt(a.num, 10)];
-            var label = 'ст. ' + a.num + ' (' + a.count + ')' + (hidden ? ' — нет на карте' : '');
+            var noMapLabel = (typeof currentLang !== "undefined" && currentLang === "kz") ? " — картада жоқ" : " — нет на карте";
+            var label = 'ст. ' + a.num + ' (' + a.count + ')' + (hidden ? noMapLabel : '');
             selectEl.innerHTML += '<option value="' + a.num + '"' + (hidden ? ' style="color:#8892b0"' : '') + '>' + label + '</option>';
         });
     }
