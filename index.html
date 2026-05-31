@@ -670,10 +670,12 @@
             <div class="analytics-tab-content" data-tab="people">
                 <div class="an-stats-grid" id="an-people-stats"></div>
 
-                <!-- Search + filters -->
-                <div class="an-section">
-                    <h3>Список лиц с поиском и фильтрами</h3>
-                    <p class="an-hint">Все лица из базы данных независимо от выбранного периода</p>
+                <!-- Список лиц (скрыт, появляется по клику на "Всего лиц") -->
+                <div id="an-people-section" class="an-section" style="display:none;">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+                        <h3>Список лиц</h3>
+                        <button id="an-people-close-list" class="crime-reset-btn">Скрыть список</button>
+                    </div>
                     <div class="an-people-toolbar">
                         <input type="text" id="an-people-search" placeholder="🔍 Поиск по ФИО или ИИН..." />
                         <select id="an-people-age-filter">

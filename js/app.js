@@ -1230,7 +1230,7 @@
         });
 
         el.innerHTML =
-            _statCard(totalCount, "Всего лиц") +
+            '<div class="an-stat-card an-stat-clickable" id="an-total-people-card"><div class="an-stat-val">' + totalCount + '</div><div class="an-stat-lbl">Всего лиц ▸</div></div>' +
             '<div class="an-stat-card an-stat-clickable" id="an-minors-card"><div class="an-stat-val">' + minorsCount + '</div><div class="an-stat-lbl">Несовершеннолетних ▸</div></div>' +
             _statCard(Object.keys(nationalities).length, "Национальностей") +
             _statCard(Object.keys(educations).length, "Уровней образ.") +
@@ -1240,6 +1240,22 @@
         if (minorsCard && minorsCount > 0) {
             minorsCard.addEventListener("click", function () {
                 showMinorsPortrait();
+            });
+        }
+
+        var totalCard = document.getElementById("an-total-people-card");
+        var peopleSection = document.getElementById("an-people-section");
+        if (totalCard && peopleSection) {
+            totalCard.addEventListener("click", function () {
+                peopleSection.style.display = "";
+                _renderFilteredPeople();
+                peopleSection.scrollIntoView({ behavior: "smooth" });
+            });
+        }
+        var closeListBtn = document.getElementById("an-people-close-list");
+        if (closeListBtn && peopleSection) {
+            closeListBtn.addEventListener("click", function () {
+                peopleSection.style.display = "none";
             });
         }
     }
