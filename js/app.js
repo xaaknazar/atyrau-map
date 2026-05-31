@@ -1354,23 +1354,23 @@
 
     function _renderAnalyticsTable(items) {
         var total = items.reduce(function (s, it) { return s + (it.count || 0); }, 0);
-        var max = items[0].count || 1;
+        var max = items[0] ? items[0].count || 1 : 1;
         var html = '<table class="an-table"><thead><tr>' +
             '<th class="an-th-num">#</th>' +
             '<th>Категория</th>' +
             '<th class="an-th-count">Кол-во</th>' +
-            '<th class="an-th-share">Доля</th>' +
-            '<th class="an-th-bar">Распределение</th>' +
+            '<th class="an-th-share">%</th>' +
+            '<th class="an-th-bar"></th>' +
             '</tr></thead><tbody>';
         items.forEach(function (it, i) {
-            var pct = Math.round((it.count || 0) / max * 100);
             var sharePct = total > 0 ? Math.round((it.count || 0) / total * 100) : 0;
+            var barWidth = max > 0 ? Math.max(1, Math.round((it.count || 0) / max * 100)) : 0;
             html += '<tr>' +
                 '<td class="an-th-num">' + (i + 1) + '</td>' +
                 '<td>' + (it.label || "") + '</td>' +
                 '<td class="an-th-count"><strong>' + it.count + '</strong></td>' +
                 '<td class="an-th-share">' + sharePct + '%</td>' +
-                '<td class="an-th-bar"><div class="an-mini-bar"><div class="an-mini-bar-fill" style="width:' + pct + '%;"></div></div></td>' +
+                '<td class="an-th-bar"><div class="an-mini-bar"><div class="an-mini-bar-fill" style="width:' + barWidth + '%;"></div></div></td>' +
                 '</tr>';
         });
         html += '</tbody></table>';

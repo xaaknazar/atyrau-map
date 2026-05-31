@@ -302,7 +302,11 @@ body {
 .an-table .an-th-num { width: 40px; text-align: center; color: #8892b0; }
 .an-table .an-th-count { width: 80px; text-align: right; font-variant-numeric: tabular-nums; }
 .an-table .an-th-share { width: 70px; text-align: right; color: #8892b0; font-variant-numeric: tabular-nums; }
-.an-table .an-th-bar { width: 30%; min-width: 100px; }
+.an-table .an-th-bar { width: 35%; min-width: 80px; }
+@media (max-width: 600px) {
+    .an-table .an-th-bar { display: none; }
+    .an-table .an-th-share { width: 50px; }
+}
 .an-mini-bar {
     height: 6px; background: rgba(255,255,255,0.06);
     border-radius: 3px; overflow: hidden;
