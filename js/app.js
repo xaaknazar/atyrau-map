@@ -1568,7 +1568,7 @@
     var showZonesBtn = document.getElementById("an-show-zones-on-map");
     if (showZonesBtn) {
         showZonesBtn.addEventListener("click", function () {
-            hideAnalyticsPanel();
+            hideAnalyticsPanelWithBack();
             showZonesOnMap();
         });
     }

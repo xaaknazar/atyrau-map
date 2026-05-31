@@ -1061,13 +1061,10 @@ var _usynuCSS =
     '.sign-left{text-align:left;}' +
     '.sign-right{text-align:right;}' +
     '.exec{margin-top:70pt;font-size:12pt;}' +
-    '.no-print{margin:10px;text-align:center;}' +
-    '@media print{.no-print{display:none;}body{margin:0;}}' +
     '.page-break{page-break-before:always;}';
 
 function _usynuStart() {
-    return '<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>' + _usynuCSS + '</style></head><body>' +
-        '<div class="no-print"><button onclick="window.print()" style="padding:10px 30px;font-size:16px;cursor:pointer;background:#16213e;color:#fff;border:none;border-radius:8px;">Басып шығару / Печать (PDF)</button></div>' +
+    return '<!DOCTYPE html><html><head><meta charset="utf-8"><style>' + _usynuCSS + '</style></head><body>' +
         '<div class="addr"><span class="blank">&nbsp;</span><br><span class="blank">&nbsp;</span></div>' +
         '<div class="title">ҰСЫНУ</div>' +
         '<div class="subtitle">заңдылықтың бұзылуын жою туралы</div>';
@@ -1092,11 +1089,26 @@ function _usynuSignature() {
 }
 
 function _usynuDownload(html, name) {
-    var win = window.open("", "_blank");
-    if (!win) { alert("\u0420\u0430\u0437\u0440\u0435\u0448\u0438\u0442\u0435 \u0432\u0441\u043f\u043b\u044b\u0432\u0430\u044e\u0449\u0438\u0435 \u043e\u043a\u043d\u0430"); return; }
-    win.document.write(html);
-    win.document.close();
-    setTimeout(function () { win.print(); }, 300);
+    // Word-compatible HTML with mso namespace
+    var wordHtml = '<html xmlns:o="urn:schemas-microsoft-com:office:office" ' +
+        'xmlns:w="urn:schemas-microsoft-com:office:word" ' +
+        'xmlns="http://www.w3.org/TR/REC-html40">' +
+        '<head><meta charset="utf-8">' +
+        '<!--[if gte mso 9]><xml><w:WordDocument><w:View>Print</w:View>' +
+        '<w:Zoom>100</w:Zoom></w:WordDocument></xml><![endif]-->' +
+        html.replace(/^<!DOCTYPE html><html><head><meta charset="utf-8">/, '')
+            .replace(/<meta name="viewport"[^>]*>/, '');
+    var blob = new Blob(['\ufeff' + wordHtml], { type: 'application/msword' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = 'Usynu_' + name + '_' + new Date().toISOString().slice(0, 10) + '.doc';
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(function () {
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }, 100);
 }
 
 function _getMapCounts() {
