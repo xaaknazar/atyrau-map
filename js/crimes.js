@@ -509,15 +509,16 @@ function _parseAPIResponse(data) {
         }
     }
 
-    crimePeople = [];
-    for (var j = 0; j < peopleRows.length; j++) {
-        var person = jsonRowToPerson(peopleRows[j], j);
-        if (person) {
-            crimePeople.push(person);
+    if (peopleRows.length > 0) {
+        crimePeople = [];
+        for (var j = 0; j < peopleRows.length; j++) {
+            var person = jsonRowToPerson(peopleRows[j], j);
+            if (person) {
+                crimePeople.push(person);
+            }
         }
+        _buildPeopleIndex();
     }
-
-    _buildPeopleIndex();
     console.log("[crimes] Загружено: " + crimeIncidents.length + " преступлений, " + crimePeople.length + " лиц");
 }
 
