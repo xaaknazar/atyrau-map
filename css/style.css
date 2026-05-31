@@ -319,8 +319,7 @@ body {
 .back-to-analytics-btn {
     position: fixed;
     top: 16px;
-    left: 50%;
-    transform: translateX(-50%);
+    left: 16px;
     z-index: 99999;
     padding: 10px 20px;
     background: #16213e;
