@@ -41,20 +41,19 @@ if (typeof FIREBASE_CONFIG !== "undefined" &&
 
 if (useFirebase) {
     // ── One-time migration: clear all old points ─────────────
-    var DATA_VERSION = 4;
+    var DATA_VERSION = 5;
     var metaRef = db.ref("_meta/data_version");
     var migrationDone = false;
 
     metaRef.once("value").then(function (snap) {
         if (snap.val() !== DATA_VERSION) {
-            console.log("[data] Запуск миграции v" + DATA_VERSION + " — удаление всех точек...");
+            console.log("[data] Обновление версии до v" + DATA_VERSION);
             return Promise.all([
-                pointsRef.remove(),
                 db.ref("suggestions").remove()
             ]).then(function () {
                 return metaRef.set(DATA_VERSION);
             }).then(function () {
-                console.log("[data] Миграция v" + DATA_VERSION + " завершена — все точки удалены");
+                console.log("[data] Версия v" + DATA_VERSION + " установлена — заявки очищены");
             });
         }
     }).then(function () {
