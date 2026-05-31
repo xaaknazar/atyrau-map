@@ -1107,8 +1107,6 @@
         var occ = oEl ? oEl.value : "";
 
         return people.filter(function (p) {
-            // Пропускаем лица без ФИО
-            if (!p.lastName && !p.firstName && !p.patronymic) return false;
             if (q) {
                 var fio = [p.lastName, p.firstName, p.patronymic].filter(Boolean).join(" ").toLowerCase();
                 if (fio.indexOf(q) === -1 && (!p.iin || p.iin.indexOf(q) === -1)) return false;
@@ -1145,7 +1143,7 @@
             return;
         }
         container.innerHTML = list.slice(0, 200).map(function (p) {
-            var fio = [p.lastName, p.firstName, p.patronymic].filter(Boolean).join(" ") || "—";
+            var fio = [p.lastName, p.firstName, p.patronymic].filter(Boolean).join(" ") || (p.iin ? "ИИН: " + p.iin : (p.article || "Лицо " + (i + 1)));
             var isMinor = p.age && p.age < 18;
             var meta = [];
             if (p.age) meta.push('<span><strong>' + p.age + '</strong> лет</span>');
