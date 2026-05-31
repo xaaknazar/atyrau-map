@@ -792,12 +792,34 @@
         if (ol) ol.classList.remove("active");
     }
 
+    var backToAnalyticsBtn = document.getElementById("back-to-analytics");
+    var _cameFromAnalytics = false;
+
     function hideAnalyticsPanel() {
         analyticsPanel.classList.add("hidden");
         mapEl.classList.remove("hidden");
         if (searchBar) searchBar.classList.remove("hidden");
         if (mapControls) mapControls.classList.remove("hidden");
         map.invalidateSize();
+    }
+
+    function hideAnalyticsPanelWithBack() {
+        _cameFromAnalytics = true;
+        hideAnalyticsPanel();
+        if (backToAnalyticsBtn) backToAnalyticsBtn.classList.remove("hidden");
+    }
+
+    function returnToAnalytics() {
+        _cameFromAnalytics = false;
+        if (backToAnalyticsBtn) backToAnalyticsBtn.classList.add("hidden");
+        // Убрать круги если есть
+        if (window._geoZoneCircle) { map.removeLayer(window._geoZoneCircle); window._geoZoneCircle = null; }
+        if (window._hotZoneCircles) { window._hotZoneCircles.forEach(function (c) { map.removeLayer(c); }); window._hotZoneCircles = []; }
+        showAnalyticsPanel();
+    }
+
+    if (backToAnalyticsBtn) {
+        backToAnalyticsBtn.addEventListener("click", returnToAnalytics);
     }
 
     var closeAnBtn = document.getElementById("close-analytics");
@@ -888,8 +910,7 @@
                     var lat = parseFloat(this.getAttribute("data-lat"));
                     var lng = parseFloat(this.getAttribute("data-lng"));
                     if (isNaN(lat) || isNaN(lng)) return;
-                    // Закрыть аналитику, показать карту
-                    hideAnalyticsPanel();
+                    hideAnalyticsPanelWithBack();
                     setTimeout(function () {
                         map.invalidateSize();
                         map.setView([lat, lng], 15);
@@ -974,7 +995,7 @@
             _showPeopleResults(crimePeople.slice(0, 50));
         } else if (type === "showallzones") {
             var zones2 = (a.problemZones || []).filter(function (z) { return z.count <= 50; }).slice(0, 10);
-            hideAnalyticsPanel();
+            hideAnalyticsPanelWithBack();
             setTimeout(function () {
                 map.invalidateSize();
                 if (window._hotZoneCircles) window._hotZoneCircles.forEach(function (c) { map.removeLayer(c); });
