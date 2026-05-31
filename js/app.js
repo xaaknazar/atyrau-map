@@ -703,6 +703,7 @@
         mapEl.classList.add("hidden");
         if (searchBar) searchBar.classList.add("hidden");
         if (mapControls) mapControls.classList.add("hidden");
+        if (mobileMenuBtn) mobileMenuBtn.classList.add("hidden");
         crimePanel.classList.remove("hidden");
         populateCrimeFilters();
         updateCrimeStats();
@@ -719,6 +720,7 @@
         mapEl.classList.remove("hidden");
         if (searchBar) searchBar.classList.remove("hidden");
         if (mapControls) mapControls.classList.remove("hidden");
+        if (mobileMenuBtn) mobileMenuBtn.classList.remove("hidden");
         map.invalidateSize();
     }
 
@@ -729,6 +731,7 @@
         mapEl.classList.add("hidden");
         if (searchBar) searchBar.classList.add("hidden");
         if (mapControls) mapControls.classList.add("hidden");
+        if (mobileMenuBtn) mobileMenuBtn.classList.add("hidden");
         reportSelector.classList.remove("hidden");
         document.getElementById("report-count-erdr").textContent = crimeIncidents.length + " записей";
         document.getElementById("report-count-av").textContent = adminViolations.length + " записей";
@@ -743,6 +746,7 @@
         mapEl.classList.remove("hidden");
         if (searchBar) searchBar.classList.remove("hidden");
         if (mapControls) mapControls.classList.remove("hidden");
+        if (mobileMenuBtn) mobileMenuBtn.classList.remove("hidden");
         map.invalidateSize();
     }
 
@@ -779,11 +783,14 @@
     var analyticsPanel = document.getElementById("analytics-panel");
     var zoneCircles = []; // circles on the map
 
+    var mobileMenuBtn = document.getElementById("mobile-menu-btn");
+
     function showAnalyticsPanel() {
         mapEl.classList.add("hidden");
         crimePanel.classList.add("hidden");
         if (searchBar) searchBar.classList.add("hidden");
         if (mapControls) mapControls.classList.add("hidden");
+        if (mobileMenuBtn) mobileMenuBtn.classList.add("hidden");
         analyticsPanel.classList.remove("hidden");
         renderAnalytics();
         var sidebar = document.getElementById("sidebar");
@@ -800,6 +807,7 @@
         mapEl.classList.remove("hidden");
         if (searchBar) searchBar.classList.remove("hidden");
         if (mapControls) mapControls.classList.remove("hidden");
+        if (mobileMenuBtn) mobileMenuBtn.classList.remove("hidden");
         map.invalidateSize();
     }
 
@@ -1951,6 +1959,7 @@
         mapEl.classList.add("hidden");
         if (searchBar) searchBar.classList.add("hidden");
         if (mapControls) mapControls.classList.add("hidden");
+        if (mobileMenuBtn) mobileMenuBtn.classList.add("hidden");
         avPanel.classList.remove("hidden");
         populateAVFilters();
         updateAVStats();
@@ -1962,6 +1971,7 @@
         mapEl.classList.remove("hidden");
         if (searchBar) searchBar.classList.remove("hidden");
         if (mapControls) mapControls.classList.remove("hidden");
+        if (mobileMenuBtn) mobileMenuBtn.classList.remove("hidden");
         map.invalidateSize();
     }
 
