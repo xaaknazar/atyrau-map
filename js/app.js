@@ -1142,8 +1142,8 @@
                 '</div>';
             return;
         }
-        container.innerHTML = list.slice(0, 200).map(function (p) {
-            var fio = [p.lastName, p.firstName, p.patronymic].filter(Boolean).join(" ") || (p.iin ? "ИИН: " + p.iin : (p.article || "Лицо " + (i + 1)));
+        container.innerHTML = list.slice(0, 200).map(function (p, idx) {
+            var fio = [p.lastName, p.firstName, p.patronymic].filter(Boolean).join(" ") || (p.iin ? "ИИН: " + p.iin : (p.article || "Лицо " + (idx + 1)));
             var isMinor = p.age && p.age < 18;
             var meta = [];
             if (p.age) meta.push('<span><strong>' + p.age + '</strong> лет</span>');
