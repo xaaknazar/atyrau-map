@@ -618,6 +618,7 @@ function _loadPeopleCSV(callback) {
             var lines = txt.split(/\r?\n/);
             if (lines.length < 2) { callback(); return; }
             var headers = _parseCSVLine(lines[0]);
+            console.log("[crimes] CSV People headers:", headers.slice(0, 5).join(", "), "... total:", headers.length);
             var people = [];
             for (var i = 1; i < lines.length; i++) {
                 if (!lines[i].trim()) continue;
@@ -627,7 +628,11 @@ function _loadPeopleCSV(callback) {
                     row[headers[j]] = cols[j] || "";
                 }
                 var person = jsonRowToPerson(row, i - 1);
-                if (person) people.push(person);
+                if (person) {
+                    people.push(person);
+                } else if (i < 4) {
+                    console.log("[crimes] CSV row " + i + " returned null, row keys:", Object.keys(row).slice(0, 5).join(", "));
+                }
             }
             if (people.length > 0) {
                 crimePeople = people;
@@ -669,15 +674,11 @@ function initCrimeData(onProgress, onDone) {
         console.log("[crimes] С координатами: " + withCoords + " из " + crimeIncidents.length);
         _saveCrimesCache();
 
-        if (crimePeople.length === 0) {
-            _loadPeopleCSV(function () {
-                if (onDone) onDone();
-                _notifyCrimesReady();
-            });
-        } else {
+        // Всегда загружать людей из CSV (API не возвращает их)
+        _loadPeopleCSV(function () {
             if (onDone) onDone();
             _notifyCrimesReady();
-        }
+        });
     });
 }
 
