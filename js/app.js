@@ -1354,7 +1354,7 @@
 
     function _renderAnalyticsTable(items) {
         var total = items.reduce(function (s, it) { return s + (it.count || 0); }, 0);
-        var max = items[0] ? items[0].count || 1 : 1;
+        var max = Math.max.apply(null, items.map(function (it) { return it.count || 0; })) || 1;
         var html = '<table class="an-table"><thead><tr>' +
             '<th class="an-th-num">#</th>' +
             '<th>Категория</th>' +
