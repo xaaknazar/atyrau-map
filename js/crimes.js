@@ -628,13 +628,12 @@ function _loadPeopleCSV(callback) {
     fetch(PEOPLE_CSV_URL)
         .then(function (r) { return r.text(); })
         .then(function (txt) {
-            var lines = txt.split(/\r?\n/);
+            var lines = _parseCSVRows(txt);
             if (lines.length < 2) { callback(); return; }
             var headers = _parseCSVLine(lines[0]);
-            console.log("[crimes] CSV People headers:", headers.slice(0, 5).join(", "), "... total:", headers.length);
+            console.log("[crimes] CSV People headers:", headers.slice(0, 5).join(", "), "... total:", headers.length, "rows:", lines.length - 1);
             var people = [];
             for (var i = 1; i < lines.length; i++) {
-                if (!lines[i].trim()) continue;
                 var cols = _parseCSVLine(lines[i]);
                 var row = {};
                 for (var j = 0; j < headers.length; j++) {
@@ -677,6 +676,26 @@ function _parseCSVLine(line) {
     }
     cells.push(cur.trim());
     return cells;
+}
+
+function _parseCSVRows(text) {
+    var rows = [];
+    var cur = "", inQ = false;
+    for (var i = 0; i < text.length; i++) {
+        var ch = text[i];
+        if (ch === '"') {
+            cur += ch;
+            inQ = !inQ;
+        } else if ((ch === '\n' || ch === '\r') && !inQ) {
+            if (ch === '\r' && text[i + 1] === '\n') i++;
+            if (cur.trim()) rows.push(cur);
+            cur = "";
+        } else {
+            cur += ch;
+        }
+    }
+    if (cur.trim()) rows.push(cur);
+    return rows;
 }
 
 function initCrimeData(onProgress, onDone) {
