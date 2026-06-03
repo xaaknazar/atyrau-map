@@ -76,7 +76,7 @@ if (useFirebase) {
             }
             _notifyListeners();
         });
-    });
+    })();
 
 } else {
     // ── localStorage fallback ─────────────────────────────────
