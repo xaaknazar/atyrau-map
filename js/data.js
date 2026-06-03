@@ -41,22 +41,10 @@ if (typeof FIREBASE_CONFIG !== "undefined" &&
 
 if (useFirebase) {
     // ── One-time migration: clear all old points ─────────────
-    var DATA_VERSION = 5;
-    var metaRef = db.ref("_meta/data_version");
     var migrationDone = false;
 
-    metaRef.once("value").then(function (snap) {
-        if (snap.val() !== DATA_VERSION) {
-            console.log("[data] Обновление версии до v" + DATA_VERSION);
-            return Promise.all([
-                db.ref("suggestions").remove()
-            ]).then(function () {
-                return metaRef.set(DATA_VERSION);
-            }).then(function () {
-                console.log("[data] Версия v" + DATA_VERSION + " установлена — заявки очищены");
-            });
-        }
-    }).then(function () {
+    // No migration — start immediately
+    (function () {
         migrationDone = true;
         // Start listener only AFTER migration is complete
         pointsRef.on("value", function (snapshot) {
@@ -64,11 +52,27 @@ if (useFirebase) {
             mapPoints = [];
             if (data) {
                 Object.keys(data).forEach(function (key) {
-                    // Преступность берётся только из таблицы (ЕРДР)
                     if (data[key].category !== "crime") {
                         mapPoints.push(data[key]);
                     }
                 });
+                // Backup to localStorage
+                try { localStorage.setItem("atyrau-map-points-backup", JSON.stringify(mapPoints)); } catch (e) {}
+            } else {
+                // Firebase empty — try restore from backup
+                var backup = localStorage.getItem("atyrau-map-points-backup");
+                if (backup) {
+                    try {
+                        var restored = JSON.parse(backup);
+                        if (restored.length > 0) {
+                            console.log("[data] Firebase пуст, восстанавливаем " + restored.length + " точек из бэкапа...");
+                            mapPoints = restored;
+                            restored.forEach(function (p) {
+                                pointsRef.child(String(p.id)).set(p);
+                            });
+                        }
+                    } catch (e) {}
+                }
             }
             _notifyListeners();
         });
