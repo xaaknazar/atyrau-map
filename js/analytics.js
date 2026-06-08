@@ -1016,7 +1016,7 @@ function buildProsecutorBriefing(analysis, allCrimes, lang) {
                 html += '<td><strong>' + escH(v.name) + '</strong><br><span class="muted" style="font-size:11px;">' + escH(v.addr) + '</span></td>';
                 html += '<td class="an-th-count"><strong>' + v.count + '</strong></td>';
                 html += '<td class="muted">' + escH(v.topArts || "—") + '</td>';
-                html += '<td><button class="an-zone-map-btn" data-lat="' + v.lat + '" data-lng="' + v.lng + '">📍</button></td>';
+                html += '<td><button class="an-venue-map-btn" data-lat="' + v.lat + '" data-lng="' + v.lng + '" data-name="' + escH(v.name) + '">📍</button></td>';
                 html += '</tr>';
             });
             html += '</tbody></table>';
