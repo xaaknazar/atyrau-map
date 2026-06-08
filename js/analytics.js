@@ -972,6 +972,59 @@ function buildProsecutorBriefing(analysis, allCrimes, lang) {
         html += '</div></div>';
     }
 
+    // ── Анализ заведений (корреляция с преступлениями) ──────────
+    if (typeof venuePoints !== "undefined" && venuePoints.length > 0) {
+        var VENUE_RADIUS = 0.001; // ~100м в градусах
+        var venueStats = [];
+        venuePoints.forEach(function (v) {
+            var nearby = 0;
+            var arts = {};
+            allCrimes.forEach(function (c) {
+                if (typeof c.lat !== "number" || isNaN(c.lat)) return;
+                var dLat = Math.abs(c.lat - v.lat);
+                var dLng = Math.abs(c.lng - v.lng);
+                if (dLat <= VENUE_RADIUS && dLng <= VENUE_RADIUS) {
+                    nearby++;
+                    if (c.article) {
+                        var num = c.article.match(/(\d{2,4})/);
+                        var key = num ? "ст. " + num[1] : c.article;
+                        arts[key] = (arts[key] || 0) + 1;
+                    }
+                }
+            });
+            if (nearby > 0) {
+                var topArtArr = Object.keys(arts).sort(function (a, b) { return arts[b] - arts[a]; }).slice(0, 3);
+                venueStats.push({ name: v.name, addr: v.addr || "", count: nearby, lat: v.lat, lng: v.lng, topArts: topArtArr.map(function (a) { return a + " (" + arts[a] + ")"; }).join(", ") });
+            }
+        });
+        venueStats.sort(function (a, b) { return b.count - a.count; });
+
+        if (venueStats.length > 0) {
+            html += '<div class="assistant-section">';
+            html += '<div class="assistant-section-title">🍸 ' + tr("brief_venues_crimes", "Заведения и преступность (радиус 100м)") + '</div>';
+            html += '<div class="assistant-hint">' + tr("brief_venues_hint", "Заведения рядом с которыми зафиксированы преступления") + '</div>';
+            html += '<table class="assistant-table"><thead><tr>';
+            html += '<th class="an-th-num">#</th>';
+            html += '<th>' + tr("brief_venue_name", "Заведение") + '</th>';
+            html += '<th class="an-th-count">' + tr("brief_count", "Кол-во") + '</th>';
+            html += '<th>' + tr("brief_main_art", "Осн. статья") + '</th>';
+            html += '<th></th>';
+            html += '</tr></thead><tbody>';
+            venueStats.slice(0, 15).forEach(function (v, i) {
+                html += '<tr>';
+                html += '<td class="an-th-num">' + (i + 1) + '</td>';
+                html += '<td><strong>' + escH(v.name) + '</strong><br><span class="muted" style="font-size:11px;">' + escH(v.addr) + '</span></td>';
+                html += '<td class="an-th-count"><strong>' + v.count + '</strong></td>';
+                html += '<td class="muted">' + escH(v.topArts || "—") + '</td>';
+                html += '<td><button class="an-zone-map-btn" data-lat="' + v.lat + '" data-lng="' + v.lng + '">📍</button></td>';
+                html += '</tr>';
+            });
+            html += '</tbody></table>';
+            html += '<button class="brief-export-btn" data-export="venues_crimes">📥 Excel</button>';
+            html += '</div>';
+        }
+    }
+
     // ── Рекомендации для прокурора ────────────────────────────
     var recs = [];
     if (top3Hours.length > 0) {

@@ -1005,6 +1005,20 @@
             _exportXlsx(h4, r4, "People_" + new Date().toISOString().slice(0, 10) + ".xlsx");
         } else if (type === "allpeople") {
             _showPeopleResults(crimePeople.slice(0, 50));
+        } else if (type === "venues_crimes") {
+            var VRAD = 0.001;
+            var vdata = [];
+            (typeof venuePoints !== "undefined" ? venuePoints : []).forEach(function (v) {
+                var cnt = 0;
+                crimeIncidents.forEach(function (c) {
+                    if (typeof c.lat !== "number" || isNaN(c.lat)) return;
+                    if (Math.abs(c.lat - v.lat) <= VRAD && Math.abs(c.lng - v.lng) <= VRAD) cnt++;
+                });
+                if (cnt > 0) vdata.push([v.name, v.addr || "", v.lat.toFixed(6), v.lng.toFixed(6), cnt]);
+            });
+            vdata.sort(function (x, y) { return y[4] - x[4]; });
+            var vh = ["Заведение", "Адрес", "Lat", "Lng", "Преступлений (100м)"];
+            _exportXlsx(vh, vdata, "Venues_crimes_" + new Date().toISOString().slice(0, 10) + ".xlsx");
         } else if (type === "showallzones") {
             var zones2 = (a.problemZones || []).filter(function (z) { return z.count <= 50; }).slice(0, 10);
             hideAnalyticsPanelWithBack();
