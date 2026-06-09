@@ -49,8 +49,8 @@ var PEOPLE_GID = "187886123";
 var PEOPLE_CSV_URL = "https://docs.google.com/spreadsheets/d/" + PEOPLE_SHEET_ID +
     "/export?format=csv&gid=" + PEOPLE_GID;
 
-var CRIMES_DATA_CACHE_KEY = "atyrau-crimes-data-cache-v2";
-var PEOPLE_DATA_CACHE_KEY = "atyrau-people-data-cache-v2";
+var CRIMES_DATA_CACHE_KEY = "atyrau-crimes-data-cache-v3";
+var PEOPLE_DATA_CACHE_KEY = "atyrau-people-data-cache-v3";
 
 // ══════════════════════════════════════════════════════════════
 //  Глобальные переменные
@@ -385,51 +385,64 @@ function csvRowToCrime(cols, idx) {
 function jsonRowToPerson(row, idx) {
     if (Array.isArray(row)) return null;
 
+    // Поиск значения по частичному совпадению ключа
+    function _find(row, parts) {
+        for (var key in row) {
+            var k = key.toLowerCase();
+            var match = true;
+            for (var i = 0; i < parts.length; i++) {
+                if (k.indexOf(parts[i]) === -1) { match = false; break; }
+            }
+            if (match) return _s(row[key]);
+        }
+        return "";
+    }
+
     return {
         id: idx + 1,
-        erdr: _s(row["Номер ЕРДР"]),
-        regDate: _parseDate(row["Дата-время регистрации"]),
-        organ: _s(row["Орган регистрации"]),
-        article: _s(row["Квалификация"]),
-        articlePart: _s(row["Квалификация п.п."]),
-        crimeDescription: _s(row["Описание преступления/проступка"]),
-        crimeDate: _s(row["Дата совершения"]),
-        crimeTime: _s(row["время совершения"]),
-        iin: _s(row["ИИН"]),
-        lastName: _s(row["Фамилия"]),
-        firstName: _s(row["Имя"]),
-        patronymic: _s(row["Отчество"]),
-        birthDate: _s(row["Дата рождения"]),
-        age: parseInt(_s(row["5.1.Возраст на момент совершения"])) || parseInt(_s(row["Возраст на момент совершения"])) || null,
-        gender: _s(row["6.Пол"]) || _s(row["Пол"]),
-        birthRepublic: _s(row["7.Место рождения Республика"]) || _s(row["Место рождения Республика"]),
-        birthOblast: _s(row["7.Место рождения Область"]) || _s(row["Место рождения Область"]),
-        birthDistrict: _s(row["7.Место рождения Район"]) || _s(row["Место рождения Район"]),
-        birthCity: _s(row["7.Место рождения Населенный пункт"]) || _s(row["Место рождения Населенный пункт"]),
-        citizenship: _s(row["8.Гражданство"]) || _s(row["Гражданство"]),
-        foreignCitizenship: _s(row["8.1.Гражданство иностранца"]) || _s(row["Гражданство иностранца"]),
-        nationality: _s(row["9.Национальность"]) || _s(row["Национальность"]),
-        education: _s(row["11.Образование"]) || _s(row["Образование"]),
-        maritalStatus: _s(row["12.Семейное положение"]) || _s(row["Семейное положение"]),
-        additionalInfo: _s(row["13.Дополнительные сведения"]) || _s(row["Дополнительные сведения"]),
-        isMinor: _s(row["13.1.Несовершеннолетний"]) || _s(row["Несовершеннолетний"]),
-        residencePlace: _s(row["14.По месту проживания"]),
-        addrRepublic: _s(row["15.Адрес Республика"]),
-        addrOblast: _s(row["15.Адрес Область"]),
-        addrDistrict: _s(row["15.Адрес Район"]),
-        addrCity: _s(row["15.Адрес Населенный пункт"]),
-        addrStreet: _s(row["15.Адрес Улица"]),
-        addrHouse: _s(row["15.Адрес Дом"]),
-        occupation: _s(row["17.Род занятий"]) || _s(row["Род занятий"]),
-        workplace: _s(row["19.Место работы (учебы)"]) || _s(row["Место работы (учебы)"]),
-        position: _s(row["19.Должность"]) || _s(row["Должность"]),
-        previousCrime: _s(row["24.Ранее совершивший преступление"]),
-        intoxication: _s(row["20.В состоянии"]),
-        inGroup: _s(row["21.В группе"]),
-        participationType: _s(row["23.Вид соучастия"]),
-        conviction: _s(row["27.Судимость"]),
-        registeredAccount: _s(row["28.Лицо состояло на учете"]),
-        decision: _s(row["55.Решение в отношении лица"])
+        erdr: _s(row["Номер ЕРДР"]) || _find(row, ["номер", "ердр"]),
+        regDate: _parseDate(row["Дата-время регистрации"]) || _parseDate(_find(row, ["дата", "регистрац"])),
+        organ: _s(row["Орган регистрации"]) || _find(row, ["орган", "регистрац"]),
+        article: _s(row["Квалификация"]) || _find(row, ["квалификац"]),
+        articlePart: _s(row["Квалификация п.п."]) || _find(row, ["квалификац", "п.п"]),
+        crimeDescription: _s(row["Описание преступления/проступка"]) || _find(row, ["описани"]),
+        crimeDate: _s(row["Дата совершения"]) || _find(row, ["дата", "соверш"]),
+        crimeTime: _s(row["время совершения"]) || _find(row, ["время", "соверш"]),
+        iin: _s(row["ИИН"]) || _find(row, ["иин"]),
+        lastName: _s(row["Фамилия"]) || _find(row, ["фамили"]),
+        firstName: _s(row["Имя"]) || _find(row, ["имя"]),
+        patronymic: _s(row["Отчество"]) || _find(row, ["отчеств"]),
+        birthDate: _s(row["Дата рождения"]) || _find(row, ["дата", "рожден"]),
+        age: parseInt(_s(row["5.1.Возраст на момент совершения"])) || parseInt(_find(row, ["возраст"])) || null,
+        gender: _s(row["6.Пол"]) || _s(row["Пол"]) || _find(row, ["пол"]),
+        birthRepublic: _find(row, ["место", "рожден", "республ"]),
+        birthOblast: _find(row, ["место", "рожден", "област"]),
+        birthDistrict: _find(row, ["место", "рожден", "район"]),
+        birthCity: _find(row, ["место", "рожден", "населен"]),
+        citizenship: _s(row["8.Гражданство"]) || _s(row["Гражданство"]) || _find(row, ["гражданств"]),
+        foreignCitizenship: _find(row, ["гражданств", "иностран"]),
+        nationality: _s(row["9.Национальность"]) || _s(row["Национальность"]) || _find(row, ["национальн"]),
+        education: _s(row["11.Образование"]) || _s(row["Образование"]) || _find(row, ["образован"]),
+        maritalStatus: _s(row["12.Семейное положение"]) || _s(row["Семейное положение"]) || _find(row, ["семейн"]),
+        additionalInfo: _s(row["13.Дополнительные сведения"]) || _find(row, ["дополнительн", "сведен"]),
+        isMinor: _s(row["13.1.Несовершеннолетний"]) || _find(row, ["несовершеннолетн"]),
+        residencePlace: _find(row, ["по месту", "проживан"]),
+        addrRepublic: _find(row, ["адрес", "республ"]),
+        addrOblast: _find(row, ["адрес", "област"]),
+        addrDistrict: _find(row, ["адрес", "район"]),
+        addrCity: _find(row, ["адрес", "населен"]),
+        addrStreet: _find(row, ["адрес", "улиц"]),
+        addrHouse: _find(row, ["адрес", "дом"]),
+        occupation: _s(row["17.Род занятий"]) || _s(row["Род занятий"]) || _find(row, ["род", "занят"]),
+        workplace: _s(row["19.Место работы (учебы)"]) || _find(row, ["место", "работ"]),
+        position: _s(row["19.Должность"]) || _find(row, ["должност"]),
+        previousCrime: _find(row, ["ранее", "соверш"]),
+        intoxication: _find(row, ["в состоянии"]),
+        inGroup: _find(row, ["в группе"]),
+        participationType: _find(row, ["вид", "соучаст"]),
+        conviction: _find(row, ["судимост"]),
+        registeredAccount: _find(row, ["состоял", "на учет"]),
+        decision: _find(row, ["решение", "отношен"])
     };
 }
 
@@ -509,15 +522,16 @@ function _parseAPIResponse(data) {
         }
     }
 
-    crimePeople = [];
-    for (var j = 0; j < peopleRows.length; j++) {
-        var person = jsonRowToPerson(peopleRows[j], j);
-        if (person && person.erdr) {
-            crimePeople.push(person);
+    if (peopleRows.length > 0) {
+        crimePeople = [];
+        for (var j = 0; j < peopleRows.length; j++) {
+            var person = jsonRowToPerson(peopleRows[j], j);
+            if (person) {
+                crimePeople.push(person);
+            }
         }
+        _buildPeopleIndex();
     }
-
-    _buildPeopleIndex();
     console.log("[crimes] Загружено: " + crimeIncidents.length + " преступлений, " + crimePeople.length + " лиц");
 }
 
@@ -614,19 +628,23 @@ function _loadPeopleCSV(callback) {
     fetch(PEOPLE_CSV_URL)
         .then(function (r) { return r.text(); })
         .then(function (txt) {
-            var lines = txt.split(/\r?\n/);
+            var lines = _parseCSVRows(txt);
             if (lines.length < 2) { callback(); return; }
             var headers = _parseCSVLine(lines[0]);
+            console.log("[crimes] CSV People headers:", headers.slice(0, 5).join(", "), "... total:", headers.length, "rows:", lines.length - 1);
             var people = [];
             for (var i = 1; i < lines.length; i++) {
-                if (!lines[i].trim()) continue;
                 var cols = _parseCSVLine(lines[i]);
                 var row = {};
                 for (var j = 0; j < headers.length; j++) {
                     row[headers[j]] = cols[j] || "";
                 }
                 var person = jsonRowToPerson(row, i - 1);
-                if (person && person.erdr) people.push(person);
+                if (person) {
+                    people.push(person);
+                } else if (i < 4) {
+                    console.log("[crimes] CSV row " + i + " returned null, row keys:", Object.keys(row).slice(0, 5).join(", "));
+                }
             }
             if (people.length > 0) {
                 crimePeople = people;
@@ -660,6 +678,26 @@ function _parseCSVLine(line) {
     return cells;
 }
 
+function _parseCSVRows(text) {
+    var rows = [];
+    var cur = "", inQ = false;
+    for (var i = 0; i < text.length; i++) {
+        var ch = text[i];
+        if (ch === '"') {
+            cur += ch;
+            inQ = !inQ;
+        } else if ((ch === '\n' || ch === '\r') && !inQ) {
+            if (ch === '\r' && text[i + 1] === '\n') i++;
+            if (cur.trim()) rows.push(cur);
+            cur = "";
+        } else {
+            cur += ch;
+        }
+    }
+    if (cur.trim()) rows.push(cur);
+    return rows;
+}
+
 function initCrimeData(onProgress, onDone) {
     loadCrimesFromSheet(function () {
         var withCoords = crimeIncidents.filter(function (c) {
@@ -668,15 +706,11 @@ function initCrimeData(onProgress, onDone) {
         console.log("[crimes] С координатами: " + withCoords + " из " + crimeIncidents.length);
         _saveCrimesCache();
 
-        if (crimePeople.length === 0) {
-            _loadPeopleCSV(function () {
-                if (onDone) onDone();
-                _notifyCrimesReady();
-            });
-        } else {
+        // Всегда загружать людей из CSV (API не возвращает их)
+        _loadPeopleCSV(function () {
             if (onDone) onDone();
             _notifyCrimesReady();
-        }
+        });
     });
 }
 

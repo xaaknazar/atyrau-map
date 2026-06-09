@@ -951,6 +951,17 @@
                 });
             });
 
+            // ── Кнопки заведений на карте (100м радиус + преступления) ──
+            assistantBody.querySelectorAll(".an-venue-map-btn").forEach(function (btn) {
+                btn.addEventListener("click", function () {
+                    var lat = parseFloat(this.getAttribute("data-lat"));
+                    var lng = parseFloat(this.getAttribute("data-lng"));
+                    var name = this.getAttribute("data-name") || "";
+                    if (isNaN(lat) || isNaN(lng)) return;
+                    _showVenueOnMap(lat, lng, name, analysis);
+                });
+            });
+
             // ── Экспорт кнопки в брифинге ──
             assistantBody.querySelectorAll("[data-export]").forEach(function (btn) {
                 btn.addEventListener("click", function () {
@@ -1005,6 +1016,20 @@
             _exportXlsx(h4, r4, "People_" + new Date().toISOString().slice(0, 10) + ".xlsx");
         } else if (type === "allpeople") {
             _showPeopleResults(crimePeople.slice(0, 50));
+        } else if (type === "venues_crimes") {
+            var VRAD = 0.001;
+            var vdata = [];
+            (typeof venuePoints !== "undefined" ? venuePoints : []).forEach(function (v) {
+                var cnt = 0;
+                crimeIncidents.forEach(function (c) {
+                    if (typeof c.lat !== "number" || isNaN(c.lat)) return;
+                    if (Math.abs(c.lat - v.lat) <= VRAD && Math.abs(c.lng - v.lng) <= VRAD) cnt++;
+                });
+                if (cnt > 0) vdata.push([v.name, v.addr || "", v.lat.toFixed(6), v.lng.toFixed(6), cnt]);
+            });
+            vdata.sort(function (x, y) { return y[4] - x[4]; });
+            var vh = ["Заведение", "Адрес", "Lat", "Lng", "Преступлений (100м)"];
+            _exportXlsx(vh, vdata, "Venues_crimes_" + new Date().toISOString().slice(0, 10) + ".xlsx");
         } else if (type === "showallzones") {
             var zones2 = (a.problemZones || []).filter(function (z) { return z.count <= 50; }).slice(0, 10);
             hideAnalyticsPanelWithBack();
@@ -1107,8 +1132,6 @@
         var occ = oEl ? oEl.value : "";
 
         return people.filter(function (p) {
-            // Пропускаем лица без ФИО
-            if (!p.lastName && !p.firstName && !p.patronymic) return false;
             if (q) {
                 var fio = [p.lastName, p.firstName, p.patronymic].filter(Boolean).join(" ").toLowerCase();
                 if (fio.indexOf(q) === -1 && (!p.iin || p.iin.indexOf(q) === -1)) return false;
@@ -1144,8 +1167,8 @@
                 '</div>';
             return;
         }
-        container.innerHTML = list.slice(0, 200).map(function (p) {
-            var fio = [p.lastName, p.firstName, p.patronymic].filter(Boolean).join(" ") || "—";
+        container.innerHTML = list.slice(0, 200).map(function (p, idx) {
+            var fio = [p.lastName, p.firstName, p.patronymic].filter(Boolean).join(" ") || (p.iin ? "ИИН: " + p.iin : (p.article || "Лицо " + (idx + 1)));
             var isMinor = p.age && p.age < 18;
             var meta = [];
             if (p.age) meta.push('<span><strong>' + p.age + '</strong> лет</span>');
@@ -1165,6 +1188,85 @@
                 if (p) _showPeopleResults([p]);
             });
         });
+    }
+
+    function _showVenueOnMap(lat, lng, venueName) {
+        var RADIUS_DEG = 0.001; // ~100м
+        hideAnalyticsPanelWithBack();
+        setTimeout(function () {
+            map.invalidateSize();
+            map.setView([lat, lng], 18);
+
+            // Убрать предыдущие элементы
+            if (window._venueOverlay) {
+                window._venueOverlay.forEach(function (l) { map.removeLayer(l); });
+            }
+            window._venueOverlay = [];
+
+            // Круг 100м
+            var circle = L.circle([lat, lng], {
+                radius: 100,
+                color: '#e91e63',
+                fillColor: '#e91e63',
+                fillOpacity: 0.1,
+                weight: 2,
+                dashArray: '6,4'
+            }).addTo(map);
+            circle.bindPopup('<strong>🍸 ' + venueName + '</strong><br>Радиус: 100 м');
+            window._venueOverlay.push(circle);
+
+            // Маркер заведения
+            var venueIcon = L.divIcon({
+                className: "venue-marker-wrap",
+                html: '<div class="venue-marker" style="width:32px;height:32px;font-size:16px;">🍸</div>',
+                iconSize: [32, 32],
+                iconAnchor: [16, 16]
+            });
+            var venueMarker = L.marker([lat, lng], { icon: venueIcon }).addTo(map);
+            venueMarker.bindPopup('<strong>🍸 ' + venueName + '</strong>').openPopup();
+            window._venueOverlay.push(venueMarker);
+
+            // Преступления в радиусе 100м
+            crimeIncidents.forEach(function (c) {
+                if (typeof c.lat !== "number" || isNaN(c.lat)) return;
+                if (Math.abs(c.lat - lat) > RADIUS_DEG || Math.abs(c.lng - lng) > RADIUS_DEG) return;
+
+                var artNum = c.article || "—";
+                var crimeMarker = L.circleMarker([c.lat, c.lng], {
+                    radius: 6,
+                    color: "#fff",
+                    weight: 2,
+                    fillColor: "#e74c3c",
+                    fillOpacity: 0.9
+                }).addTo(map);
+
+                crimeMarker.bindTooltip(artNum, { direction: "top", offset: [0, -8], className: "marker-tooltip", permanent: true });
+
+                crimeMarker.on("click", function () {
+                    if (isStaff) {
+                        openCrimeModal(c);
+                    } else {
+                        crimeMarker.unbindPopup();
+                        crimeMarker.bindPopup(
+                            '<div style="text-align:center;min-width:120px;">' +
+                            '<div style="font-size:16px;font-weight:700;color:#e74c3c;">' + artNum + '</div>' +
+                            '<div style="font-size:11px;color:#888;">' + formatDateOnly(c.crimeDate) + '</div>' +
+                            '</div>'
+                        ).openPopup();
+                    }
+                });
+
+                window._venueOverlay.push(crimeMarker);
+            });
+
+            // Авто-убрать через 2 минуты
+            setTimeout(function () {
+                if (window._venueOverlay) {
+                    window._venueOverlay.forEach(function (l) { map.removeLayer(l); });
+                    window._venueOverlay = [];
+                }
+            }, 120000);
+        }, 100);
     }
 
     function _showPeopleResults(people) {
