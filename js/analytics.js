@@ -864,7 +864,7 @@ function buildProsecutorBriefing(analysis, allCrimes, lang) {
     var publicPct = pct(analysis.publicCount, analysis.total);
     var coordsPct = pct(analysis.withCoords, analysis.total);
     html += '<div class="assistant-section">';
-    html += '<div class="assistant-section-title">📊 ' + tr("brief_summary", "Қысқаша түйін") + '</div>';
+    html += '<div class="assistant-section-title">' + tr("brief_summary", "Қысқаша түйін") + '</div>';
     html += '<div class="assistant-summary-grid">';
     html += '<div class="assistant-stat"><div class="assistant-stat-value">' + analysis.total + '</div><div class="assistant-stat-label">' + tr("brief_total", "Барлық құқық бұзушылық") + '</div></div>';
     html += '<div class="assistant-stat"><div class="assistant-stat-value">' + analysis.byArticle.length + '</div><div class="assistant-stat-label">' + tr("brief_articles", "Түрлі баптар") + '</div></div>';
@@ -873,7 +873,7 @@ function buildProsecutorBriefing(analysis, allCrimes, lang) {
 
     // ── Топ статей с распределением по местам ──────────────────
     html += '<div class="assistant-section">';
-    html += '<div class="assistant-section-title">⚖️ ' + tr("brief_top_articles", "Топ статей УК — структура преступности") + '</div>';
+    html += '<div class="assistant-section-title">' + tr("brief_top_articles", "Топ статей УК — структура преступности") + '</div>';
     html += '<table class="assistant-table"><thead><tr>';
     html += '<th>#</th><th>' + tr("brief_article", "Статья") + '</th>';
     html += '<th>' + tr("brief_count", "Кол-во") + '</th>';
@@ -899,13 +899,13 @@ function buildProsecutorBriefing(analysis, allCrimes, lang) {
         html += '</tr>';
     });
     html += '</tbody></table>';
-    html += '<button class="brief-export-btn" data-export="articles">📥 Excel</button>';
+    html += '<button class="brief-export-btn" data-export="articles">Excel</button>';
     html += '</div>';
 
     // ── Топ аймақтар по координатам (радиус ~300м) ──────────────
     var topGeoZones = (analysis.byGeoZone || []).slice(0, 10);
     html += '<div class="assistant-section">';
-    html += '<div class="assistant-section-title">📍 ' + tr("brief_geo_zones", "Топ зон по координатам") + '</div>';
+    html += '<div class="assistant-section-title">' + tr("brief_geo_zones", "Топ зон по координатам") + '</div>';
     html += '<div class="assistant-hint">' + tr("brief_geo_hint", "Группировка по координатам (радиус ~500м)") + '</div>';
     html += '<table class="assistant-table"><thead><tr>';
     html += '<th>#</th>';
@@ -924,18 +924,18 @@ function buildProsecutorBriefing(analysis, allCrimes, lang) {
         html += '<td>' + escH(z.coords) + '</td>';
         html += '<td><strong>' + z.count + '</strong></td>';
         html += '<td class="muted">' + escH(topArts || "—") + '</td>';
-        html += '<td><button class="an-zone-map-btn" data-lat="' + z.lat + '" data-lng="' + z.lng + '">📍</button></td>';
+        html += '<td><button class="an-zone-map-btn" data-lat="' + z.lat + '" data-lng="' + z.lng + '">На карте</button></td>';
         html += '</tr>';
     });
     html += '</tbody></table>';
-    html += '<button class="brief-export-btn" data-export="geozones">📥 Excel</button>';
+    html += '<button class="brief-export-btn" data-export="geozones">Excel</button>';
     html += '</div>';
 
     // ── Горячие зоны (радиус ~500м) ────────────────────────────
     var validZones = (analysis.problemZones || []).filter(function (z) { return z.count <= 50; });
     if (validZones.length > 0) {
         html += '<div class="assistant-section">';
-        html += '<div class="assistant-section-title">🔥 ' + tr("brief_hot_zones", "Горячие зоны (радиус ~500 м)") + '</div>';
+        html += '<div class="assistant-section-title">' + tr("brief_hot_zones", "Горячие зоны (радиус ~500 м)") + '</div>';
         html += '<div class="assistant-hint">' + tr("brief_hot_hint", "Кластеры преступности — приоритетные участки") + '</div>';
         validZones.slice(0, 5).forEach(function (z, i) {
             var dangerCls = z.dangerLevel >= 3 ? "danger-high" : (z.dangerLevel >= 2 ? "danger-mid" : "danger-low");
@@ -952,8 +952,8 @@ function buildProsecutorBriefing(analysis, allCrimes, lang) {
             html += '</div>';
         });
         html += '<div style="display:flex;gap:8px;margin-top:12px;">';
-        html += '<button class="brief-export-btn" data-export="hotzones">📥 Excel</button>';
-        html += '<button class="brief-export-btn an-zone-map-btn" data-export="showallzones">📍 ' + tr("an_show_map", "Показать на карте") + '</button>';
+        html += '<button class="brief-export-btn" data-export="hotzones">Excel</button>';
+        html += '<button class="brief-export-btn an-zone-map-btn" data-export="showallzones">' + tr("an_show_map", "Показать на карте") + '</button>';
         html += '</div>';
         html += '</div>';
     }
@@ -966,7 +966,7 @@ function buildProsecutorBriefing(analysis, allCrimes, lang) {
     var dayPeaks = analysis.byDayOfWeek.labels.map(function (d, i) { return { d: d, c: analysis.byDayOfWeek.counts[i] }; })
         .sort(function (a, b) { return b.c - a.c; });
     html += '<div class="assistant-section">';
-    html += '<div class="assistant-section-title">⏰ ' + tr("brief_danger_time", "Опасное время") + '</div>';
+    html += '<div class="assistant-section-title">' + tr("brief_danger_time", "Опасное время") + '</div>';
     html += '<div class="assistant-time-grid">';
     html += '<div><strong>' + tr("brief_peak_hours", "Пиковые часы") + ':</strong><br>';
     html += top3Hours.map(function (x) { return ("0" + x.h).slice(-2) + ':00 (' + x.c + ')'; }).join(" · ") + '</div>';
@@ -987,7 +987,7 @@ function buildProsecutorBriefing(analysis, allCrimes, lang) {
         var trendIcon = diff > 0 ? "↑" : (diff < 0 ? "↓" : "→");
         var trendCls = diff > 0 ? "trend-up" : (diff < 0 ? "trend-down" : "trend-flat");
         html += '<div class="assistant-section">';
-        html += '<div class="assistant-section-title">📈 ' + tr("brief_trend", "Тренд между завершёнными месяцами") + '</div>';
+        html += '<div class="assistant-section-title">' + tr("brief_trend", "Тренд между завершёнными месяцами") + '</div>';
         html += '<div class="assistant-trend ' + trendCls + '">';
         html += trendIcon + ' ' + (diff >= 0 ? "+" : "") + diff + ' ' + tr("brief_cases", "случаев") + ' (' + (diffPct >= 0 ? "+" : "") + diffPct + '%)';
         html += '</div>';
@@ -1001,7 +1001,7 @@ function buildProsecutorBriefing(analysis, allCrimes, lang) {
     if (analysis.people) {
         var p = analysis.people;
         html += '<div class="assistant-section">';
-        html += '<div class="assistant-section-title">👤 ' + tr("brief_offenders", "Профиль правонарушителей") + '</div>';
+        html += '<div class="assistant-section-title">' + tr("brief_offenders", "Профиль правонарушителей") + '</div>';
         html += '<div class="assistant-people-grid">';
         if (p.total) html += '<div><strong>' + tr("brief_total_persons", "Всего лиц") + ':</strong> ' + p.total + '</div>';
         if (p.minors) html += '<div><strong>' + tr("brief_minors", "Несовершеннолетних") + ':</strong> ' + p.minors + ' (' + pct(p.minors, p.total) + '%)</div>';
@@ -1010,8 +1010,8 @@ function buildProsecutorBriefing(analysis, allCrimes, lang) {
         if (p.byOccupation && p.byOccupation[0]) html += '<div><strong>' + tr("brief_occupation", "Род занятий") + ':</strong> ' + escH(p.byOccupation[0].label) + '</div>';
         html += '</div>';
         html += '<div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;">';
-        html += '<button class="brief-export-btn" data-export="people">📥 Excel</button>';
-        html += '<button class="brief-export-btn" data-export="allpeople">👤 ' + tr("brief_all_persons", "Все лица") + '</button>';
+        html += '<button class="brief-export-btn" data-export="people">Excel</button>';
+        html += '<button class="brief-export-btn" data-export="allpeople">' + tr("brief_all_persons", "Все лица") + '</button>';
         html += '<div class="brief-search-wrap"><input type="text" id="brief-people-search" class="brief-search-input" placeholder="' + tr("brief_search_person", "Поиск по ФИО...") + '" /></div>';
         html += '</div></div>';
     }
@@ -1045,7 +1045,7 @@ function buildProsecutorBriefing(analysis, allCrimes, lang) {
 
         if (venueStats.length > 0) {
             html += '<div class="assistant-section">';
-            html += '<div class="assistant-section-title">🍸 ' + tr("brief_venues_crimes", "Заведения и преступность (радиус 100м)") + '</div>';
+            html += '<div class="assistant-section-title">' + tr("brief_venues_crimes", "Заведения и преступность (радиус 100м)") + '</div>';
             html += '<div class="assistant-hint">' + tr("brief_venues_hint", "Заведения рядом с которыми зафиксированы преступления") + '</div>';
             html += '<table class="assistant-table"><thead><tr>';
             html += '<th class="an-th-num">#</th>';
@@ -1060,11 +1060,11 @@ function buildProsecutorBriefing(analysis, allCrimes, lang) {
                 html += '<td><strong>' + escH(v.name) + '</strong><br><span class="muted" style="font-size:11px;">' + escH(v.addr) + '</span></td>';
                 html += '<td class="an-th-count"><strong>' + v.count + '</strong></td>';
                 html += '<td class="muted">' + escH(v.topArts || "—") + '</td>';
-                html += '<td><button class="an-venue-map-btn" data-lat="' + v.lat + '" data-lng="' + v.lng + '" data-name="' + escH(v.name) + '">📍</button></td>';
+                html += '<td><button class="an-venue-map-btn" data-lat="' + v.lat + '" data-lng="' + v.lng + '" data-name="' + escH(v.name) + '">На карте</button></td>';
                 html += '</tr>';
             });
             html += '</tbody></table>';
-            html += '<button class="brief-export-btn" data-export="venues_crimes">📥 Excel</button>';
+            html += '<button class="brief-export-btn" data-export="venues_crimes">Excel</button>';
             html += '</div>';
         }
     }
@@ -1091,7 +1091,7 @@ function buildProsecutorBriefing(analysis, allCrimes, lang) {
     }
     if (recs.length > 0) {
         html += '<div class="assistant-section assistant-recommendations">';
-        html += '<div class="assistant-section-title">✅ ' + tr("brief_recommendations", "Рекомендации прокурору") + '</div>';
+        html += '<div class="assistant-section-title">' + tr("brief_recommendations", "Рекомендации прокурору") + '</div>';
         html += '<ol class="assistant-rec-list">';
         recs.forEach(function (r) { html += '<li>' + escH(r) + '</li>'; });
         html += '</ol></div>';
@@ -1101,7 +1101,7 @@ function buildProsecutorBriefing(analysis, allCrimes, lang) {
     var smartFindings = buildSmartFindings(analysis, allCrimes);
     if (smartFindings.length > 0) {
         html += '<div class="assistant-section">';
-        html += '<div class="assistant-section-title">📄 Анықталған мәселелер бойынша ҰСЫНУ</div>';
+        html += '<div class="assistant-section-title">Анықталған мәселелер бойынша ҰСЫНУ</div>';
         html += '<div class="assistant-hint">Жүйе деректерді талдап, маңызды мәселелерді анықтады. Әр мәселе бойынша жеке акт надзора жүктей аласыз.</div>';
         html += '<div class="usynu-findings-list">';
         smartFindings.forEach(function (f) {
@@ -1116,7 +1116,7 @@ function buildProsecutorBriefing(analysis, allCrimes, lang) {
             html += '<ul class="usynu-finding-facts">';
             f.facts.forEach(function (fact) { html += '<li>' + escH(fact) + '</li>'; });
             html += '</ul>';
-            html += '<button class="usynu-download-btn" data-usynu-type="' + f.type + '">📄 ҰСЫНУ жүктеу</button>';
+            html += '<button class="usynu-download-btn" data-usynu-type="' + f.type + '">ҰСЫНУ жүктеу</button>';
             html += '</div>';
         });
         html += '</div></div>';
@@ -1124,7 +1124,7 @@ function buildProsecutorBriefing(analysis, allCrimes, lang) {
 
     // ── Что ещё можно сделать ────────────────────────────────
     html += '<div class="assistant-section assistant-extra">';
-    html += '<div class="assistant-section-title">💡 ' + tr("brief_extra", "Дополнительные возможности") + '</div>';
+    html += '<div class="assistant-section-title">' + tr("brief_extra", "Дополнительные возможности") + '</div>';
     html += '<ul class="assistant-rec-list">';
     html += '<li>' + tr("extra_predict", "Прогнозирование риска по дням и зонам на основании исторических трендов") + '</li>';
     html += '<li>' + tr("extra_correlate", "Корреляция с инфраструктурой: освещение, камеры, заброшенные здания") + '</li>';

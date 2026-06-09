@@ -1066,7 +1066,7 @@
                         fillOpacity: 0.12, weight: 2, dashArray: '6,4'
                     }).addTo(map);
                     var _hotName = (typeof zoneAreaName === "function") ? zoneAreaName(z) : "";
-                    var _hotHtml = '<strong>#' + (i + 1) + '</strong> — ' + z.count + ' случаев' + (_hotName ? '<br>📍 ' + _hotName : '') + '<br>' + z.lat.toFixed(4) + ', ' + z.lng.toFixed(4);
+                    var _hotHtml = '<strong>#' + (i + 1) + '</strong> — ' + z.count + ' случаев' + (_hotName ? '<br>' + _hotName : '') + '<br>' + z.lat.toFixed(4) + ', ' + z.lng.toFixed(4);
                     _circleWithPanorama(c, _hotHtml, {});
                     window._hotZoneCircles.push(c);
                     bounds.push([z.lat, z.lng]);
@@ -1197,8 +1197,8 @@
             var meta = [];
             if (p.age) meta.push('<span><strong>' + p.age + '</strong> лет</span>');
             if (p.gender) meta.push('<span>' + p.gender + '</span>');
-            if (p.article) meta.push('<span>📋 ' + p.article + '</span>');
-            if (p.occupation) meta.push('<span>💼 ' + p.occupation + '</span>');
+            if (p.article) meta.push('<span>' + p.article + '</span>');
+            if (p.occupation) meta.push('<span>' + p.occupation + '</span>');
             return '<div class="an-people-card' + (isMinor ? ' minor' : '') + '" data-erdr="' + (p.erdr || "") + '">' +
                 '<div class="an-people-card-fio">' + fio + '</div>' +
                 '<div class="an-people-card-meta">' + meta.join("") + '</div>' +
@@ -1242,12 +1242,12 @@
             // Маркер заведения
             var venueIcon = L.divIcon({
                 className: "venue-marker-wrap",
-                html: '<div class="venue-marker" style="width:32px;height:32px;font-size:16px;">🍸</div>',
+                html: '<div class="venue-marker" style="width:32px;height:32px;font-size:16px;"></div>',
                 iconSize: [32, 32],
                 iconAnchor: [16, 16]
             });
             var venueMarker = L.marker([lat, lng], { icon: venueIcon }).addTo(map);
-            venueMarker.bindPopup('<strong>🍸 ' + venueName + '</strong>').openPopup();
+            venueMarker.bindPopup('<strong>' + venueName + '</strong>').openPopup();
             window._venueOverlay.push(venueMarker);
 
             // Преступления в радиусе 100м
@@ -1698,7 +1698,7 @@
                 '<div class="an-zone-rank d' + z.dangerLevel + '">' + (i + 1) + '</div>' +
                 '<div class="an-zone-info">' +
                     '<h4>' + z.count + ' правонарушений</h4>' +
-                    (_areaName ? '<p class="an-zone-name">📍 ' + _areaName + '</p>' : '') +
+                    (_areaName ? '<p class="an-zone-name">' + _areaName + '</p>' : '') +
                     '<p>Координаты: ' + z.lat.toFixed(4) + ', ' + z.lng.toFixed(4) + '</p>' +
                     '<p>Пиковое время: ' + peakTime + ' | В общ. местах: ' + z.publicCount + '</p>' +
                     '<div class="an-zone-tags">' + tags + '</div>' +
@@ -1823,9 +1823,9 @@
                             '<ul class="zone-popup-list">' + topStreetsHtml + '</ul>' +
                         '</div>' +
                         '<div class="zone-popup-stats">' +
-                            '<div class="zone-popup-stat"><span>⏰</span> Пик: <b>' + peakTime + '</b></div>' +
-                            '<div class="zone-popup-stat"><span>🏛️</span> В общ. местах: <b>' + publicPct + '%</b> (' + z.publicCount + ')</div>' +
-                            '<div class="zone-popup-stat"><span>📍</span> Радиус: <b>~' + Math.round(radius) + 'м</b></div>' +
+                            '<div class="zone-popup-stat">Пик: <b>' + peakTime + '</b></div>' +
+                            '<div class="zone-popup-stat">В общ. местах: <b>' + publicPct + '%</b> (' + z.publicCount + ')</div>' +
+                            '<div class="zone-popup-stat">Радиус: <b>~' + Math.round(radius) + 'м</b></div>' +
                         '</div>' +
                     '</div>' +
                 '</div>';
@@ -1879,7 +1879,7 @@
             }
 
             statusEl.classList.remove("hidden");
-            statusEl.textContent = "🤖 AI анализирует все данные (это может занять до минуты)...";
+            statusEl.textContent = "AI анализирует все данные (это может занять до минуты)...";
             resultEl.innerHTML = "";
             aiRunBtn.disabled = true;
 
@@ -1907,7 +1907,7 @@
             .catch(function (err) {
                 statusEl.classList.add("hidden");
                 aiRunBtn.disabled = false;
-                resultEl.innerHTML = '<div class="ai-error">⚠️ Ошибка анализа: ' + (err && err.message ? err.message : "неизвестная ошибка") + '</div>';
+                resultEl.innerHTML = '<div class="ai-error">Ошибка анализа: ' + (err && err.message ? err.message : "неизвестная ошибка") + '</div>';
             });
         });
     }
@@ -2452,7 +2452,7 @@
                 var phones = s.schoolPhones.length ? s.schoolPhones.join(", ") : "—";
                 popupContent =
                     '<strong>' + s.name + '</strong><br>' +
-                    (s.address ? '<span style="color:#8899b0">📍 ' + s.address + '</span><br>' : '') +
+                    (s.address ? '<span style="color:#8899b0">' + s.address + '</span><br>' : '') +
                     '<br><b>Директор:</b> ' + (s.director || "—") + '<br>' +
                     '<b>Тел. школы:</b> ' + phones + '<br>' +
                     '<b>Тел. директора:</b> ' + (s.directorPhone || "—");
@@ -2482,7 +2482,7 @@
         venuePoints.forEach(function (v) {
             var icon = L.divIcon({
                 className: "venue-marker-wrap",
-                html: '<div class="venue-marker">🍸</div>',
+                html: '<div class="venue-marker"></div>',
                 iconSize: [24, 24],
                 iconAnchor: [12, 12]
             });
@@ -4039,7 +4039,7 @@
         var info = CATEGORIES[category] || { color: "#888" };
         var bg = resolved ? "#27ae60" : info.color;
         var cls = resolved ? "in-progress-marker is-resolved" : "in-progress-marker";
-        var icon = resolved ? "✓" : "⚒";
+        var icon = resolved ? "✓" : "•";
         var pulse = resolved ? "" : '<span class="in-progress-pulse" style="background:' + bg + ';"></span>';
         var html = '<div class="' + cls + '" style="background:' + bg + ';">' +
                     pulse +

@@ -24,7 +24,7 @@
 
     <!-- Floating menu button for mobile (over the map) -->
     <button id="mobile-menu-btn" aria-label="Меню">
-        <span></span><span></span><span></span>
+        
     </button>
 
     <!-- Sidebar -->
@@ -407,7 +407,7 @@
             <!-- Показано записей -->
             <div class="crime-panel-results-bar">
                 <span>Показано: <strong id="crime-panel-count-value">0</strong></span>
-                <button id="crime-export-xlsx" class="export-xlsx-btn">📥 Выгрузить</button>
+                <button id="crime-export-xlsx" class="export-xlsx-btn">Выгрузить</button>
                 <button id="crime-reset-filters" class="crime-reset-btn">Сбросить фильтры</button>
             </div>
         </div>
@@ -493,7 +493,7 @@
 
             <div class="crime-panel-results-bar">
                 <span>Показано: <strong id="av-count-value">0</strong></span>
-                <button id="av-export-xlsx" class="export-xlsx-btn">📥 Выгрузить</button>
+                <button id="av-export-xlsx" class="export-xlsx-btn">Выгрузить</button>
                 <button id="av-reset-filters" class="crime-reset-btn">Сбросить фильтры</button>
             </div>
         </div>
@@ -512,7 +512,7 @@
                     <span>Назад</span>
                 </button>
                 <h2>Аналитика административных правонарушений</h2>
-                <button id="av-analytics-export-xlsx" class="export-xlsx-btn">📥 Выгрузить</button>
+                <button id="av-analytics-export-xlsx" class="export-xlsx-btn">Выгрузить</button>
             </div>
             <div class="analytics-period-row">
                 <span class="analytics-period-label">Период:</span>
@@ -569,7 +569,7 @@
                     <span>Назад к карте</span>
                 </button>
                 <h2 data-i18n="an_title">Аналитика преступлений</h2>
-                <button id="crime-analytics-export-xlsx" class="export-xlsx-btn">📥 Выгрузить</button>
+                <button id="crime-analytics-export-xlsx" class="export-xlsx-btn">Выгрузить</button>
             </div>
             <!-- Период -->
             <div class="analytics-period-row">
@@ -676,7 +676,7 @@
                         <button id="an-people-close-list" class="crime-reset-btn">Скрыть список</button>
                     </div>
                     <div class="an-people-toolbar">
-                        <input type="text" id="an-people-search" placeholder="🔍 Поиск по ФИО или ИИН..." />
+                        <input type="text" id="an-people-search" placeholder="Поиск по ФИО или ИИН..." />
                         <select id="an-people-age-filter">
                             <option value="">Возраст: все</option>
                             <option value="minor">До 18 лет</option>
@@ -695,7 +695,7 @@
                         <select id="an-people-occ-filter">
                             <option value="">Род занятий: все</option>
                         </select>
-                        <button id="an-people-export" class="export-xlsx-btn">📥 Excel</button>
+                        <button id="an-people-export" class="export-xlsx-btn">Excel</button>
                     </div>
                     <div class="an-people-count">Показано: <strong id="an-people-count-val">0</strong></div>
                     <div class="an-people-list" id="an-people-list"></div>
@@ -743,7 +743,7 @@
                     <h3 data-i18n="an_h_ai">AI-анализ преступности</h3>
                     <p class="an-hint" data-i18n="an_hint_ai">ИИ проанализирует все данные и подготовит аналитический отчёт с причинами, прогнозами и рекомендациями</p>
                     <div class="an-ai-key-row">
-                        <button id="an-ai-run" class="an-action-btn an-ai-run-btn" data-i18n="an_ai_run">🤖 Запустить AI-анализ</button>
+                        <button id="an-ai-run" class="an-action-btn an-ai-run-btn" data-i18n="an_ai_run">Запустить AI-анализ</button>
                     </div>
                     <div id="an-ai-status" class="an-ai-status hidden" data-i18n="an_ai_status">Анализ выполняется...</div>
                     <div id="an-ai-result" class="an-ai-result"></div>
@@ -919,7 +919,7 @@
     <div id="suggest-intro-overlay" class="hidden">
         <div id="suggest-intro-modal">
             <button id="suggest-intro-close" aria-label="Закрыть">&times;</button>
-            <div class="suggest-intro-icon">📍</div>
+            <div class="suggest-intro-icon"></div>
             <h2 data-i18n="suggest_intro_title">Как сообщить о проблеме?</h2>
             <div class="suggest-intro-steps">
                 <div class="suggest-intro-step">
@@ -1104,7 +1104,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
     <script src="js/firebase-config.js?v=2"></script>
-    <script src="js/i18n.js?v=5"></script>
+    <script src="js/i18n.js?v=6"></script>
     <script src="js/photos.js?v=2"></script>
     <script src="js/crimes.js?v=4"></script>
     <script src="js/cameras.js?v=2"></script>
@@ -1112,10 +1112,10 @@
     <script src="js/admin-violations.js?v=2"></script>
     <script src="js/schools.js?v=1"></script>
     <script src="js/venues.js?v=2"></script>
-    <script src="js/analytics.js?v=7"></script>
+    <script src="js/analytics.js?v=8"></script>
     <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.mini.min.js"></script>
     <script src="js/data.js?v=3"></script>
-    <script src="js/app.js?v=15"></script>
+    <script src="js/app.js?v=16"></script>
     <!-- QR code generator (lightweight) -->
     <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
     <script>
@@ -1177,8 +1177,8 @@
                 d.className = "pwa-ios-hint";
                 d.innerHTML = '<div class="pwa-ios-card">' +
                     '<b>Safari-де орнату / Установить в Safari:</b><br><br>' +
-                    '1. Төменде ⬆️ «Бөлісу» батырмасын басыңыз<br>' +
-                    '&nbsp;&nbsp;&nbsp;&nbsp;Нажмите ⬆️ «Поделиться» внизу<br><br>' +
+                    '1. Төменде «Бөлісу» батырмасын басыңыз<br>' +
+                    '&nbsp;&nbsp;&nbsp;&nbsp;Нажмите «Поделиться» внизу<br><br>' +
                     '2. «Басты экранға қосу» таңдаңыз<br>' +
                     '&nbsp;&nbsp;&nbsp;&nbsp;Выберите «На экран Домой»<br><br>' +
                     '<button onclick="this.parentNode.parentNode.remove()">OK</button></div>';
