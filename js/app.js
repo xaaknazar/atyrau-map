@@ -1203,20 +1203,16 @@
             }
             window._venueOverlay = [];
 
-            // Круг 100м
+            // Круг 100м — не перехватывает клики, чтобы режим «360° Панорама» работал внутри радиуса
             var circle = L.circle([lat, lng], {
                 radius: 100,
                 color: '#e91e63',
                 fillColor: '#e91e63',
                 fillOpacity: 0.1,
                 weight: 2,
-                dashArray: '6,4'
+                dashArray: '6,4',
+                interactive: false
             }).addTo(map);
-            // Клик в любой точке радиуса → обзор 360° (Google Street View)
-            circle.bindTooltip('📷 Обзор 360° — нажмите в радиусе', { sticky: true, direction: 'top', className: 'marker-tooltip' });
-            circle.on('click', function (e) {
-                openPanorama(e.latlng.lat.toFixed(6), e.latlng.lng.toFixed(6));
-            });
             window._venueOverlay.push(circle);
 
             // Маркер заведения
@@ -1227,7 +1223,7 @@
                 iconAnchor: [16, 16]
             });
             var venueMarker = L.marker([lat, lng], { icon: venueIcon }).addTo(map);
-            venueMarker.bindPopup('<strong>🍸 ' + venueName + '</strong><br><span style="font-size:11px;color:#888;">📷 Нажмите внутри круга для обзора 360°</span>').openPopup();
+            venueMarker.bindPopup('<strong>🍸 ' + venueName + '</strong>').openPopup();
             window._venueOverlay.push(venueMarker);
 
             // Преступления в радиусе 100м
@@ -1247,6 +1243,13 @@
                 crimeMarker.bindTooltip(artNum, { direction: "top", offset: [0, -8], className: "marker-tooltip", permanent: true });
 
                 crimeMarker.on("click", function () {
+                    if (panoramaMode) {
+                        openPanorama(c.lat.toFixed(6), c.lng.toFixed(6));
+                        panoramaMode = false;
+                        panoramaBtn.classList.remove("active");
+                        document.getElementById("map").classList.remove("panorama-mode");
+                        return;
+                    }
                     if (isStaff) {
                         openCrimeModal(c);
                     } else {
