@@ -274,16 +274,21 @@
         if (_m) _m.classList.remove("panorama-mode");
     }
 
-    // Делает слой (круг/маркер) «панорамо-зависимым»: в режиме 360°
-    // клик по нему открывает Street View в точке клика вместо popup.
-    function attachPanoramaClick(layer) {
-        layer.on("click", function (e) {
-            if (!panoramaMode) return;
-            if (layer.closePopup) layer.closePopup();
-            openPanorama(e.latlng.lat.toFixed(6), e.latlng.lng.toFixed(6));
-            _exitPanoramaMode();
+    // Круг радиуса. В режиме «360° Панорама» (включается кнопкой на карте)
+    // клик по радиусу открывает Street View в выбранной точке. В обычном
+    // режиме показывает информационный popup. В режиме панорамы popup НЕ открывается.
+    function _circleWithPanorama(circle, html, popupOpts) {
+        circle.on("click", function (e) {
+            if (panoramaMode) {
+                openPanorama(e.latlng.lat.toFixed(6), e.latlng.lng.toFixed(6));
+                _exitPanoramaMode();
+                return;
+            }
+            if (html) {
+                L.popup(popupOpts || {}).setLatLng(e.latlng).setContent(html).openOn(map);
+            }
         });
-        return layer;
+        return circle;
     }
 
     panoramaBtn.addEventListener("click", function () {
@@ -954,11 +959,9 @@
                             weight: 3,
                             dashArray: '8,6'
                         }).addTo(map);
-                        window._geoZoneCircle.bindPopup(
-                            '<strong>' + lat.toFixed(4) + ', ' + lng.toFixed(4) + '</strong><br>' +
-                            'Радиус: 500 м'
-                        ).openPopup();
-                        attachPanoramaClick(window._geoZoneCircle);
+                        var _gzHtml = '<strong>' + lat.toFixed(4) + ', ' + lng.toFixed(4) + '</strong><br>Радиус: 500 м';
+                        _circleWithPanorama(window._geoZoneCircle, _gzHtml, {});
+                        L.popup().setLatLng([lat, lng]).setContent(_gzHtml).openOn(map);
                         // Убрать круг через 60 сек
                         setTimeout(function () {
                             if (window._geoZoneCircle) {
@@ -1063,8 +1066,8 @@
                         fillOpacity: 0.12, weight: 2, dashArray: '6,4'
                     }).addTo(map);
                     var _hotName = (typeof zoneAreaName === "function") ? zoneAreaName(z) : "";
-                    c.bindPopup('<strong>#' + (i + 1) + '</strong> — ' + z.count + ' случаев' + (_hotName ? '<br>📍 ' + _hotName : '') + '<br>' + z.lat.toFixed(4) + ', ' + z.lng.toFixed(4));
-                    attachPanoramaClick(c);
+                    var _hotHtml = '<strong>#' + (i + 1) + '</strong> — ' + z.count + ' случаев' + (_hotName ? '<br>📍 ' + _hotName : '') + '<br>' + z.lat.toFixed(4) + ', ' + z.lng.toFixed(4);
+                    _circleWithPanorama(c, _hotHtml, {});
                     window._hotZoneCircles.push(c);
                     bounds.push([z.lat, z.lng]);
                 });
@@ -1827,8 +1830,7 @@
                     '</div>' +
                 '</div>';
 
-            circle.bindPopup(popupHtml, { maxWidth: 300, className: "zone-popup-wrapper" });
-            attachPanoramaClick(circle);
+            _circleWithPanorama(circle, popupHtml, { maxWidth: 300, className: "zone-popup-wrapper" });
 
             zoneCircles.push(circle);
             zoneCircles.push(label);
@@ -1868,28 +1870,44 @@
     var aiRunBtn = document.getElementById("an-ai-run");
     if (aiRunBtn) {
         aiRunBtn.addEventListener("click", function () {
-            var keyInput = document.getElementById("an-ai-key");
-            var apiKey = keyInput ? keyInput.value.trim().replace(/[^\x20-\x7E]/g, "") : "";
-            if (!apiKey) { alert("Введите API ключ OpenAI (sk-...)"); return; }
-
             var statusEl = document.getElementById("an-ai-status");
             var resultEl = document.getElementById("an-ai-result");
+
+            if (!crimeIncidents || crimeIncidents.length === 0) {
+                alert("Данные ещё не загружены. Подождите загрузку ЕРДР и повторите.");
+                return;
+            }
+
             statusEl.classList.remove("hidden");
-            statusEl.textContent = "AI анализирует данные...";
-            resultEl.textContent = "";
+            statusEl.textContent = "🤖 AI анализирует все данные (это может занять до минуты)...";
+            resultEl.innerHTML = "";
             aiRunBtn.disabled = true;
 
-            var analysis = window._lastAnalysis || runFullAnalysis(crimeIncidents);
-            var summary = buildAnalysisSummaryForAI(analysis);
+            // Полный анализ по всем актуальным данным (не зависит от выбранного периода)
+            var analysis = runFullAnalysis(crimeIncidents);
+            window._lastAnalysis = analysis;
+            var summary = buildAnalysisSummaryForAI(analysis, crimeIncidents);
 
-            requestAIAnalysis(summary, apiKey, function (err, text) {
+            fetch("/api/ai-analyze", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ summary: summary, lang: (typeof currentLang !== "undefined" ? currentLang : "ru") })
+            })
+            .then(function (resp) {
+                return resp.json().then(function (data) {
+                    if (!resp.ok) throw new Error(data && data.error ? data.error : ("HTTP " + resp.status));
+                    return data;
+                });
+            })
+            .then(function (data) {
                 statusEl.classList.add("hidden");
                 aiRunBtn.disabled = false;
-                if (err) {
-                    resultEl.textContent = "Ошибка: " + err.message;
-                } else {
-                    resultEl.innerHTML = markdownToHtml(text);
-                }
+                resultEl.innerHTML = '<div class="ai-report">' + markdownToHtml(data.text || "") + '</div>';
+            })
+            .catch(function (err) {
+                statusEl.classList.add("hidden");
+                aiRunBtn.disabled = false;
+                resultEl.innerHTML = '<div class="ai-error">⚠️ Ошибка анализа: ' + (err && err.message ? err.message : "неизвестная ошибка") + '</div>';
             });
         });
     }

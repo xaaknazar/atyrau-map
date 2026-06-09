@@ -445,11 +445,34 @@ function runFullAnalysis(crimes, people) {
 /**
  * Сформировать текстовую сводку данных для отправки в AI.
  */
-function buildAnalysisSummaryForAI(analysis) {
+function buildAnalysisSummaryForAI(analysis, crimes) {
     var lines = [];
-    lines.push("СВОДКА ПО ПРЕСТУПЛЕНИЯМ г. АТЫРАУ");
+    lines.push("СВОДКА ПО ПРЕСТУПЛЕНИЯМ г. АТЫРАУ (данные ЕРДР, полная выборка)");
     lines.push("Всего правонарушений: " + analysis.total);
-    lines.push("В общественных местах: " + analysis.publicCount + " (" + Math.round(analysis.publicCount / analysis.total * 100) + "%)");
+    if (analysis.total > 0) {
+        lines.push("В общественных местах: " + analysis.publicCount + " (" + Math.round(analysis.publicCount / analysis.total * 100) + "%)");
+        if (typeof analysis.withCoords === "number") {
+            lines.push("С координатами на карте: " + analysis.withCoords + " (" + Math.round(analysis.withCoords / analysis.total * 100) + "%)");
+        }
+    }
+    // Свежесть данных: период регистрации
+    if (crimes && crimes.length) {
+        var _minD = null, _maxD = null;
+        crimes.forEach(function (c) {
+            if (!c.regDate) return;
+            var d = new Date(c.regDate);
+            if (isNaN(d.getTime())) return;
+            if (!_minD || d < _minD) _minD = d;
+            if (!_maxD || d > _maxD) _maxD = d;
+        });
+        function _fd(d) { return ('0' + d.getDate()).slice(-2) + '.' + ('0' + (d.getMonth() + 1)).slice(-2) + '.' + d.getFullYear(); }
+        if (_minD && _maxD) lines.push("Период регистрации в данных: " + _fd(_minD) + " — " + _fd(_maxD));
+    }
+    // Инфраструктура города (отметки на карте)
+    if (typeof _getMapCounts === "function") {
+        var _mc = _getMapCounts();
+        lines.push("Инфраструктура (отметки на карте): камеры — " + _mc.cameras + ", слепые зоны без камер — " + _mc.blindSpots + ", неосвещённые улицы — " + _mc.unlit + ", заброшенные здания — " + _mc.abandoned);
+    }
     lines.push("");
 
     lines.push("ТОП-10 СТАТЕЙ:");
@@ -514,9 +537,10 @@ function buildAnalysisSummaryForAI(analysis) {
     lines.push("");
 
     if (analysis.problemZones.length > 0) {
-        lines.push("ПРОБЛЕМНЫЕ ЗОНЫ (топ-5 по концентрации):");
-        analysis.problemZones.slice(0, 5).forEach(function (z, i) {
-            lines.push("  " + (i + 1) + ". Координаты: " + z.lat.toFixed(4) + ", " + z.lng.toFixed(4) +
+        lines.push("ПРОБЛЕМНЫЕ ЗОНЫ (топ-8 по концентрации):");
+        analysis.problemZones.slice(0, 8).forEach(function (z, i) {
+            var _nm = (typeof zoneAreaName === "function") ? zoneAreaName(z) : "";
+            lines.push("  " + (i + 1) + ". " + (_nm ? _nm + " " : "") + "(" + z.lat.toFixed(4) + ", " + z.lng.toFixed(4) + ")" +
                 " — " + z.count + " преступлений" +
                 ", основная статья: " + z.topArticle +
                 ", пик: " + (z.peakHour !== undefined ? z.peakHour + ":00" : "нет данных"));

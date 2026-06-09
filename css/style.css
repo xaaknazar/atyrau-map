@@ -5098,3 +5098,40 @@ body {
 
 /* Название района/улицы в карточке зоны */
 .an-zone-name { color:#e91e63; font-weight:600; margin:2px 0; }
+
+/* ── AI-отчёт: оформление результата анализа ───────────────── */
+.an-ai-run-btn { font-size: 15px; padding: 12px 20px; }
+.an-ai-result .ai-report {
+    background: #ffffff;
+    border: 1px solid #e6e9f0;
+    border-radius: 12px;
+    padding: 20px 22px;
+    margin-top: 12px;
+    line-height: 1.6;
+    color: #1d2433;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+}
+.an-ai-result .ai-report h2 {
+    font-size: 18px;
+    margin: 20px 0 10px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #16213e;
+    color: #16213e;
+}
+.an-ai-result .ai-report h2:first-child { margin-top: 0; }
+.an-ai-result .ai-report h3 { font-size: 15px; margin: 14px 0 6px; color: #34406b; }
+.an-ai-result .ai-report h4 { font-size: 14px; margin: 10px 0 4px; color: #34406b; }
+.an-ai-result .ai-report ul,
+.an-ai-result .ai-report ol { margin: 6px 0 12px; padding-left: 22px; }
+.an-ai-result .ai-report li { margin: 5px 0; }
+.an-ai-result .ai-report strong { color: #0b3d91; }
+.an-ai-result .ai-report hr { border: none; border-top: 1px solid #e6e9f0; margin: 16px 0; }
+.an-ai-result .ai-report p { margin: 7px 0; }
+.an-ai-result .ai-error {
+    background: #fdecec;
+    border: 1px solid #f5b5b5;
+    color: #a11;
+    border-radius: 10px;
+    padding: 12px 14px;
+    margin-top: 12px;
+}

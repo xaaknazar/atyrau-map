@@ -15,7 +15,7 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
-    <link rel="stylesheet" href="css/style.css?v=13" />
+    <link rel="stylesheet" href="css/style.css?v=14" />
 </head>
 <body>
 
@@ -743,8 +743,7 @@
                     <h3 data-i18n="an_h_ai">AI-анализ преступности</h3>
                     <p class="an-hint" data-i18n="an_hint_ai">ИИ проанализирует все данные и подготовит аналитический отчёт с причинами, прогнозами и рекомендациями</p>
                     <div class="an-ai-key-row">
-                        <input type="password" id="an-ai-key" placeholder="OpenAI API ключ (sk-...)" class="an-ai-input" />
-                        <button id="an-ai-run" class="an-action-btn" data-i18n="an_ai_run">Запустить анализ</button>
+                        <button id="an-ai-run" class="an-action-btn an-ai-run-btn" data-i18n="an_ai_run">🤖 Запустить AI-анализ</button>
                     </div>
                     <div id="an-ai-status" class="an-ai-status hidden" data-i18n="an_ai_status">Анализ выполняется...</div>
                     <div id="an-ai-result" class="an-ai-result"></div>
@@ -1113,10 +1112,10 @@
     <script src="js/admin-violations.js?v=2"></script>
     <script src="js/schools.js?v=1"></script>
     <script src="js/venues.js?v=2"></script>
-    <script src="js/analytics.js?v=6"></script>
+    <script src="js/analytics.js?v=7"></script>
     <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.mini.min.js"></script>
     <script src="js/data.js?v=3"></script>
-    <script src="js/app.js?v=14"></script>
+    <script src="js/app.js?v=15"></script>
     <!-- QR code generator (lightweight) -->
     <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
     <script>
