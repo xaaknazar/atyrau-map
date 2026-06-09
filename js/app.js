@@ -1212,7 +1212,11 @@
                 weight: 2,
                 dashArray: '6,4'
             }).addTo(map);
-            circle.bindPopup('<strong>🍸 ' + venueName + '</strong><br>Радиус: 100 м');
+            // Клик в любой точке радиуса → обзор 360° (Google Street View)
+            circle.bindTooltip('📷 Обзор 360° — нажмите в радиусе', { sticky: true, direction: 'top', className: 'marker-tooltip' });
+            circle.on('click', function (e) {
+                openPanorama(e.latlng.lat.toFixed(6), e.latlng.lng.toFixed(6));
+            });
             window._venueOverlay.push(circle);
 
             // Маркер заведения
@@ -1223,7 +1227,7 @@
                 iconAnchor: [16, 16]
             });
             var venueMarker = L.marker([lat, lng], { icon: venueIcon }).addTo(map);
-            venueMarker.bindPopup('<strong>🍸 ' + venueName + '</strong>').openPopup();
+            venueMarker.bindPopup('<strong>🍸 ' + venueName + '</strong><br><span style="font-size:11px;color:#888;">📷 Нажмите внутри круга для обзора 360°</span>').openPopup();
             window._venueOverlay.push(venueMarker);
 
             // Преступления в радиусе 100м
