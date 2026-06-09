@@ -133,6 +133,24 @@ function analyzeByStreet(crimes) {
     return Object.values(map).sort(function (a, b) { return b.count - a.count; });
 }
 
+// Название района/улицы зоны по её преступлениям (most common район + улица)
+function zoneAreaName(z) {
+    if (!z || !z.crimes || !z.crimes.length) return "";
+    var dC = {}, ctC = {}, sC = {};
+    z.crimes.forEach(function (c) {
+        if (c.district) dC[c.district] = (dC[c.district] || 0) + 1;
+        if (c.city) ctC[c.city] = (ctC[c.city] || 0) + 1;
+        if (c.street) sC[c.street] = (sC[c.street] || 0) + 1;
+    });
+    function _top(o) { var k = "", n = 0; Object.keys(o).forEach(function (x) { if (o[x] > n) { k = x; n = o[x]; } }); return k; }
+    var district = _top(dC), city = _top(ctC), street = _top(sC);
+    var place = district || city;
+    var parts = [];
+    if (place) parts.push(place);
+    if (street) parts.push("ул. " + street);
+    return parts.join(", ");
+}
+
 function analyzeByGeoZone(crimes, radius) {
     radius = radius || 0.005;
     var grid = {};
@@ -867,6 +885,7 @@ function buildProsecutorBriefing(analysis, allCrimes, lang) {
     html += '<div class="assistant-hint">' + tr("brief_geo_hint", "Группировка по координатам (радиус ~500м)") + '</div>';
     html += '<table class="assistant-table"><thead><tr>';
     html += '<th>#</th>';
+    html += '<th>' + tr("brief_area", "Район / улица") + '</th>';
     html += '<th>' + tr("brief_coords", "Координаты") + '</th>';
     html += '<th>' + tr("brief_count", "Кол-во") + '</th>';
     html += '<th>' + tr("brief_main_art", "Осн. статья") + '</th>';
@@ -877,6 +896,7 @@ function buildProsecutorBriefing(analysis, allCrimes, lang) {
             .slice(0, 3).map(function (a) { return a + " (" + z.articles[a] + ")"; }).join(", ");
         html += '<tr>';
         html += '<td>' + (i + 1) + '</td>';
+        html += '<td>' + escH(zoneAreaName(z) || z.label || "—") + '</td>';
         html += '<td>' + escH(z.coords) + '</td>';
         html += '<td><strong>' + z.count + '</strong></td>';
         html += '<td class="muted">' + escH(topArts || "—") + '</td>';

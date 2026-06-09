@@ -267,6 +267,24 @@
         var mapsUrl = "https://www.google.com/maps/@" + lat + "," + lng + ",3a,75y,0h,90t/data=!3m4!1e1!3m2!1s!2e0";
         window.open(mapsUrl, "_blank");
     }
+    function _exitPanoramaMode() {
+        panoramaMode = false;
+        if (panoramaBtn) panoramaBtn.classList.remove("active");
+        var _m = document.getElementById("map");
+        if (_m) _m.classList.remove("panorama-mode");
+    }
+
+    // Делает слой (круг/маркер) «панорамо-зависимым»: в режиме 360°
+    // клик по нему открывает Street View в точке клика вместо popup.
+    function attachPanoramaClick(layer) {
+        layer.on("click", function (e) {
+            if (!panoramaMode) return;
+            if (layer.closePopup) layer.closePopup();
+            openPanorama(e.latlng.lat.toFixed(6), e.latlng.lng.toFixed(6));
+            _exitPanoramaMode();
+        });
+        return layer;
+    }
 
     panoramaBtn.addEventListener("click", function () {
         panoramaMode = !panoramaMode;
@@ -940,6 +958,7 @@
                             '<strong>' + lat.toFixed(4) + ', ' + lng.toFixed(4) + '</strong><br>' +
                             'Радиус: 500 м'
                         ).openPopup();
+                        attachPanoramaClick(window._geoZoneCircle);
                         // Убрать круг через 60 сек
                         setTimeout(function () {
                             if (window._geoZoneCircle) {
@@ -1043,7 +1062,9 @@
                         radius: 500, color: '#e74c3c', fillColor: '#e74c3c',
                         fillOpacity: 0.12, weight: 2, dashArray: '6,4'
                     }).addTo(map);
-                    c.bindPopup('<strong>#' + (i + 1) + '</strong> — ' + z.count + ' случаев<br>' + z.lat.toFixed(4) + ', ' + z.lng.toFixed(4));
+                    var _hotName = (typeof zoneAreaName === "function") ? zoneAreaName(z) : "";
+                    c.bindPopup('<strong>#' + (i + 1) + '</strong> — ' + z.count + ' случаев' + (_hotName ? '<br>📍 ' + _hotName : '') + '<br>' + z.lat.toFixed(4) + ', ' + z.lng.toFixed(4));
+                    attachPanoramaClick(c);
                     window._hotZoneCircles.push(c);
                     bounds.push([z.lat, z.lng]);
                 });
@@ -1668,11 +1689,13 @@
             var tags = Object.keys(z.articles).sort(function (a, b) { return z.articles[b] - z.articles[a]; }).slice(0, 3)
                 .map(function (a) { return '<span class="an-zone-tag">' + a + ' (' + z.articles[a] + ')</span>'; }).join("");
             var peakTime = z.peakHour !== undefined ? ("0" + z.peakHour).slice(-2) + ":00" : "—";
+            var _areaName = (typeof zoneAreaName === "function") ? zoneAreaName(z) : "";
 
             return '<div class="an-zone-card">' +
                 '<div class="an-zone-rank d' + z.dangerLevel + '">' + (i + 1) + '</div>' +
                 '<div class="an-zone-info">' +
                     '<h4>' + z.count + ' правонарушений</h4>' +
+                    (_areaName ? '<p class="an-zone-name">📍 ' + _areaName + '</p>' : '') +
                     '<p>Координаты: ' + z.lat.toFixed(4) + ', ' + z.lng.toFixed(4) + '</p>' +
                     '<p>Пиковое время: ' + peakTime + ' | В общ. местах: ' + z.publicCount + '</p>' +
                     '<div class="an-zone-tags">' + tags + '</div>' +
@@ -1805,6 +1828,7 @@
                 '</div>';
 
             circle.bindPopup(popupHtml, { maxWidth: 300, className: "zone-popup-wrapper" });
+            attachPanoramaClick(circle);
 
             zoneCircles.push(circle);
             zoneCircles.push(label);
