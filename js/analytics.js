@@ -528,7 +528,11 @@ function buildAnalysisSummaryForAI(analysis, crimes) {
     lines.push("");
 
     lines.push("ТОП-10 РАЙОНОВ/НАСЕЛЁННЫХ ПУНКТОВ:");
-    analysis.byArea.slice(0, 10).forEach(function (a, i) {
+    // Сам город Атырау исключаем — все данные и так по г. Атырау, это не вывод
+    analysis.byArea.filter(function (a) {
+        var l = (a.label || "").toLowerCase().replace(/[^а-яёa-z]/g, "");
+        return l !== "атырау" && l !== "гатырау";
+    }).slice(0, 10).forEach(function (a, i) {
         var topArt = Object.keys(a.articles).sort(function (x, y) { return a.articles[y] - a.articles[x]; })[0] || "";
         lines.push("  " + (i + 1) + ". " + a.label + " — " + a.count + " (основная статья: " + topArt + ")");
     });
