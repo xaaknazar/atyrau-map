@@ -949,17 +949,17 @@
                     setTimeout(function () {
                         map.invalidateSize();
                         map.setView([lat, lng], 15);
-                        // Нарисовать круг 500м
+                        // Нарисовать круг 1000м
                         if (window._geoZoneCircle) { map.removeLayer(window._geoZoneCircle); }
                         window._geoZoneCircle = L.circle([lat, lng], {
-                            radius: 500,
+                            radius: 1000,
                             color: '#e74c3c',
                             fillColor: '#e74c3c',
                             fillOpacity: 0.15,
                             weight: 3,
                             dashArray: '8,6'
                         }).addTo(map);
-                        var _gzHtml = '<strong>' + lat.toFixed(4) + ', ' + lng.toFixed(4) + '</strong><br>Радиус: 500 м';
+                        var _gzHtml = '<strong>' + lat.toFixed(4) + ', ' + lng.toFixed(4) + '</strong><br>Радиус: 1000 м';
                         _circleWithPanorama(window._geoZoneCircle, _gzHtml, {});
                         L.popup().setLatLng([lat, lng]).setContent(_gzHtml).openOn(map);
                         // Убрать круг через 60 сек

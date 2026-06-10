@@ -182,7 +182,7 @@ function zoneAreaName(z) {
 }
 
 function analyzeByGeoZone(crimes, radius) {
-    radius = radius || 0.005;
+    radius = radius || 0.009; // ~1000м
     var grid = {};
     crimes.forEach(function (c) {
         if (typeof c.lat !== "number" || isNaN(c.lat)) return;
@@ -934,7 +934,7 @@ function buildProsecutorBriefing(analysis, allCrimes, lang) {
     var topGeoZones = (analysis.byGeoZone || []).slice(0, 10);
     html += '<div class="assistant-section">';
     html += '<div class="assistant-section-title">' + tr("brief_geo_zones", "Топ зон по координатам") + '</div>';
-    html += '<div class="assistant-hint">' + tr("brief_geo_hint", "Группировка по координатам (радиус ~500м)") + '</div>';
+    html += '<div class="assistant-hint">' + tr("brief_geo_hint", "Группировка по координатам (радиус ~1000м)") + '</div>';
     html += '<table class="assistant-table"><thead><tr>';
     html += '<th>#</th>';
     html += '<th>' + tr("brief_area", "Район / улица") + '</th>';
