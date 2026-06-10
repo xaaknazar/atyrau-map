@@ -1993,6 +1993,43 @@
             }
         }
 
+        // Кнопка "Показать на карте" (если есть координаты)
+        var showMapBtnEl = document.getElementById("crime-modal-show-map");
+        if (showMapBtnEl) {
+            if (typeof crime.lat === "number" && typeof crime.lng === "number") {
+                showMapBtnEl.classList.remove("hidden");
+                showMapBtnEl.onclick = function () {
+                    overlay.classList.add("hidden");
+                    hideCrimePanel();
+                    setTimeout(function () {
+                        map.invalidateSize();
+                        map.setView([crime.lat, crime.lng], 17);
+                        if (window._crimeLocMarker) { map.removeLayer(window._crimeLocMarker); }
+                        window._crimeLocMarker = L.circleMarker([crime.lat, crime.lng], {
+                            radius: 11,
+                            color: "#fff",
+                            weight: 3,
+                            fillColor: "#e74c3c",
+                            fillOpacity: 0.95
+                        }).addTo(map);
+                        var popupHtml = '<strong>' + (crime.article || "") + (crime.articlePart ? " " + crime.articlePart : "") + '</strong>' +
+                            '<br>' + buildCrimeAddress(crime) +
+                            '<br><span style="color:#888;font-size:11px;">' + formatDateOnly(crime.crimeDate) + ' ' + formatTimeOnly(crime.crimeTime) + '</span>';
+                        window._crimeLocMarker.bindPopup(popupHtml).openPopup();
+                        // Убрать маркер через 60 сек
+                        setTimeout(function () {
+                            if (window._crimeLocMarker) {
+                                map.removeLayer(window._crimeLocMarker);
+                                window._crimeLocMarker = null;
+                            }
+                        }, 60000);
+                    }, 100);
+                };
+            } else {
+                showMapBtnEl.classList.add("hidden");
+            }
+        }
+
         overlay.classList.remove("hidden");
     }
 
