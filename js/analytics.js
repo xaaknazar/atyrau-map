@@ -41,22 +41,35 @@ function analyzeByArticle(crimes) {
 //  2. ВРЕМЕННЫЕ ПАТТЕРНЫ
 // ══════════════════════════════════════════════════════════════
 
-// Час совершения (0-23): время совершения -> дата-время совершения -> дата-время регистрации
-function crimeHourOf(c) {
-    if (!c) return null;
-    if (c.crimeTime) {
-        var str = String(c.crimeTime);
-        var m = str.match(/(\d{1,2})\s*[:.\u0447]/);
-        if (!m) m = str.match(/^\s*(\d{1,2})\s*$/);
-        if (m) { var h = parseInt(m[1], 10); if (h >= 0 && h <= 23) return h; }
+// Час из значения времени/даты совершения. Возвращает 0-23 ТОЛЬКО если
+// есть реальное время суток. Полночь (00:00) трактуется как «время не указано»
+// (в данных это заглушка у записей без времени), поэтому отбрасывается.
+function _hourFromCommission(v) {
+    if (!v) return null;
+    var sv = String(v);
+    if (sv.indexOf("T") !== -1) {
+        var d = new Date(sv);
+        if (isNaN(d.getTime())) return null;
+        var hh = d.getHours(), mm = d.getMinutes();
+        if (hh === 0 && mm === 0) return null;
+        return hh;
     }
-    if (c.crimeDate && String(c.crimeDate).indexOf("T") !== -1) {
-        var d1 = new Date(c.crimeDate); if (!isNaN(d1.getTime())) return d1.getHours();
-    }
-    if (c.regDate && String(c.regDate).indexOf("T") !== -1) {
-        var d2 = new Date(c.regDate); if (!isNaN(d2.getTime())) return d2.getHours();
+    var m = sv.match(/(\d{1,2})\s*[:.\u0447]\s*(\d{2})/);
+    if (m) {
+        var h = parseInt(m[1], 10), mi = parseInt(m[2], 10);
+        if (h < 0 || h > 23) return null;
+        if (h === 0 && mi === 0) return null;
+        return h;
     }
     return null;
+}
+// Час совершения преступления — строго из «время совершения», затем из
+// даты-времени совершения. Дата регистрации НЕ используется.
+function crimeHourOf(c) {
+    if (!c) return null;
+    var h = _hourFromCommission(c.crimeTime);
+    if (h !== null) return h;
+    return _hourFromCommission(c.crimeDate);
 }
 
 function analyzeByHour(crimes) {
@@ -73,9 +86,8 @@ function analyzeByDayOfWeek(crimes) {
     var days = [0, 0, 0, 0, 0, 0, 0]; // Пн-Вс
     var dayNames = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"];
     crimes.forEach(function (c) {
-        var src = c.crimeDate || c.regDate;
-        if (!src) return;
-        var d = new Date(src);
+        if (!c.crimeDate) return;
+        var d = new Date(c.crimeDate);
         if (isNaN(d.getTime())) return;
         var day = d.getDay(); // 0=Вс, 1=Пн...
         var idx = day === 0 ? 6 : day - 1;
