@@ -1082,9 +1082,6 @@ function buildProsecutorBriefing(analysis, allCrimes, lang) {
     if (topGeoZones.length > 0) {
         recs.push(tr("rec_zones", "Установить надзор в районах:") + " " + topGeoZones.slice(0, 3).map(function (z) { return z.label + " [" + z.coords + "]"; }).join(", "));
     }
-    if (validZones.length > 0) {
-        recs.push(tr("rec_cameras", "Рассмотреть установку камер в горячих зонах #1–#") + Math.min(3, validZones.length));
-    }
     if (publicPct >= 50) {
         recs.push(tr("rec_public", "Доля преступлений в общественных местах превышает 50% — требуется межведомственное взаимодействие с акиматом и полицией"));
     }
