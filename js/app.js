@@ -1874,12 +1874,12 @@
             var resultEl = document.getElementById("an-ai-result");
 
             if (!crimeIncidents || crimeIncidents.length === 0) {
-                alert("Данные ещё не загружены. Подождите загрузку ЕРДР и повторите.");
+                alert((currentLang === "kz") ? "Деректер әлі жүктелмеген. ЕРДР жүктелуін күтіп, қайталаңыз." : "Данные ещё не загружены. Подождите загрузку ЕРДР и повторите.");
                 return;
             }
 
             statusEl.classList.remove("hidden");
-            statusEl.textContent = "AI анализирует все данные (это может занять до минуты)...";
+            statusEl.textContent = (currentLang === "kz") ? "AI барлық деректерді талдауда (бір минутқа дейін)..." : "AI анализирует все данные (это может занять до минуты)...";
             resultEl.innerHTML = "";
             aiRunBtn.disabled = true;
 
@@ -1907,7 +1907,8 @@
             .catch(function (err) {
                 statusEl.classList.add("hidden");
                 aiRunBtn.disabled = false;
-                resultEl.innerHTML = '<div class="ai-error">Ошибка анализа: ' + (err && err.message ? err.message : "неизвестная ошибка") + '</div>';
+                var _errPrefix = (currentLang === "kz") ? "Талдау қатесі: " : "Ошибка анализа: ";
+                resultEl.innerHTML = '<div class="ai-error">' + _errPrefix + (err && err.message ? err.message : ((currentLang === "kz") ? "белгісіз қате" : "неизвестная ошибка")) + '</div>';
             });
         });
     }
@@ -2753,6 +2754,10 @@
         btn.addEventListener("click", function () {
             setLanguage(this.getAttribute("data-lang"));
             refreshTooltips();
+            // Перерисовать аналитику и брифинг на новом языке
+            if (typeof renderAnalytics === "function" && crimeIncidents && crimeIncidents.length > 0) {
+                try { renderAnalytics(); } catch (e) {}
+            }
         });
     });
     setLanguage(currentLang);
