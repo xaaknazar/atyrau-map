@@ -1246,7 +1246,7 @@
             // Маркер заведения
             var venueIcon = L.divIcon({
                 className: "venue-marker-wrap",
-                html: '<div class="venue-marker" style="width:32px;height:32px;font-size:16px;"></div>',
+                html: '<div class="venue-marker" style="width:32px;height:32px;font-size:16px;">🍸</div>',
                 iconSize: [32, 32],
                 iconAnchor: [16, 16]
             });
@@ -2524,7 +2524,7 @@
         venuePoints.forEach(function (v) {
             var icon = L.divIcon({
                 className: "venue-marker-wrap",
-                html: '<div class="venue-marker"></div>',
+                html: '<div class="venue-marker">🍸</div>',
                 iconSize: [24, 24],
                 iconAnchor: [12, 12]
             });
