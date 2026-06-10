@@ -46,8 +46,17 @@ function analyzeByHour(crimes) {
     for (var i = 0; i < 24; i++) hours[i] = 0;
     crimes.forEach(function (c) {
         if (!c.crimeTime) return;
-        var m = String(c.crimeTime).match(/(\d{2}):/);
-        if (m) hours[parseInt(m[1])]++;
+        var t = String(c.crimeTime);
+        var h = null;
+        // ISO format: ...T20:00:00...
+        var isoM = t.match(/T(\d{2}):/);
+        if (isoM) { h = parseInt(isoM[1]); }
+        else {
+            // Plain time: "20:00" or "1:30"
+            var plainM = t.match(/^(\d{1,2}):/);
+            if (plainM) h = parseInt(plainM[1]);
+        }
+        if (h !== null && h >= 0 && h < 24) hours[h]++;
     });
     return hours;
 }
@@ -257,8 +266,10 @@ function findProblemZones(crimes, gridSize) {
         if (c.isPublic) zone.publicCount++;
 
         if (c.crimeTime) {
-            var m = String(c.crimeTime).match(/(\d{2}):/);
-            if (m) zone.hours.push(parseInt(m[1]));
+            var isoH = String(c.crimeTime).match(/T(\d{2}):/);
+            var plainH = !isoH ? String(c.crimeTime).match(/^(\d{1,2}):/) : null;
+            var hh = isoH ? parseInt(isoH[1]) : (plainH ? parseInt(plainH[1]) : null);
+            if (hh !== null && hh >= 0 && hh < 24) zone.hours.push(hh);
         }
     });
 
