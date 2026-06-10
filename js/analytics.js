@@ -898,32 +898,8 @@ function buildProsecutorBriefing(analysis, allCrimes, lang) {
     html += '<button class="brief-export-btn" data-export="geozones">📥 Excel</button>';
     html += '</div>';
 
-    // ── Горячие зоны (радиус ~500м) ────────────────────────────
+    // validZones needed for recommendations
     var validZones = (analysis.problemZones || []).filter(function (z) { return z.count <= 50; });
-    if (validZones.length > 0) {
-        html += '<div class="assistant-section">';
-        html += '<div class="assistant-section-title">🔥 ' + tr("brief_hot_zones", "Горячие зоны (радиус ~500 м)") + '</div>';
-        html += '<div class="assistant-hint">' + tr("brief_hot_hint", "Кластеры преступности — приоритетные участки") + '</div>';
-        validZones.slice(0, 5).forEach(function (z, i) {
-            var dangerCls = z.dangerLevel >= 3 ? "danger-high" : (z.dangerLevel >= 2 ? "danger-mid" : "danger-low");
-            html += '<div class="assistant-zone ' + dangerCls + '">';
-            html += '<div class="assistant-zone-head">';
-            html += '<span class="assistant-zone-num">#' + (i + 1) + '</span>';
-            html += '<span class="assistant-zone-count">' + z.count + ' ' + tr("brief_cases", "случаев") + '</span>';
-            html += '<span class="assistant-zone-coords">' + z.lat.toFixed(4) + ', ' + z.lng.toFixed(4) + '</span>';
-            html += '</div>';
-            html += '<div class="assistant-zone-body">';
-            if (z.topArticle) html += '<div><strong>' + tr("brief_main_article", "Основная статья") + ':</strong> ' + escH(z.topArticle) + '</div>';
-            if (typeof z.peakHour === "number") html += '<div><strong>' + tr("brief_peak_hour", "Пиковый час") + ':</strong> ' + ("0" + z.peakHour).slice(-2) + ':00</div>';
-            html += '</div>';
-            html += '</div>';
-        });
-        html += '<div style="display:flex;gap:8px;margin-top:12px;">';
-        html += '<button class="brief-export-btn" data-export="hotzones">📥 Excel</button>';
-        html += '<button class="brief-export-btn an-zone-map-btn" data-export="showallzones">📍 ' + tr("an_show_map", "Показать на карте") + '</button>';
-        html += '</div>';
-        html += '</div>';
-    }
 
     // ── Время повышенного риска ───────────────────────────────
     var hourPeaks = [];
@@ -964,17 +940,30 @@ function buildProsecutorBriefing(analysis, allCrimes, lang) {
         html += '</div>';
     }
 
-    // ── Демография нарушителей ────────────────────────────────
-    if (analysis.people) {
-        var p = analysis.people;
+    // ── Демография нарушителей (полный список из базы) ──────────
+    var allPeopleForBrief = (typeof crimePeople !== "undefined") ? crimePeople : [];
+    if (allPeopleForBrief.length > 0) {
+        var totalP = allPeopleForBrief.length;
+        var minorsP = allPeopleForBrief.filter(function (x) { return x.age && x.age < 18; }).length;
+        var genderMap = {}, ageMap = {}, occMap = {};
+        allPeopleForBrief.forEach(function (x) {
+            if (x.gender) genderMap[x.gender] = (genderMap[x.gender] || 0) + 1;
+            if (x.age) {
+                var ag = x.age < 18 ? "до 18" : x.age <= 25 ? "18-25" : x.age <= 35 ? "26-35" : x.age <= 45 ? "36-45" : x.age <= 55 ? "46-55" : "56+";
+                ageMap[ag] = (ageMap[ag] || 0) + 1;
+            }
+            if (x.occupation) occMap[x.occupation] = (occMap[x.occupation] || 0) + 1;
+        });
+        function _topKey(m) { var top = "", max = 0; for (var k in m) { if (m[k] > max) { top = k; max = m[k]; } } return top ? top + " (" + max + ")" : ""; }
+
         html += '<div class="assistant-section">';
         html += '<div class="assistant-section-title">👤 ' + tr("brief_offenders", "Профиль правонарушителей") + '</div>';
         html += '<div class="assistant-people-grid">';
-        if (p.total) html += '<div><strong>' + tr("brief_total_persons", "Всего лиц") + ':</strong> ' + p.total + '</div>';
-        if (p.minors) html += '<div><strong>' + tr("brief_minors", "Несовершеннолетних") + ':</strong> ' + p.minors + ' (' + pct(p.minors, p.total) + '%)</div>';
-        if (p.byGender && p.byGender[0]) html += '<div><strong>' + tr("brief_gender", "Преобл. пол") + ':</strong> ' + escH(p.byGender[0].label) + ' (' + p.byGender[0].count + ')</div>';
-        if (p.byAge && p.byAge[0]) html += '<div><strong>' + tr("brief_age_group", "Возрастная группа") + ':</strong> ' + escH(p.byAge[0].label) + '</div>';
-        if (p.byOccupation && p.byOccupation[0]) html += '<div><strong>' + tr("brief_occupation", "Род занятий") + ':</strong> ' + escH(p.byOccupation[0].label) + '</div>';
+        html += '<div><strong>' + tr("brief_total_persons", "Всего лиц") + ':</strong> ' + totalP + '</div>';
+        if (minorsP) html += '<div><strong>' + tr("brief_minors", "Несовершеннолетних") + ':</strong> ' + minorsP + ' (' + pct(minorsP, totalP) + '%)</div>';
+        var topG = _topKey(genderMap); if (topG) html += '<div><strong>' + tr("brief_gender", "Преобл. пол") + ':</strong> ' + escH(topG) + '</div>';
+        var topA = _topKey(ageMap); if (topA) html += '<div><strong>' + tr("brief_age_group", "Возрастная группа") + ':</strong> ' + escH(topA) + '</div>';
+        var topO = _topKey(occMap); if (topO) html += '<div><strong>' + tr("brief_occupation", "Род занятий") + ':</strong> ' + escH(topO) + '</div>';
         html += '</div>';
         html += '<div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;">';
         html += '<button class="brief-export-btn" data-export="people">📥 Excel</button>';
