@@ -41,13 +41,30 @@ function analyzeByArticle(crimes) {
 //  2. ВРЕМЕННЫЕ ПАТТЕРНЫ
 // ══════════════════════════════════════════════════════════════
 
+// Час совершения (0-23): время совершения -> дата-время совершения -> дата-время регистрации
+function crimeHourOf(c) {
+    if (!c) return null;
+    if (c.crimeTime) {
+        var str = String(c.crimeTime);
+        var m = str.match(/(\d{1,2})\s*[:.\u0447]/);
+        if (!m) m = str.match(/^\s*(\d{1,2})\s*$/);
+        if (m) { var h = parseInt(m[1], 10); if (h >= 0 && h <= 23) return h; }
+    }
+    if (c.crimeDate && String(c.crimeDate).indexOf("T") !== -1) {
+        var d1 = new Date(c.crimeDate); if (!isNaN(d1.getTime())) return d1.getHours();
+    }
+    if (c.regDate && String(c.regDate).indexOf("T") !== -1) {
+        var d2 = new Date(c.regDate); if (!isNaN(d2.getTime())) return d2.getHours();
+    }
+    return null;
+}
+
 function analyzeByHour(crimes) {
     var hours = [];
     for (var i = 0; i < 24; i++) hours[i] = 0;
     crimes.forEach(function (c) {
-        if (!c.crimeTime) return;
-        var m = String(c.crimeTime).match(/(\d{2}):/);
-        if (m) hours[parseInt(m[1])]++;
+        var h = crimeHourOf(c);
+        if (h !== null) hours[h]++;
     });
     return hours;
 }
@@ -56,8 +73,9 @@ function analyzeByDayOfWeek(crimes) {
     var days = [0, 0, 0, 0, 0, 0, 0]; // Пн-Вс
     var dayNames = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"];
     crimes.forEach(function (c) {
-        if (!c.crimeDate) return;
-        var d = new Date(c.crimeDate);
+        var src = c.crimeDate || c.regDate;
+        if (!src) return;
+        var d = new Date(src);
         if (isNaN(d.getTime())) return;
         var day = d.getDay(); // 0=Вс, 1=Пн...
         var idx = day === 0 ? 6 : day - 1;
@@ -274,10 +292,8 @@ function findProblemZones(crimes, gridSize) {
         }
         if (c.isPublic) zone.publicCount++;
 
-        if (c.crimeTime) {
-            var m = String(c.crimeTime).match(/(\d{2}):/);
-            if (m) zone.hours.push(parseInt(m[1]));
-        }
+        var _zh = crimeHourOf(c);
+        if (_zh !== null) zone.hours.push(_zh);
     });
 
     var zones = Object.values(grid);
