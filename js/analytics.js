@@ -1023,7 +1023,7 @@ function buildProsecutorBriefing(analysis, allCrimes, lang) {
 
     // ── Анализ заведений (корреляция с преступлениями) ──────────
     if (typeof venuePoints !== "undefined" && venuePoints.length > 0) {
-        var VENUE_RADIUS = 0.001; // ~100м в градусах
+        var VENUE_RADIUS = 0.0005; // ~50м в градусах
         var venueStats = [];
         venuePoints.forEach(function (v) {
             var nearby = 0;
@@ -1050,7 +1050,7 @@ function buildProsecutorBriefing(analysis, allCrimes, lang) {
 
         if (venueStats.length > 0) {
             html += '<div class="assistant-section">';
-            html += '<div class="assistant-section-title">' + tr("brief_venues_crimes", "Заведения и преступность (радиус 100м)") + '</div>';
+            html += '<div class="assistant-section-title">' + tr("brief_venues_crimes", "Заведения и преступность (радиус 50м)") + '</div>';
             html += '<div class="assistant-hint">' + tr("brief_venues_hint", "Заведения рядом с которыми зафиксированы преступления") + '</div>';
             html += '<table class="assistant-table"><thead><tr>';
             html += '<th class="an-th-num">#</th>';

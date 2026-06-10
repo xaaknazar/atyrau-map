@@ -973,7 +973,7 @@
                 });
             });
 
-            // ── Кнопки заведений на карте (100м радиус + преступления) ──
+            // ── Кнопки заведений на карте (50м радиус + преступления) ──
             assistantBody.querySelectorAll(".an-venue-map-btn").forEach(function (btn) {
                 btn.addEventListener("click", function () {
                     var lat = parseFloat(this.getAttribute("data-lat"));
@@ -1039,7 +1039,7 @@
         } else if (type === "allpeople") {
             _showPeopleResults(crimePeople.slice(0, 50));
         } else if (type === "venues_crimes") {
-            var VRAD = 0.001;
+            var VRAD = 0.0005;
             var vdata = [];
             (typeof venuePoints !== "undefined" ? venuePoints : []).forEach(function (v) {
                 var cnt = 0;
@@ -1050,7 +1050,7 @@
                 if (cnt > 0) vdata.push([v.name, v.addr || "", v.lat.toFixed(6), v.lng.toFixed(6), cnt]);
             });
             vdata.sort(function (x, y) { return y[4] - x[4]; });
-            var vh = ["Заведение", "Адрес", "Lat", "Lng", "Преступлений (100м)"];
+            var vh = ["Заведение", "Адрес", "Lat", "Lng", "Преступлений (50м)"];
             _exportXlsx(vh, vdata, "Venues_crimes_" + new Date().toISOString().slice(0, 10) + ".xlsx");
         } else if (type === "showallzones") {
             var zones2 = (a.problemZones || []).filter(function (z) { return z.count <= 50; }).slice(0, 10);
@@ -1215,7 +1215,7 @@
     }
 
     function _showVenueOnMap(lat, lng, venueName) {
-        var RADIUS_DEG = 0.001; // ~100м
+        var RADIUS_DEG = 0.0005; // ~50м
         hideAnalyticsPanelWithBack();
         setTimeout(function () {
             map.invalidateSize();
@@ -1227,9 +1227,9 @@
             }
             window._venueOverlay = [];
 
-            // Круг 100м — не перехватывает клики, чтобы режим «360° Панорама» работал внутри радиуса
+            // Круг 50м — не перехватывает клики, чтобы режим «360° Панорама» работал внутри радиуса
             var circle = L.circle([lat, lng], {
-                radius: 100,
+                radius: 50,
                 color: '#e91e63',
                 fillColor: '#e91e63',
                 fillOpacity: 0.1,
@@ -1250,7 +1250,7 @@
             venueMarker.bindPopup('<strong>' + venueName + '</strong>').openPopup();
             window._venueOverlay.push(venueMarker);
 
-            // Преступления в радиусе 100м
+            // Преступления в радиусе 50м
             crimeIncidents.forEach(function (c) {
                 if (typeof c.lat !== "number" || isNaN(c.lat)) return;
                 if (Math.abs(c.lat - lat) > RADIUS_DEG || Math.abs(c.lng - lng) > RADIUS_DEG) return;

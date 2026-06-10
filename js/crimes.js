@@ -49,8 +49,8 @@ var PEOPLE_GID = "187886123";
 var PEOPLE_CSV_URL = "https://docs.google.com/spreadsheets/d/" + PEOPLE_SHEET_ID +
     "/export?format=csv&gid=" + PEOPLE_GID;
 
-var CRIMES_DATA_CACHE_KEY = "atyrau-crimes-data-cache-v3";
-var PEOPLE_DATA_CACHE_KEY = "atyrau-people-data-cache-v3";
+var CRIMES_DATA_CACHE_KEY = "atyrau-crimes-data-cache-v4";
+var PEOPLE_DATA_CACHE_KEY = "atyrau-people-data-cache-v4";
 
 // ══════════════════════════════════════════════════════════════
 //  Глобальные переменные
@@ -312,8 +312,8 @@ function jsonRowToCrime(row, idx) {
         organ: _s(row["Орган регистрации"] || row["2.Орган регистрации"]),
         kuiNumber: _s(row["Номер КУИ"] || row["3. Номер КУИ"] || row["4.Номер КУИ"]),
         kuiDate: _parseDate(row["Дата-время регистрации в КУИ"] || row["4.Дата-время регистрации в КУИ"]),
-        crimeDate: _parseDate(row["Дата совершения"] || row["9.Дата совершения"]),
-        crimeTime: _s(row["время совершения"] || row["9.время совершения"]),
+        crimeDate: _parseDate(row["Дата совершения"] || row["9.Дата совершения"] || _findFieldCI(row, ["дата", "соверш"])),
+        crimeTime: _s(row["время совершения"] || row["Время совершения"] || row["9.время совершения"] || row["9.Время совершения"] || _findFieldCI(row, ["время", "соверш"])),
         description: _s(row["Описание преступления/проступка"] || row["9.1 Описание преступления/проступка"]),
         article: article,
         articlePart: _s(row["10.Квалификация п.п."]),
@@ -338,6 +338,22 @@ function jsonRowToCrime(row, idx) {
 /**
  * CSV fallback (старый формат).
  */
+// Поиск значения по частичному совпадению ключа (без учёта регистра).
+function _findFieldCI(row, parts) {
+    for (var key in row) {
+        var k = key.toLowerCase();
+        var match = true;
+        for (var i = 0; i < parts.length; i++) {
+            if (k.indexOf(parts[i]) === -1) { match = false; break; }
+        }
+        if (match) {
+            var v = row[key];
+            if (v !== null && v !== undefined && String(v).trim() !== "") return v;
+        }
+    }
+    return "";
+}
+
 function csvRowToCrime(cols, idx) {
     var lat = cols[24] ? parseFloat(cols[24]) : (cols[20] ? parseFloat(cols[20]) : null);
     var lng = cols[25] ? parseFloat(cols[25]) : (cols[21] ? parseFloat(cols[21]) : null);
