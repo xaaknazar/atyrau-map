@@ -4242,7 +4242,31 @@
                 var s = mapSuggestions.find(function (x) { return x.id === id; });
                 if (s) {
                     prokOverlay.classList.add("hidden");
+                    map.invalidateSize();
                     map.setView([s.lat, s.lng], 17);
+                    // Если маркер заявки есть на карте (принятые/решённые) — открыть его popup.
+                    // Иначе (например, новая заявка — pending) показать временный маркер.
+                    if (!focusSuggestionOnMap(s.id)) {
+                        if (window._prokFocusMarker) { map.removeLayer(window._prokFocusMarker); }
+                        window._prokFocusMarker = L.circleMarker([s.lat, s.lng], {
+                            radius: 11,
+                            color: "#fff",
+                            weight: 3,
+                            fillColor: "#f39c12",
+                            fillOpacity: 0.95
+                        }).addTo(map);
+                        var st = s.status || "pending";
+                        var popupHtml = '<div>' + _catBadge(s.category) + ' ' + _statusBadge(st) + '</div>' +
+                            '<div style="margin-top:6px;">' + escHtml(s.description || "") + '</div>' +
+                            '<div style="color:#888;font-size:11px;margin-top:4px;">' + _fmtDMY(s.created) + '</div>';
+                        window._prokFocusMarker.bindPopup(popupHtml, { maxWidth: 260 }).openPopup();
+                        setTimeout(function () {
+                            if (window._prokFocusMarker) {
+                                map.removeLayer(window._prokFocusMarker);
+                                window._prokFocusMarker = null;
+                            }
+                        }, 60000);
+                    }
                 }
             });
         });
