@@ -913,15 +913,19 @@
         var validZones = analysis.problemZones.filter(function (z) { return z.count <= 50; });
         renderZonesList(validZones);
 
-        // Люди
-        if (analysis.people) {
-            renderPeopleStats(analysis.people);
-            renderBarChart("an-people-age-chart", analysis.people.byAge, "blue");
-            renderBarChart("an-people-gender-chart", analysis.people.byGender, "green");
-            renderBarChart("an-people-education-chart", analysis.people.byEducation, "purple");
-            renderBarChart("an-people-occupation-chart", analysis.people.byOccupation.slice(0, 15), "orange");
-            renderBarChart("an-people-marital-chart", analysis.people.byMaritalStatus, "blue");
-            renderBarChart("an-people-nationality-chart", analysis.people.byNationality.slice(0, 10), "green");
+        // Люди — всегда полный список лиц с ФИО (как в карточках сверху),
+        // а не отфильтрованный по периоду/ЕРДР
+        var _fullPeopleList = (typeof crimePeople !== "undefined" ? crimePeople : [])
+            .filter(function (p) { return p.lastName || p.firstName || p.patronymic; });
+        var _fullPA = _fullPeopleList.length > 0 ? runPeopleAnalysis(_fullPeopleList) : analysis.people;
+        if (_fullPA) {
+            renderPeopleStats(_fullPA);
+            renderBarChart("an-people-age-chart", _fullPA.byAge, "blue");
+            renderBarChart("an-people-gender-chart", _fullPA.byGender, "green");
+            renderBarChart("an-people-education-chart", _fullPA.byEducation, "purple");
+            renderBarChart("an-people-occupation-chart", _fullPA.byOccupation.slice(0, 15), "orange");
+            renderBarChart("an-people-marital-chart", _fullPA.byMaritalStatus, "blue");
+            renderBarChart("an-people-nationality-chart", _fullPA.byNationality.slice(0, 10), "green");
         }
         // Список лиц — всегда (независимо от analysis.people)
         _initPeopleFilters();
