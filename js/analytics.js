@@ -959,33 +959,6 @@ function buildProsecutorBriefing(analysis, allCrimes, lang) {
     html += '<button class="brief-export-btn" data-export="geozones">Excel</button>';
     html += '</div>';
 
-    // ── Горячие зоны (радиус ~500м) ────────────────────────────
-    var validZones = (analysis.problemZones || []).filter(function (z) { return z.count <= 50; });
-    if (validZones.length > 0) {
-        html += '<div class="assistant-section">';
-        html += '<div class="assistant-section-title">' + tr("brief_hot_zones", "Горячие зоны (радиус ~500 м)") + '</div>';
-        html += '<div class="assistant-hint">' + tr("brief_hot_hint", "Кластеры преступности — приоритетные участки") + '</div>';
-        validZones.slice(0, 5).forEach(function (z, i) {
-            var dangerCls = z.dangerLevel >= 3 ? "danger-high" : (z.dangerLevel >= 2 ? "danger-mid" : "danger-low");
-            html += '<div class="assistant-zone ' + dangerCls + '">';
-            html += '<div class="assistant-zone-head">';
-            html += '<span class="assistant-zone-num">#' + (i + 1) + '</span>';
-            html += '<span class="assistant-zone-count">' + z.count + ' ' + tr("brief_cases", "случаев") + '</span>';
-            html += '<span class="assistant-zone-coords">' + z.lat.toFixed(4) + ', ' + z.lng.toFixed(4) + '</span>';
-            html += '</div>';
-            html += '<div class="assistant-zone-body">';
-            if (z.topArticle) html += '<div><strong>' + tr("brief_main_article", "Основная статья") + ':</strong> ' + escH(z.topArticle) + '</div>';
-            if (typeof z.peakHour === "number") html += '<div><strong>' + tr("brief_peak_hour", "Пиковый час") + ':</strong> ' + ("0" + z.peakHour).slice(-2) + ':00</div>';
-            html += '</div>';
-            html += '</div>';
-        });
-        html += '<div style="display:flex;gap:8px;margin-top:12px;">';
-        html += '<button class="brief-export-btn" data-export="hotzones">Excel</button>';
-        html += '<button class="brief-export-btn an-zone-map-btn" data-export="showallzones">' + tr("an_show_map", "Показать на карте") + '</button>';
-        html += '</div>';
-        html += '</div>';
-    }
-
     // ── Время повышенного риска ───────────────────────────────
     var hourPeaks = [];
     analysis.byHour.forEach(function (count, h) { hourPeaks.push({ h: h, c: count }); });
@@ -1026,8 +999,12 @@ function buildProsecutorBriefing(analysis, allCrimes, lang) {
     }
 
     // ── Демография нарушителей ────────────────────────────────
-    if (analysis.people) {
-        var p = analysis.people;
+    // Используем полный список лиц (как в разделе "Лица"), а не отфильтрованный по периоду
+    var _fullPeople = (typeof crimePeople !== "undefined" ? crimePeople : [])
+        .filter(function (pp) { return pp.lastName || pp.firstName || pp.patronymic; });
+    var _peopleAnalysis = _fullPeople.length > 0 ? runPeopleAnalysis(_fullPeople) : analysis.people;
+    if (_peopleAnalysis) {
+        var p = _peopleAnalysis;
         html += '<div class="assistant-section">';
         html += '<div class="assistant-section-title">' + tr("brief_offenders", "Профиль правонарушителей") + '</div>';
         html += '<div class="assistant-people-grid">';
