@@ -39,8 +39,8 @@
     }
 
     // ── Config ──────────────────────────────────────────────
-    var ADMIN_PASSWORD = "prokuratura2025";
-    var STAFF_PASSWORD = "1345";
+    var ADMIN_PASSWORD = "Qalaprok2025";
+    var STAFF_PASSWORD = "Qalaprok2025";
     var AKIMAT_PASSWORD = "aa123";
 
     var CATEGORIES = {
