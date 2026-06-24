@@ -5177,6 +5177,20 @@ body {
 
 .av-cat-hidden { display: none; }
 
+/* Скрытие «хвоста» длинного списка */
+.av-person-extra { display: none; }
+.av-pc-list.show-all .av-person-extra { display: block; }
+.av-pc-more {
+    margin-top: 10px;
+    width: 100%;
+    font-size: 13px; font-weight: 600;
+    color: #b3261e; background: #fbeceb;
+    border: 1px solid #f4d3d1; border-radius: 9px;
+    padding: 9px 12px; cursor: pointer;
+    transition: background .12s ease;
+}
+.av-pc-more:hover { background: #f7dddb; }
+
 .av-persons-cat { margin-bottom: 16px; }
 .av-pc-block {
     border: 1px solid #e6e9f0;

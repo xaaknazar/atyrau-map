@@ -2418,7 +2418,7 @@
         });
     }
 
-    function _avPersonCardHTML(p) {
+    function _avPersonCardHTML(p, isExtra) {
         var riskLabel = p.count >= 5 ? "Высокий риск" : (p.count >= 3 ? "Повышенный риск" : "Средний риск");
         var riskClass = p.count >= 5 ? "risk-high" : (p.count >= 3 ? "risk-mid" : "risk-low");
         var sub = [];
@@ -2426,7 +2426,7 @@
         if (p.age) sub.push(_avEsc(p.age) + " лет");
         if (p.raion) sub.push(_avEsc(p.raion));
 
-        var html = '<div class="av-person">';
+        var html = '<div class="av-person' + (isExtra ? ' av-person-extra' : '') + '">';
         html += '<div class="av-person-main">';
         html += '<span class="av-person-count" title="Кол-во правонарушений">' + p.count + '</span>';
         html += '<div class="av-person-info">';
@@ -2498,12 +2498,27 @@
                         : "Нет лиц с повторными правонарушениями за выбранный период.") +
                     '</div>';
             } else {
+                var LIMIT = 5;
                 html += '<div class="av-pc-list">';
-                list.forEach(function (p) { html += _avPersonCardHTML(p); });
+                list.forEach(function (p, i) { html += _avPersonCardHTML(p, i >= LIMIT); });
                 html += '</div>';
+                if (list.length > LIMIT) {
+                    html += '<button class="av-pc-more">Показать ещё ' + (list.length - LIMIT) + '</button>';
+                }
             }
             html += '</div>';
             el.innerHTML = html;
+
+            // Кнопка "Показать ещё / Свернуть"
+            var moreBtn = el.querySelector(".av-pc-more");
+            if (moreBtn) {
+                var _hiddenN = list.length - 5;
+                moreBtn.addEventListener("click", function () {
+                    var listEl = el.querySelector(".av-pc-list");
+                    var open = listEl.classList.toggle("show-all");
+                    this.textContent = open ? "Свернуть" : ("Показать ещё " + _hiddenN);
+                });
+            }
 
             // Разворачивание карточки
             el.querySelectorAll(".av-person").forEach(function (card) {
