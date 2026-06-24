@@ -117,7 +117,7 @@ function REG_buildItems() {
             crimeDateRaw: c.crimeDate,
             article: _regStr(c.article) + (c.articlePart ? " " + c.articlePart : ""),
             articleRaw: _regStr(c.article),
-            description: _regStr(c.crimeDescription),
+            description: _regStr(c.description || c.crimeDescription),
             fio: [c.lastName, c.firstName, c.patronymic].map(_regStr).filter(Boolean).join(" "),
             lat: (c.lat != null ? c.lat : null), lng: (c.lng != null ? c.lng : null)
         }, today));
