@@ -123,23 +123,7 @@ function REG_buildItems() {
         }, today));
     });
 
-    var av = (typeof adminViolations !== "undefined" && adminViolations) ? adminViolations : [];
-    av.forEach(function (v) {
-        items.push(_regNorm({
-            uid: "A-" + v.id,
-            source: "admin",
-            sourceLabel: "Административные правонарушения",
-            number: _regStr(v.materialNumber),
-            organ: _regStr(v.podrazdelenie || v.organ),
-            regDateRaw: v.regDate,
-            crimeDateRaw: v.crimeDate,
-            article: _regStr(v.article),
-            articleRaw: _regStr(v.article),
-            description: _regStr(v.fabula),
-            fio: [v.lastName, v.firstName, v.patronymic].map(_regStr).filter(Boolean).join(" "),
-            lat: (v.lat != null ? v.lat : null), lng: (v.lng != null ? v.lng : null)
-        }, today));
-    });
+    // Административные правонарушения исключены — контроль только по ЕРДР (уголовные).
 
     _regMarkDuplicates(items);
     return items;
