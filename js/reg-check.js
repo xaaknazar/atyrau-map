@@ -65,7 +65,7 @@ function _regNorm(it, today) {
     if (!_regStr(it.regDateRaw)) it.flags.push({ cat: "date", sev: "med", label: "Нет даты регистрации" });
     if (!_regStr(it.crimeDateRaw)) it.flags.push({ cat: "complete", sev: "low", label: "Нет даты совершения" });
     if (!it.fio) it.flags.push({ cat: "complete", sev: "low", label: "Нет данных о лице" });
-    if (it.lat == null || it.lng == null) it.flags.push({ cat: "complete", sev: "low", label: "Нет координат" });
+    // Координаты не проверяем: для ряда статей (например, мошенничество ст.190) они намеренно не наносятся на карту.
 
     // Логика дат
     var reg = _regParseDate(it.regDateRaw);
@@ -105,8 +105,21 @@ function REG_buildItems() {
     var items = [];
     var today = new Date(); today.setHours(23, 59, 59, 999);
 
+    var peopleByErdr = (typeof crimePeopleByErdr !== "undefined" && crimePeopleByErdr) ? crimePeopleByErdr : {};
     var crimes = (typeof crimeIncidents !== "undefined" && crimeIncidents) ? crimeIncidents : [];
     crimes.forEach(function (c) {
+        // Данные о лице берём из листа лиц по номеру ЕРДР
+        var persons = (c.erdr && peopleByErdr[c.erdr]) ? peopleByErdr[c.erdr] : [];
+        var fio = "";
+        var iin = "";
+        if (persons.length) {
+            var p0 = persons[0];
+            fio = [p0.lastName, p0.firstName, p0.patronymic].map(_regStr).filter(Boolean).join(" ");
+            iin = _regStr(p0.iin);
+            if (persons.length > 1) fio += " (+" + (persons.length - 1) + ")";
+        }
+        if (!fio) fio = [c.lastName, c.firstName, c.patronymic].map(_regStr).filter(Boolean).join(" ");
+
         items.push(_regNorm({
             uid: "C-" + c.id,
             source: "crime",
@@ -118,7 +131,8 @@ function REG_buildItems() {
             article: _regStr(c.article) + (c.articlePart ? " " + c.articlePart : ""),
             articleRaw: _regStr(c.article),
             description: _regStr(c.description || c.crimeDescription),
-            fio: [c.lastName, c.firstName, c.patronymic].map(_regStr).filter(Boolean).join(" "),
+            fio: fio,
+            iin: iin,
             lat: (c.lat != null ? c.lat : null), lng: (c.lng != null ? c.lng : null)
         }, today));
     });
@@ -212,6 +226,7 @@ function _regRowHTML(it) {
     html += _regKV("Дата регистрации", _regStr(it.regDateRaw) || "—");
     html += _regKV("Дата совершения", _regStr(it.crimeDateRaw) || "—");
     if (it.fio) html += _regKV("Лицо", it.fio);
+    if (it.iin) html += _regKV("ИИН", it.iin);
     html += _regKV("Язык описания", it.lang);
     html += '<div class="reg-kv"><div class="reg-kv-k">Описание / фабула</div><div class="reg-kv-v reg-kv-desc">' + _regEsc(it.description || "—") + '</div></div>';
     if (ai) {
