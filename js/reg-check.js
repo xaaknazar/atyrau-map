@@ -353,6 +353,13 @@ function REG_setProgress(text) {
 }
 
 function REG_runAI() {
+    // Сначала дождёмся загрузки ранее проверенных вердиктов из общей базы,
+    // чтобы НЕ перепроверять их заново и не тратить токены.
+    if (!REG_dbLoaded) {
+        REG_setProgress("Загружаю ранее проверенные записи…");
+        REG_loadAI(function () { REG_apply(); REG_runAI(); });
+        return;
+    }
     var pending = REG_currentItems.filter(function (it) { return !REG_aiResults[it.aiKey]; });
     if (pending.length === 0) {
         REG_setProgress("Все записи в текущем списке уже проверены AI.");
