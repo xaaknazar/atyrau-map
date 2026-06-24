@@ -5421,12 +5421,8 @@ body {
 .reg-empty { font-size: 13px; color: #6a7394; padding: 26px 4px; text-align: center; }
 .reg-row {
     border: 1px solid rgba(255,255,255,0.07);
-    border-left: 3px solid rgba(255,255,255,0.18);
     border-radius: 12px; background: rgba(255,255,255,0.035); overflow: hidden;
 }
-.reg-row.sev-high { border-left-color: #ff6b6b; }
-.reg-row.sev-med  { border-left-color: #f39c12; }
-.reg-row.sev-low  { border-left-color: #5a6588; }
 .reg-row-main { display: flex; align-items: flex-start; gap: 12px; padding: 14px 16px; cursor: pointer; transition: background .12s ease; }
 .reg-row-main:hover { background: rgba(255,255,255,0.05); }
 .reg-badge {

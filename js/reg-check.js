@@ -14,6 +14,7 @@ var REG_allItems = [];       // все нормализованные запис
 var REG_currentItems = [];   // источник+период, пригодные для AI (есть статья и описание)
 var REG_state = { source: "all", period: "all", filter: "issues", limit: 100 };
 var REG_wired = false;
+var REG_aiRunning = false;
 
 // ── Утилиты ──────────────────────────────────────────────────
 function _regStr(v) { return (v == null ? "" : String(v)).trim(); }
@@ -268,6 +269,14 @@ function REG_apply() {
     REG_renderStats(items);
     REG_currentItems = items.filter(function (it) { return it.articleRaw && it.description; });
 
+    // Подсказка: AI-проверка охватывает текущий выбор (период + источник)
+    if (!REG_aiRunning) {
+        var notChecked = REG_currentItems.filter(function (it) { return !REG_aiResults[it.uid]; }).length;
+        REG_setProgress(REG_currentItems.length
+            ? ("AI-проверка охватит текущий выбор: " + notChecked + " из " + REG_currentItems.length + " записей")
+            : "");
+    }
+
     var f = REG_state.filter;
     var view = items;
     if (f === "issues") view = items.filter(function (it) { return it.flags.length > 0; });
@@ -293,19 +302,21 @@ function REG_runAI() {
         return;
     }
     if (pending.length > 150 &&
-        !confirm("Будет проверено " + pending.length + " записей через AI. Это займёт время и расходует API. Продолжить?")) {
+        !confirm("Будет проверено " + pending.length + " записей за текущий выбор (период + источник) через AI. Это займёт время и расходует API. Продолжить?")) {
         return;
     }
     var btn = document.getElementById("reg-ai-btn");
     if (btn) btn.disabled = true;
+    REG_aiRunning = true;
 
     var total = pending.length, done = 0, batchSize = 12;
 
     function nextBatch() {
         if (pending.length === 0) {
             if (btn) btn.disabled = false;
-            REG_setProgress("Готово: проверено " + done + " записей.");
             REG_apply();
+            REG_aiRunning = false;
+            REG_setProgress("Готово: проверено " + done + " записей за текущий выбор.");
             return;
         }
         var batch = pending.splice(0, batchSize);
