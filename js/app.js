@@ -2319,6 +2319,8 @@
     var avAnalyticsPeriod = "all";
 
     function showAVAnalyticsPanel() {
+        var _b = document.getElementById("av-back-to-analytics");
+        if (_b) _b.classList.add("hidden");
         mapEl.classList.add("hidden");
         if (searchBar) searchBar.classList.add("hidden");
         if (mapControls) mapControls.classList.add("hidden");
@@ -2410,6 +2412,22 @@
         btn.addEventListener("click", function () {
             _avSwitchCat(this.getAttribute("data-cat"));
         });
+    });
+
+    // Плавающая кнопка "Назад в анализ" (на карте, после перехода из списка лиц)
+    var _avBackBtn = document.createElement("button");
+    _avBackBtn.id = "av-back-to-analytics";
+    _avBackBtn.className = "av-back-to-analytics hidden";
+    _avBackBtn.innerHTML =
+        '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>' +
+        '<span>Назад в анализ</span>';
+    document.body.appendChild(_avBackBtn);
+    _avBackBtn.addEventListener("click", function () {
+        _avBackBtn.classList.add("hidden");
+        if (window._avLocMarker) {
+            try { map.removeLayer(window._avLocMarker); window._avLocMarker = null; } catch (e) {}
+        }
+        showAVAnalyticsPanel();
     });
 
     function _avEsc(s) {
@@ -2555,12 +2573,7 @@
                             window._avLocMarker.bindPopup(
                                 '<strong>' + fio + '</strong>' + (art ? '<br>' + art : '')
                             ).openPopup();
-                            setTimeout(function () {
-                                if (window._avLocMarker) {
-                                    map.removeLayer(window._avLocMarker);
-                                    window._avLocMarker = null;
-                                }
-                            }, 60000);
+                            if (_avBackBtn) _avBackBtn.classList.remove("hidden");
                         } catch (err) {}
                     }, 80);
                 });
