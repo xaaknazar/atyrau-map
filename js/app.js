@@ -2350,6 +2350,41 @@
         showAVAnalyticsPanel();
     });
 
+    // ═══════════════════════════════════════════════════════
+    //  REG CHECK PANEL — контроль регистраций (прокурорский надзор)
+    // ═══════════════════════════════════════════════════════
+    var regCheckPanel = document.getElementById("reg-check-panel");
+    function showRegCheckPanel() {
+        mapEl.classList.add("hidden");
+        if (searchBar) searchBar.classList.add("hidden");
+        if (mapControls) mapControls.classList.add("hidden");
+        if (mobileMenuBtn) mobileMenuBtn.classList.add("hidden");
+        if (regCheckPanel) regCheckPanel.classList.remove("hidden");
+        if (typeof REG_open === "function") REG_open();
+        var sidebar = document.getElementById("sidebar");
+        if (sidebar) sidebar.classList.remove("open");
+        var ol = document.getElementById("sidebar-overlay");
+        if (ol) ol.classList.remove("active");
+    }
+    function hideRegCheckPanel() {
+        if (regCheckPanel) regCheckPanel.classList.add("hidden");
+        mapEl.classList.remove("hidden");
+        if (searchBar) searchBar.classList.remove("hidden");
+        if (mapControls) mapControls.classList.remove("hidden");
+        if (mobileMenuBtn) mobileMenuBtn.classList.remove("hidden");
+        map.invalidateSize();
+    }
+    var regCloseBtn = document.getElementById("close-reg-check");
+    if (regCloseBtn) regCloseBtn.addEventListener("click", function () {
+        hideRegCheckPanel();
+        showReportSelector();
+    });
+    var regCard = document.getElementById("report-card-reg-check");
+    if (regCard) regCard.addEventListener("click", function () {
+        reportSelector.classList.add("hidden");
+        showRegCheckPanel();
+    });
+
     document.querySelectorAll(".av-an-period-btn").forEach(function (btn) {
         btn.addEventListener("click", function () {
             document.querySelectorAll(".av-an-period-btn").forEach(function (b) { b.classList.remove("active"); });

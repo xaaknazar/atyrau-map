@@ -2,6 +2,7 @@
   "cleanUrls": true,
   "trailingSlash": false,
   "functions": {
-    "api/ai-analyze.js": { "maxDuration": 60 }
+    "api/ai-analyze.js": { "maxDuration": 60 },
+    "api/check-registration.js": { "maxDuration": 60 }
   }
 }

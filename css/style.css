@@ -5344,3 +5344,123 @@ body {
 .av-back-to-analytics:hover { background: #f7f8fa; box-shadow: 0 6px 20px rgba(20,30,50,.2); }
 .av-back-to-analytics svg { color: var(--av-red, #b3261e); }
 .av-back-to-analytics.hidden { display: none; }
+
+/* ══════════════════════════════════════════════════════════════
+   КОНТРОЛЬ РЕГИСТРАЦИЙ — прокурорский надзор
+   ══════════════════════════════════════════════════════════════ */
+#reg-check-panel .an-hint { color: var(--av-ink-3, #8b94a3); font-size: 12.5px; line-height: 1.5; margin: 0 0 14px; }
+
+/* Сегментированные вкладки источника */
+.reg-src-tabs {
+    display: flex; gap: 4px; margin: 0 0 16px;
+    background: var(--av-bg-soft, #f7f8fa);
+    border: 1px solid var(--av-line, #e9ebf0);
+    border-radius: 12px; padding: 4px;
+}
+.reg-src-tab {
+    flex: 1 1 auto;
+    font-size: 13px; font-weight: 600; color: var(--av-ink-2, #5b6573);
+    background: transparent; border: none; border-radius: 9px;
+    padding: 9px 12px; cursor: pointer; white-space: nowrap;
+    transition: background .14s ease, color .14s ease, box-shadow .14s ease;
+}
+.reg-src-tab:hover { color: var(--av-ink, #1d2530); }
+.reg-src-tab.active {
+    background: #fff; color: var(--av-ink, #1d2530);
+    box-shadow: 0 1px 2px rgba(20,30,50,.08), 0 0 0 1px var(--av-line, #e9ebf0);
+}
+
+/* Сводные карточки */
+.reg-stats-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(96px, 1fr));
+    gap: 10px; margin-bottom: 16px;
+}
+.reg-stat {
+    border: 1px solid var(--av-line, #e9ebf0); border-radius: 12px;
+    padding: 12px 14px; background: #fff; text-align: left;
+}
+.reg-stat-num { font-size: 22px; font-weight: 700; color: var(--av-ink, #1d2530); font-variant-numeric: tabular-nums; }
+.reg-stat-label { font-size: 11.5px; color: var(--av-ink-3, #8b94a3); margin-top: 2px; }
+.reg-stat-high .reg-stat-num { color: var(--av-red, #b3261e); }
+
+/* AI-кнопка */
+.reg-ai-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 14px; }
+.reg-ai-btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-size: 13px; font-weight: 600; color: #fff;
+    background: var(--av-red, #b3261e); border: none;
+    border-radius: 10px; padding: 10px 16px; cursor: pointer;
+    transition: background .12s ease, opacity .12s ease;
+}
+.reg-ai-btn:hover { background: #9c2019; }
+.reg-ai-btn:disabled { opacity: .55; cursor: default; }
+.reg-ai-progress { font-size: 12.5px; color: var(--av-ink-2, #5b6573); }
+
+/* Фильтр-чипы */
+.reg-filters { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+.reg-filter-chip {
+    font-size: 12.5px; font-weight: 600; color: var(--av-ink-2, #5b6573);
+    background: var(--av-bg-soft, #f7f8fa); border: 1px solid var(--av-line, #e9ebf0);
+    border-radius: 20px; padding: 7px 13px; cursor: pointer;
+    transition: background .12s ease, color .12s ease, border-color .12s ease;
+}
+.reg-filter-chip:hover { color: var(--av-ink, #1d2530); }
+.reg-filter-chip.active { background: var(--av-ink, #1d2530); color: #fff; border-color: var(--av-ink, #1d2530); }
+
+/* Список записей */
+.reg-list { display: flex; flex-direction: column; gap: 8px; }
+.reg-empty { font-size: 13px; color: var(--av-ink-3, #8b94a3); padding: 20px 4px; text-align: center; }
+.reg-row {
+    border: 1px solid var(--av-line, #e9ebf0);
+    border-left: 3px solid #cdd3dc;
+    border-radius: 11px; background: #fff; overflow: hidden;
+}
+.reg-row.sev-high { border-left-color: var(--av-red, #b3261e); }
+.reg-row.sev-med  { border-left-color: var(--av-amber, #b9791c); }
+.reg-row.sev-low  { border-left-color: #c2c9d4; }
+.reg-row-main { display: flex; align-items: flex-start; gap: 11px; padding: 12px 14px; cursor: pointer; transition: background .12s ease; }
+.reg-row-main:hover { background: var(--av-bg-soft, #f7f8fa); }
+.reg-badge {
+    flex: 0 0 auto; font-size: 10.5px; font-weight: 700; letter-spacing: .02em;
+    padding: 3px 7px; border-radius: 6px; margin-top: 1px;
+}
+.reg-src-crime { background: #fbe9e8; color: var(--av-red, #b3261e); }
+.reg-src-admin { background: #e9eefb; color: #3a5bbf; }
+.reg-row-info { flex: 1 1 auto; min-width: 0; }
+.reg-row-top { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.reg-row-article { font-weight: 700; font-size: 13.5px; color: var(--av-ink, #1d2530); }
+.reg-row-num { font-size: 11.5px; color: var(--av-ink-3, #8b94a3); font-variant-numeric: tabular-nums; }
+.reg-row-desc { font-size: 12.5px; color: var(--av-ink-2, #5b6573); margin-top: 4px; line-height: 1.45; }
+.reg-row-flags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 9px; }
+.reg-flag { font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 6px; background: #eef0f4; color: var(--av-ink-2, #5b6573); }
+.reg-flag.sev-high { background: #fbe9e8; color: var(--av-red, #b3261e); }
+.reg-flag.sev-med  { background: #fbf1e2; color: var(--av-amber, #b9791c); }
+.reg-flag.sev-low  { background: #eef0f4; color: var(--av-ink-2, #5b6573); }
+.reg-flag.reg-ai.ai-match    { background: #e6f5ec; color: #1f8a4c; }
+.reg-flag.reg-ai.ai-partial  { background: #fbf1e2; color: var(--av-amber, #b9791c); }
+.reg-flag.reg-ai.ai-mismatch { background: #fbe9e8; color: var(--av-red, #b3261e); }
+.reg-flag.reg-ai.ai-unknown  { background: #eef0f4; color: var(--av-ink-3, #8b94a3); }
+.reg-row-arrow { flex: 0 0 auto; color: #b8c0cd; transition: transform .15s ease; margin-top: 2px; }
+.reg-row.expanded .reg-row-arrow { transform: rotate(90deg); }
+
+.reg-row-details { display: none; padding: 4px 14px 14px 14px; border-top: 1px solid var(--av-line-2, #f0f2f6); }
+.reg-row.expanded .reg-row-details { display: block; }
+.reg-kv { display: flex; gap: 12px; padding: 5px 0; font-size: 12.5px; }
+.reg-kv-k { flex: 0 0 150px; color: var(--av-ink-3, #8b94a3); }
+.reg-kv-v { flex: 1 1 auto; color: var(--av-ink, #1d2530); min-width: 0; word-break: break-word; }
+.reg-kv-desc { line-height: 1.5; }
+.reg-ai-box { margin-top: 10px; padding: 10px 12px; border-radius: 9px; font-size: 12.5px; line-height: 1.5; }
+.reg-ai-box strong { display: block; margin-bottom: 3px; }
+.reg-ai-box.ai-match    { background: #e6f5ec; color: #1f6b3e; }
+.reg-ai-box.ai-partial  { background: #fbf1e2; color: #8a5a14; }
+.reg-ai-box.ai-mismatch { background: #fbe9e8; color: #8f1e18; }
+.reg-ai-box.ai-unknown  { background: #f3f4f7; color: var(--av-ink-2, #5b6573); }
+
+.reg-more {
+    margin-top: 4px; width: 100%;
+    font-size: 12.5px; font-weight: 600; color: var(--av-ink-2, #5b6573);
+    background: var(--av-bg-soft, #f7f8fa); border: 1px solid var(--av-line, #e9ebf0);
+    border-radius: 9px; padding: 10px 12px; cursor: pointer;
+    transition: background .12s ease, color .12s ease;
+}
+.reg-more:hover { background: #eef0f4; color: var(--av-ink, #1d2530); }

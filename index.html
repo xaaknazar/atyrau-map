@@ -15,7 +15,7 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
-    <link rel="stylesheet" href="css/style.css?v=21" />
+    <link rel="stylesheet" href="css/style.css?v=22" />
 </head>
 <body>
 
@@ -303,6 +303,22 @@
                     </div>
                 </div>
             </div>
+
+            <div class="report-section">
+                <div class="report-section-label">Прокурорский надзор</div>
+                <div class="report-cards-row">
+                    <div class="report-card" id="report-card-reg-check">
+                        <div class="rc-icon rc-red">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+                        </div>
+                        <div class="rc-body">
+                            <div class="rc-title">Контроль регистраций</div>
+                            <div class="rc-desc">Проверка качества: соответствие фабулы статье (AI), полнота, даты, дубликаты, язык</div>
+                        </div>
+                        <div class="rc-arrow">›</div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -499,6 +515,62 @@
         </div>
 
         <div id="av-list-content" class="crime-list"></div>
+    </div>
+
+    <!-- Registration control panel (прокурорский надзор) -->
+    <div id="reg-check-panel" class="hidden">
+        <div class="analytics-header">
+            <div class="crime-panel-top-row">
+                <button id="close-reg-check" class="close-crime-panel-btn" aria-label="Назад">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="15 18 9 12 15 6"/>
+                    </svg>
+                    <span>Назад</span>
+                </button>
+                <h2>Контроль регистраций</h2>
+                <span style="width:64px;"></span>
+            </div>
+            <div class="analytics-period-row">
+                <span class="analytics-period-label">Период:</span>
+                <div class="crime-period-buttons">
+                    <button class="reg-period-btn active" data-period="all">Все</button>
+                    <button class="reg-period-btn" data-period="month">Месяц</button>
+                    <button class="reg-period-btn" data-period="week">Неделя</button>
+                    <button class="reg-period-btn" data-period="day">День</button>
+                </div>
+            </div>
+        </div>
+        <div class="analytics-body">
+            <p class="an-hint">Надзор за качеством регистрации: соответствие описания указанной статье (на русском и казахском), полнота полей, корректность дат, дубликаты и язык описания.</p>
+
+            <div class="reg-src-tabs">
+                <button class="reg-src-tab active" data-src="all">Все</button>
+                <button class="reg-src-tab" data-src="crime">Уголовные / ЕРДР</button>
+                <button class="reg-src-tab" data-src="admin">Админ</button>
+            </div>
+
+            <div class="reg-stats-grid" id="reg-stats"></div>
+
+            <div class="reg-ai-row">
+                <button id="reg-ai-btn" class="reg-ai-btn">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a4 4 0 0 1 4 4v1h1a3 3 0 0 1 3 3v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-8a3 3 0 0 1 3-3h1V6a4 4 0 0 1 4-4z"/><circle cx="9" cy="13" r="1"/><circle cx="15" cy="13" r="1"/></svg>
+                    Проверить соответствие статье (AI)
+                </button>
+                <span id="reg-ai-progress" class="reg-ai-progress"></span>
+            </div>
+
+            <div class="reg-filters">
+                <button class="reg-filter-chip active" data-filter="issues">С замечаниями</button>
+                <button class="reg-filter-chip" data-filter="all">Все</button>
+                <button class="reg-filter-chip" data-filter="complete">Полнота</button>
+                <button class="reg-filter-chip" data-filter="date">Даты</button>
+                <button class="reg-filter-chip" data-filter="dup">Дубликаты</button>
+                <button class="reg-filter-chip" data-filter="lang">Язык</button>
+                <button class="reg-filter-chip" data-filter="ai-mismatch">AI: несоответствия</button>
+            </div>
+
+            <div id="reg-list" class="reg-list"></div>
+        </div>
     </div>
 
     <!-- AV Analytics panel (separate page) -->
@@ -1146,12 +1218,13 @@
     <script src="js/cameras.js?v=2"></script>
     <script src="js/police.js?v=2"></script>
     <script src="js/admin-violations.js?v=3"></script>
+    <script src="js/reg-check.js?v=1"></script>
     <script src="js/schools.js?v=1"></script>
     <script src="js/venues.js?v=2"></script>
     <script src="js/analytics.js?v=14"></script>
     <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.mini.min.js"></script>
     <script src="js/data.js?v=3"></script>
-    <script src="js/app.js?v=28"></script>
+    <script src="js/app.js?v=29"></script>
     <!-- QR code generator (lightweight) -->
     <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
     <script>
