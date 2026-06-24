@@ -2362,12 +2362,14 @@
         if (regCheckPanel) regCheckPanel.classList.remove("hidden");
         if (typeof REG_open === "function") REG_open();
         var sidebar = document.getElementById("sidebar");
-        if (sidebar) sidebar.classList.remove("open");
+        if (sidebar) { sidebar.classList.remove("open"); sidebar.classList.add("hidden"); }
         var ol = document.getElementById("sidebar-overlay");
         if (ol) ol.classList.remove("active");
     }
     function hideRegCheckPanel() {
         if (regCheckPanel) regCheckPanel.classList.add("hidden");
+        var sidebar = document.getElementById("sidebar");
+        if (sidebar) sidebar.classList.remove("hidden");
         mapEl.classList.remove("hidden");
         if (searchBar) searchBar.classList.remove("hidden");
         if (mapControls) mapControls.classList.remove("hidden");
