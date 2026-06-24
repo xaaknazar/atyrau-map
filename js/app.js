@@ -2373,6 +2373,9 @@
                 _statCard(a.uniqueAuthors, "Инспекторов");
         }
 
+        // Лица — потенциальные нарушители (риск перехода в уголовные)
+        renderAVPersons(filtered);
+
         renderGroupedAuthorsChart("av-chart-authors", a.byAuthorGrouped);
         renderExpandableChart("av-chart-units", a.byUnit, 10, "teal");
         renderExpandableChart("av-chart-articles", a.byArticle, 15, "red");
@@ -2380,6 +2383,138 @@
         renderExpandableChart("av-chart-state", a.byState, 10, "orange");
         renderExpandableChart("av-chart-age", a.byAge, 10, "purple");
         renderExpandableChart("av-chart-months", a.byMonth, 12, "green");
+    }
+
+    // ── Лица — потенциальные нарушители ──────────────────────
+    var avPersonsShowAll = false;
+    var _avShowAllCb = document.getElementById("av-persons-show-all");
+    if (_avShowAllCb) {
+        _avShowAllCb.addEventListener("change", function () {
+            avPersonsShowAll = this.checked;
+            renderAVAnalytics();
+        });
+    }
+
+    function _avEsc(s) {
+        return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) {
+            return ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c];
+        });
+    }
+
+    function _avPersonCardHTML(p) {
+        var riskLabel = p.count >= 5 ? "Высокий риск" : (p.count >= 3 ? "Повышенный риск" : "Средний риск");
+        var riskClass = p.count >= 5 ? "risk-high" : (p.count >= 3 ? "risk-mid" : "risk-low");
+        var sub = [];
+        if (p.birthDate) sub.push("др. " + _avEsc(p.birthDate));
+        if (p.age) sub.push(_avEsc(p.age) + " лет");
+        if (p.raion) sub.push(_avEsc(p.raion));
+
+        var html = '<div class="av-person">';
+        html += '<div class="av-person-main">';
+        html += '<span class="av-person-count" title="Кол-во правонарушений">' + p.count + '</span>';
+        html += '<div class="av-person-info">';
+        html += '<div class="av-person-fio">' + _avEsc(p.fio) + '</div>';
+        if (sub.length) html += '<div class="av-person-sub">' + sub.join(' · ') + '</div>';
+        html += '</div>';
+        html += '<span class="av-person-risk ' + riskClass + '">' + riskLabel + '</span>';
+        html += '<svg class="av-person-arrow" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>';
+        html += '</div>';
+
+        html += '<div class="av-person-details">';
+        var vs = p.violations.slice().sort(function (a, b) {
+            return String(b.regDate || "").localeCompare(String(a.regDate || ""));
+        });
+        vs.forEach(function (v) {
+            html += '<div class="av-viol">';
+            html += '<div class="av-viol-row">';
+            html += '<span class="av-viol-article">' + _avEsc(v.article || '—') + '</span>';
+            var d = v.crimeDate || v.regDate;
+            if (d) html += '<span class="av-viol-date">' + _avEsc(d) + '</span>';
+            html += '</div>';
+            var loc = [v.raion, v.place].filter(Boolean).join(', ');
+            if (loc) html += '<div class="av-viol-place">' + _avEsc(loc) + '</div>';
+            if (v.fabula) html += '<div class="av-viol-fabula">' + _avEsc(v.fabula) + '</div>';
+            if (v.lat !== null && v.lat !== undefined && v.lng !== null && v.lng !== undefined) {
+                html += '<button class="av-person-map-btn" data-lat="' + v.lat + '" data-lng="' + v.lng +
+                    '" data-fio="' + _avEsc(p.fio) + '" data-art="' + _avEsc(v.article || '') + '">На карте</button>';
+            }
+            html += '</div>';
+        });
+        html += '</div>'; // details
+        html += '</div>'; // person
+        return html;
+    }
+
+    function renderAVPersons(items) {
+        if (typeof analyzeAVPersons !== "function") return;
+        var cats = analyzeAVPersons(items, 2);
+        var idMap = {
+            transport: "av-persons-transport",
+            personal: "av-persons-personal",
+            family: "av-persons-family"
+        };
+        cats.forEach(function (cat) {
+            var el = document.getElementById(idMap[cat.key]);
+            if (!el) return;
+            var list = avPersonsShowAll ? cat.persons : cat.repeat;
+
+            var html = '<div class="av-pc-block av-pc-' + cat.color + '">';
+            html += '<div class="av-pc-head">';
+            html += '<div class="av-pc-title">' + _avEsc(cat.title) + '</div>';
+            html += '<div class="av-pc-desc">' + _avEsc(cat.desc) + '</div>';
+            html += '<div class="av-pc-badges">';
+            html += '<span class="av-pc-badge av-pc-badge-danger">Повторных лиц: ' + cat.repeatCount + '</span>';
+            html += '<span class="av-pc-badge">Всего лиц: ' + cat.totalPersons + '</span>';
+            html += '</div></div>';
+
+            if (list.length === 0) {
+                html += '<div class="av-pc-empty">' +
+                    (avPersonsShowAll
+                        ? "Нет лиц по данным статьям за выбранный период."
+                        : "Нет лиц с повторными правонарушениями за выбранный период.") +
+                    '</div>';
+            } else {
+                html += '<div class="av-pc-list">';
+                list.forEach(function (p) { html += _avPersonCardHTML(p); });
+                html += '</div>';
+            }
+            html += '</div>';
+            el.innerHTML = html;
+
+            // Разворачивание карточки
+            el.querySelectorAll(".av-person").forEach(function (card) {
+                var main = card.querySelector(".av-person-main");
+                if (main) main.addEventListener("click", function () {
+                    card.classList.toggle("expanded");
+                });
+            });
+
+            // Кнопки "На карте"
+            el.querySelectorAll(".av-person-map-btn").forEach(function (btn) {
+                btn.addEventListener("click", function (e) {
+                    e.stopPropagation();
+                    var lat = parseFloat(this.getAttribute("data-lat"));
+                    var lng = parseFloat(this.getAttribute("data-lng"));
+                    if (isNaN(lat) || isNaN(lng)) return;
+                    hideAVAnalyticsPanel();
+                    if (typeof reportSelector !== "undefined" && reportSelector) {
+                        reportSelector.classList.add("hidden");
+                    }
+                    map.setView([lat, lng], 17);
+                    if (window._avLocMarker) {
+                        try { map.removeLayer(window._avLocMarker); } catch (err) {}
+                    }
+                    try {
+                        window._avLocMarker = L.marker([lat, lng]).addTo(map);
+                        var fio = this.getAttribute("data-fio") || "";
+                        var art = this.getAttribute("data-art") || "";
+                        window._avLocMarker.bindPopup(
+                            '<strong>' + fio + '</strong>' + (art ? '<br>' + art : '')
+                        ).openPopup();
+                    } catch (err) {}
+                });
+            });
+        });
     }
 
     // Загрузка данных

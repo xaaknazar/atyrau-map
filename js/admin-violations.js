@@ -296,3 +296,105 @@ function loadAdminViolations(onDone) {
     };
     xhr.send();
 }
+
+// ══════════════════════════════════════════════════════════════
+//  ЛИЦА — ПОТЕНЦИАЛЬНЫЕ НАРУШИТЕЛИ (риск перехода в уголовные)
+//  Лица, неоднократно совершившие админ. правонарушения по статьям,
+//  сопряжённым с риском уголовной ответственности.
+// ══════════════════════════════════════════════════════════════
+
+// Категории статей КоАП → риск уголовного правонарушения
+var AV_RISK_CATEGORIES = [
+    {
+        key: "transport",
+        title: "Лица, которые могут совершить транспортные уголовные правонарушения",
+        desc: "Статьи КоАП: 590–600, 608, 610, 611, 612",
+        color: "red",
+        match: function (n) {
+            return (n >= 590 && n <= 600) || n === 608 || n === 610 || n === 611 || n === 612;
+        }
+    },
+    {
+        key: "personal",
+        title: "Лица, которые могут совершить уголовные правонарушения против личности",
+        desc: "Статьи КоАП: 434, 440",
+        color: "orange",
+        match: function (n) {
+            return n === 434 || n === 440;
+        }
+    },
+    {
+        key: "family",
+        title: "Лица, которые могут совершить уголовные правонарушения в семейно-бытовой сфере",
+        desc: "Статья КоАП: 73",
+        color: "purple",
+        match: function (n) {
+            return n === 73;
+        }
+    }
+];
+
+// Числовой номер статьи из строки квалификации ("ст.600 ч.1" → 600)
+function _avArticleNum(article) {
+    if (!article) return null;
+    var m = String(article).match(/(\d{2,4})/);
+    return m ? parseInt(m[1], 10) : null;
+}
+
+// Ключ лица: ФИО + дата рождения (для объединения записей одного человека)
+function _avPersonKey(v) {
+    var fio = [v.lastName, v.firstName, v.patronymic]
+        .map(function (s) { return (s || "").trim().toLowerCase(); })
+        .filter(Boolean).join(" ");
+    return fio + "|" + (v.birthDate || "").trim();
+}
+
+/**
+ * Сгруппировать лиц по 3 категориям статей.
+ * minCount — минимальное число правонарушений, чтобы считать лицо «неоднократным».
+ * Возвращает массив категорий с полными списками лиц и списком повторных.
+ */
+function analyzeAVPersons(items, minCount) {
+    minCount = minCount || 2;
+    return AV_RISK_CATEGORIES.map(function (cat) {
+        var byPerson = {};
+        items.forEach(function (v) {
+            var n = _avArticleNum(v.article);
+            if (n === null || !cat.match(n)) return;
+            var fio = [v.lastName, v.firstName, v.patronymic]
+                .map(function (s) { return (s || "").trim(); })
+                .filter(Boolean).join(" ");
+            if (!fio) return; // пропускаем записи без ФИО
+            var key = _avPersonKey(v);
+            if (!byPerson[key]) {
+                byPerson[key] = {
+                    fio: fio,
+                    birthDate: v.birthDate || "",
+                    age: v.age || "",
+                    workplace: v.workplace || "",
+                    phone: v.phone || "",
+                    raion: v.raion || "",
+                    count: 0,
+                    violations: []
+                };
+            }
+            byPerson[key].count++;
+            byPerson[key].violations.push(v);
+            if (v.age && !byPerson[key].age) byPerson[key].age = v.age;
+            if (v.phone && !byPerson[key].phone) byPerson[key].phone = v.phone;
+        });
+        var persons = Object.keys(byPerson).map(function (k) { return byPerson[k]; })
+            .sort(function (a, b) { return b.count - a.count; });
+        var repeat = persons.filter(function (p) { return p.count >= minCount; });
+        return {
+            key: cat.key,
+            title: cat.title,
+            desc: cat.desc,
+            color: cat.color,
+            persons: persons,
+            repeat: repeat,
+            totalPersons: persons.length,
+            repeatCount: repeat.length
+        };
+    });
+}
