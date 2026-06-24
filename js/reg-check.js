@@ -12,7 +12,7 @@
 var REG_aiResults = {};      // uid -> { verdict, comment }
 var REG_allItems = [];       // все нормализованные записи
 var REG_currentItems = [];   // источник+период, пригодные для AI (есть статья и описание)
-var REG_state = { source: "all", period: "all", filter: "issues", limit: 100 };
+var REG_state = { source: "all", period: "all", filter: "issues", search: "", limit: 100 };
 var REG_wired = false;
 var REG_aiRunning = false;
 
@@ -267,6 +267,15 @@ function REG_apply() {
     else if (f === "ai-mismatch") view = items.filter(function (it) { var a = REG_aiResults[it.uid]; return a && (a.verdict === "mismatch" || a.verdict === "partial"); });
     else if (f !== "all") view = items.filter(function (it) { return it.flags.some(function (fl) { return fl.cat === f; }); });
 
+    // Поиск по статье
+    var q = (REG_state.search || "").trim().toLowerCase();
+    if (q) {
+        view = view.filter(function (it) {
+            return (it.article || "").toLowerCase().indexOf(q) !== -1 ||
+                String(_regArtNum(it.articleRaw)).indexOf(q) !== -1;
+        });
+    }
+
     var order = { high: 0, med: 1, low: 2, none: 3 };
     view = view.slice().sort(function (a, b) { return order[_regSev(a)] - order[_regSev(b)]; });
 
@@ -366,6 +375,10 @@ function REG_wire() {
     });
     var ai = document.getElementById("reg-ai-btn");
     if (ai) ai.addEventListener("click", REG_runAI);
+    var search = document.getElementById("reg-search");
+    if (search) search.addEventListener("input", function () {
+        REG_state.search = this.value || ""; REG_state.limit = 100; REG_apply();
+    });
 }
 
 // Вызывается из app.js при открытии панели
