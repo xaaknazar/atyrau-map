@@ -53,10 +53,58 @@ function _regVerdict(v) {
     return ({ match: "Соответствует", partial: "Частично", mismatch: "Не соответствует", unknown: "Не определено" })[v] || "—";
 }
 
+// ── Общее хранилище результатов AI (Firebase Realtime DB) ────
+var REG_FB_NODE = "regCheckAI";
+var REG_dbLoaded = false;
+
+// Безопасный ключ Firebase (запрещены . # $ / [ ])
+function _regFbKey(s) {
+    return String(s == null ? "" : s).replace(/[.#$/\[\]]/g, "_");
+}
+
+function _regDB() {
+    try {
+        if (typeof firebase === "undefined" || !firebase.database) return null;
+        if (!firebase.apps || !firebase.apps.length) {
+            if (typeof FIREBASE_CONFIG !== "undefined") firebase.initializeApp(FIREBASE_CONFIG);
+            else return null;
+        }
+        return firebase.database();
+    } catch (e) { return null; }
+}
+
+// Загрузить ранее сохранённые вердикты (общие для всех)
+function REG_loadAI(cb) {
+    var db = _regDB();
+    if (!db) { REG_dbLoaded = true; if (cb) cb(); return; }
+    db.ref(REG_FB_NODE).once("value").then(function (snap) {
+        var val = snap.val() || {};
+        Object.keys(val).forEach(function (k) {
+            if (val[k] && val[k].verdict) {
+                REG_aiResults[k] = { verdict: val[k].verdict, comment: val[k].comment || "" };
+            }
+        });
+        REG_dbLoaded = true;
+        if (cb) cb();
+    }).catch(function () { REG_dbLoaded = true; if (cb) cb(); });
+}
+
+// Сохранить один вердикт в общее хранилище
+function REG_saveAI(key, res) {
+    var db = _regDB();
+    if (!db || !key) return;
+    try {
+        db.ref(REG_FB_NODE + "/" + _regFbKey(key)).set({
+            verdict: res.verdict, comment: res.comment || "", ts: Date.now()
+        });
+    } catch (e) {}
+}
+
 // ── Нормализация + мгновенные проверки ───────────────────────
 function _regNorm(it, today) {
     it.flags = [];
     it.lang = _regDetectLang(it.description);
+    if (!it.aiKey) it.aiKey = _regFbKey(it.uid);
 
     // Полнота полей
     if (!it.articleRaw) it.flags.push({ cat: "complete", sev: "high", label: "Не указана статья" });
@@ -122,6 +170,7 @@ function REG_buildItems() {
 
         items.push(_regNorm({
             uid: "C-" + c.id,
+            aiKey: _regFbKey(c.erdr ? ("erdr-" + c.erdr) : ("cid-" + c.id)),
             source: "crime",
             sourceLabel: "Уголовные / ЕРДР",
             number: _regStr(c.erdr),
@@ -157,7 +206,7 @@ function REG_filterByPeriod(items, period) {
 function _regSev(it) {
     var has = {};
     it.flags.forEach(function (f) { has[f.sev] = 1; });
-    var ai = REG_aiResults[it.uid];
+    var ai = REG_aiResults[it.aiKey];
     if (ai && ai.verdict === "mismatch") has.high = 1;
     if (ai && ai.verdict === "partial") has.med = 1;
     if (has.high) return "high";
@@ -180,8 +229,8 @@ function REG_renderStats(items) {
     var issues = items.filter(function (it) { return it.flags.length > 0; }).length;
     var high = items.filter(function (it) { return _regSev(it) === "high"; }).length;
     var dup = items.filter(function (it) { return it.flags.some(function (f) { return f.cat === "dup"; }); }).length;
-    var aiChecked = items.filter(function (it) { return REG_aiResults[it.uid]; }).length;
-    var aiMis = items.filter(function (it) { var a = REG_aiResults[it.uid]; return a && a.verdict === "mismatch"; }).length;
+    var aiChecked = items.filter(function (it) { return REG_aiResults[it.aiKey]; }).length;
+    var aiMis = items.filter(function (it) { var a = REG_aiResults[it.aiKey]; return a && a.verdict === "mismatch"; }).length;
     el.innerHTML =
         _regStatCard(total, "Записей") +
         _regStatCard(issues, "С замечаниями") +
@@ -197,7 +246,7 @@ function _regKV(k, v) {
 
 function _regRowHTML(it) {
     var sev = _regSev(it);
-    var ai = REG_aiResults[it.uid];
+    var ai = REG_aiResults[it.aiKey];
     var srcCls = it.source === "crime" ? "reg-src-crime" : "reg-src-admin";
     var html = '<div class="reg-row sev-' + sev + '">';
     html += '<div class="reg-row-main">';
@@ -270,7 +319,7 @@ function REG_apply() {
 
     // Подсказка: AI-проверка охватывает текущий выбор (период + источник)
     if (!REG_aiRunning) {
-        var notChecked = REG_currentItems.filter(function (it) { return !REG_aiResults[it.uid]; }).length;
+        var notChecked = REG_currentItems.filter(function (it) { return !REG_aiResults[it.aiKey]; }).length;
         REG_setProgress(REG_currentItems.length
             ? ("AI-проверка охватит текущий выбор: " + notChecked + " из " + REG_currentItems.length + " записей")
             : "");
@@ -279,7 +328,7 @@ function REG_apply() {
     var f = REG_state.filter;
     var view = items;
     if (f === "issues") view = items.filter(function (it) { return it.flags.length > 0; });
-    else if (f === "ai-mismatch") view = items.filter(function (it) { var a = REG_aiResults[it.uid]; return a && (a.verdict === "mismatch" || a.verdict === "partial"); });
+    else if (f === "ai-mismatch") view = items.filter(function (it) { var a = REG_aiResults[it.aiKey]; return a && (a.verdict === "mismatch" || a.verdict === "partial"); });
     else if (f !== "all") view = items.filter(function (it) { return it.flags.some(function (fl) { return fl.cat === f; }); });
 
     // Поиск по статье
@@ -304,7 +353,7 @@ function REG_setProgress(text) {
 }
 
 function REG_runAI() {
-    var pending = REG_currentItems.filter(function (it) { return !REG_aiResults[it.uid]; });
+    var pending = REG_currentItems.filter(function (it) { return !REG_aiResults[it.aiKey]; });
     if (pending.length === 0) {
         REG_setProgress("Все записи в текущем списке уже проверены AI.");
         return;
@@ -334,7 +383,7 @@ function REG_runAI() {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
                 items: batch.map(function (it) {
-                    return { id: it.uid, article: it.article, description: it.description };
+                    return { id: it.aiKey, article: it.article, description: it.description };
                 })
             })
         })
@@ -342,7 +391,11 @@ function REG_runAI() {
             .then(function (data) {
                 if (data && data.results) {
                     data.results.forEach(function (rr) {
-                        if (rr && rr.id != null) REG_aiResults[rr.id] = { verdict: rr.verdict, comment: rr.comment };
+                        if (rr && rr.id != null) {
+                            var res = { verdict: rr.verdict, comment: rr.comment };
+                            REG_aiResults[rr.id] = res;
+                            REG_saveAI(rr.id, res); // сохраняем в общее хранилище (Firebase)
+                        }
                     });
                 } else if (data && data.error) {
                     console.warn("[reg-check] AI:", data.error);
@@ -402,4 +455,8 @@ function REG_open() {
     REG_allItems = REG_buildItems();
     REG_setProgress("");
     REG_apply();
+    // Подтягиваем сохранённые ранее вердикты (общие для всех пользователей)
+    if (!REG_dbLoaded) {
+        REG_loadAI(function () { REG_apply(); });
+    }
 }
