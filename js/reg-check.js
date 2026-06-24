@@ -389,6 +389,14 @@ function REG_runAI() {
         })
             .then(function (r) { return r.json(); })
             .then(function (data) {
+                if (data && data.error) {
+                    // Прекращаем весь прогон, чтобы не нагружать API повторными ошибками
+                    console.warn("[reg-check] AI:", data.error);
+                    if (btn) btn.disabled = false;
+                    REG_aiRunning = false;
+                    REG_setProgress("Ошибка AI: " + data.error);
+                    return;
+                }
                 if (data && data.results) {
                     data.results.forEach(function (rr) {
                         if (rr && rr.id != null) {
@@ -397,9 +405,6 @@ function REG_runAI() {
                             REG_saveAI(rr.id, res); // сохраняем в общее хранилище (Firebase)
                         }
                     });
-                } else if (data && data.error) {
-                    console.warn("[reg-check] AI:", data.error);
-                    REG_setProgress("Ошибка AI: " + data.error);
                 }
                 done += batch.length;
                 REG_apply();

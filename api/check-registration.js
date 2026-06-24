@@ -74,7 +74,7 @@ module.exports = async function handler(req, res) {
                 "Authorization": "Bearer " + apiKey
             },
             body: JSON.stringify({
-                model: "gpt-4o",
+                model: "gpt-4o-mini",
                 max_tokens: 3000,
                 temperature: 0,
                 response_format: { type: "json_object" },
@@ -87,7 +87,17 @@ module.exports = async function handler(req, res) {
 
         if (!aiResp.ok) {
             var errText = await aiResp.text();
-            res.status(502).json({ error: "OpenAI API " + aiResp.status + ": " + errText.slice(0, 600) });
+            var low = (errText || "").toLowerCase();
+            // Понятное сообщение при исчерпании квоты/средств OpenAI
+            if (aiResp.status === 429 || low.indexOf("insufficient_quota") !== -1 || low.indexOf("exceeded your current quota") !== -1) {
+                res.status(402).json({ error: "Закончились средства или квота OpenAI. Пополните баланс / проверьте биллинг на platform.openai.com (раздел Billing)." });
+                return;
+            }
+            if (aiResp.status === 401) {
+                res.status(401).json({ error: "Неверный или отсутствует ключ OpenAI (OPENAI_API_KEY) в настройках Vercel." });
+                return;
+            }
+            res.status(502).json({ error: "OpenAI API " + aiResp.status + ": " + errText.slice(0, 400) });
             return;
         }
 
