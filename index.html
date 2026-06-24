@@ -15,7 +15,7 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
-    <link rel="stylesheet" href="css/style.css?v=25" />
+    <link rel="stylesheet" href="css/style.css?v=26" />
 </head>
 <body>
 
@@ -87,6 +87,11 @@
                 <input type="checkbox" data-filter="venues" />
                 <span class="legend-dot" style="background: #e91e63;"></span>
                 <span data-i18n="cat_venues">Заведения</span>
+            </label>
+            <label class="legend-item">
+                <input type="checkbox" checked data-filter="alkomarkets" />
+                <span class="legend-dot" style="background: #f4a300;"></span>
+                <span>Алкомаркеты</span>
             </label>
             <label class="legend-item">
                 <input type="checkbox" checked data-filter="police" />
@@ -1220,10 +1225,11 @@
     <script src="js/reg-check.js?v=9"></script>
     <script src="js/schools.js?v=1"></script>
     <script src="js/venues.js?v=2"></script>
+    <script src="js/alkomarkets.js?v=1"></script>
     <script src="js/analytics.js?v=14"></script>
     <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.mini.min.js"></script>
     <script src="js/data.js?v=3"></script>
-    <script src="js/app.js?v=30"></script>
+    <script src="js/app.js?v=31"></script>
     <!-- QR code generator (lightweight) -->
     <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
     <script>

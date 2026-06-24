@@ -4905,6 +4905,14 @@ body {
     display: flex; align-items: center; justify-content: center;
     font-size: 12px; line-height: 1;
 }
+.alko-marker-wrap { background: transparent; border: none; }
+.alko-marker {
+    width: 24px; height: 24px; border-radius: 50%;
+    background: #f4a300; border: 2px solid #fff;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; line-height: 1;
+}
 
 /* Clickable stat card */
 .an-stat-clickable { cursor: pointer; border: 1px solid rgba(231,76,60,0.3); transition: all 0.15s; }

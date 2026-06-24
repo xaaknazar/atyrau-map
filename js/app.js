@@ -430,6 +430,9 @@
             } else if (cat === "venues") {
                 if (this.checked) map.addLayer(venueLayer);
                 else map.removeLayer(venueLayer);
+            } else if (cat === "alkomarkets") {
+                if (this.checked) map.addLayer(alkoLayer);
+                else map.removeLayer(alkoLayer);
             } else {
                 if (this.checked) map.addLayer(layers[cat]);
                 else map.removeLayer(layers[cat]);
@@ -2780,6 +2783,54 @@
         loadVenues(function () { buildVenueMarkers(); });
     } else {
         buildVenueMarkers();
+    }
+
+    // ── Алкомаркеты на карте (🍺) ───────────────────────────
+    var alkoLayer = L.layerGroup();
+
+    function buildAlkoMarkers() {
+        alkoLayer.clearLayers();
+        if (typeof alkomarketPoints === "undefined") return;
+        alkomarketPoints.forEach(function (a) {
+            var icon = L.divIcon({
+                className: "alko-marker-wrap",
+                html: '<div class="alko-marker">🍺</div>',
+                iconSize: [24, 24],
+                iconAnchor: [12, 12]
+            });
+            var marker = L.marker([a.lat, a.lng], { icon: icon });
+            marker.bindTooltip(a.name, { direction: "top", offset: [0, -14], className: "marker-tooltip" });
+            marker.bindPopup(
+                '<div style="min-width:160px;">' +
+                '<div style="font-weight:700;font-size:14px;color:#c77b00;margin-bottom:4px;">🍺 ' + a.name + '</div>' +
+                '<div style="font-size:12px;color:#888;">' + (a.addr || "") + '</div>' +
+                '</div>', { maxWidth: 240 }
+            );
+            alkoLayer.addLayer(marker);
+        });
+        console.log("[map] Алкомаркетов: " + alkomarketPoints.length);
+    }
+
+    function _alkoVisible() {
+        var cb = document.querySelector('[data-filter="alkomarkets"]');
+        return !cb || cb.checked;
+    }
+
+    if (typeof loadAlkomarkets === "function") {
+        loadAlkomarkets(function () {
+            buildAlkoMarkers();
+            if (_alkoVisible() && !map.hasLayer(alkoLayer)) map.addLayer(alkoLayer);
+        });
+        // Автообновление по мере поступления/обновления данных
+        setInterval(function () {
+            loadAlkomarkets(function () {
+                buildAlkoMarkers();
+                if (_alkoVisible() && !map.hasLayer(alkoLayer)) map.addLayer(alkoLayer);
+            });
+        }, 60000);
+    } else {
+        buildAlkoMarkers();
+        if (_alkoVisible()) map.addLayer(alkoLayer);
     }
 
     // ── Административные правонарушения на карте ───────────
