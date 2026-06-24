@@ -2395,6 +2395,23 @@
         });
     }
 
+    // Переключение вкладок категорий лиц
+    var _avActiveCat = "transport";
+    function _avSwitchCat(cat) {
+        _avActiveCat = cat;
+        document.querySelectorAll(".av-risk-tab").forEach(function (b) {
+            b.classList.toggle("active", b.getAttribute("data-cat") === cat);
+        });
+        document.querySelectorAll(".av-persons-cat").forEach(function (el) {
+            el.classList.toggle("av-cat-hidden", el.getAttribute("data-cat") !== cat);
+        });
+    }
+    document.querySelectorAll(".av-risk-tab").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+            _avSwitchCat(this.getAttribute("data-cat"));
+        });
+    });
+
     function _avEsc(s) {
         return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) {
             return ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c];
@@ -2457,6 +2474,13 @@
             var el = document.getElementById(idMap[cat.key]);
             if (!el) return;
             var list = avPersonsShowAll ? cat.persons : cat.repeat;
+
+            // Бейдж со счётчиком на вкладке
+            var badge = document.getElementById("av-tab-badge-" + cat.key);
+            if (badge) {
+                badge.textContent = list.length;
+                badge.classList.toggle("av-badge-zero", list.length === 0);
+            }
 
             var html = '<div class="av-pc-block av-pc-' + cat.color + '">';
             html += '<div class="av-pc-head">';

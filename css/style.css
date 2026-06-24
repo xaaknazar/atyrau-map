@@ -5148,6 +5148,35 @@ body {
 }
 .av-risk-toggle input { width: 15px; height: 15px; cursor: pointer; }
 
+/* Вкладки категорий */
+.av-risk-tabs {
+    display: flex; flex-wrap: wrap; gap: 8px;
+    margin: 12px 0 4px;
+}
+.av-risk-tab {
+    display: inline-flex; align-items: center; gap: 7px;
+    font-size: 13px; font-weight: 600; color: #51607a;
+    background: #f1f3f8; border: 1px solid #e6e9f0;
+    border-radius: 22px; padding: 8px 14px; cursor: pointer;
+    transition: background .12s ease, color .12s ease, border-color .12s ease;
+}
+.av-risk-tab:hover { background: #e8ebf2; }
+.av-risk-tab.active {
+    background: #b3261e; border-color: #b3261e; color: #fff;
+}
+.av-risk-tab-badge {
+    display: inline-flex; align-items: center; justify-content: center;
+    min-width: 20px; height: 20px; padding: 0 6px;
+    font-size: 12px; font-weight: 700;
+    background: #fff; color: #b3261e;
+    border-radius: 11px;
+}
+.av-risk-tab.active .av-risk-tab-badge { background: rgba(255,255,255,.25); color: #fff; }
+.av-risk-tab-badge.av-badge-zero { background: #e1e5ec; color: #9aa3b2; }
+.av-risk-tab.active .av-risk-tab-badge.av-badge-zero { background: rgba(255,255,255,.2); color: #fff; }
+
+.av-cat-hidden { display: none; }
+
 .av-persons-cat { margin-bottom: 16px; }
 .av-pc-block {
     border: 1px solid #e6e9f0;

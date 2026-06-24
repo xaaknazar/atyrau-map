@@ -15,7 +15,7 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
-    <link rel="stylesheet" href="css/style.css?v=17" />
+    <link rel="stylesheet" href="css/style.css?v=18" />
 </head>
 <body>
 
@@ -538,14 +538,25 @@
                     Лица — потенциальные нарушители
                 </h3>
                 <p class="an-hint">Лица, неоднократно совершившие административные правонарушения по статьям, сопряжённым с риском перехода в уголовную ответственность. Прокуроры могут видеть потенциальных нарушителей.</p>
+                <div class="av-risk-tabs" id="av-risk-tabs">
+                    <button class="av-risk-tab active" data-cat="transport">
+                        Транспортные <span class="av-risk-tab-badge" id="av-tab-badge-transport">0</span>
+                    </button>
+                    <button class="av-risk-tab" data-cat="personal">
+                        Против личности <span class="av-risk-tab-badge" id="av-tab-badge-personal">0</span>
+                    </button>
+                    <button class="av-risk-tab" data-cat="family">
+                        Семейно-бытовые <span class="av-risk-tab-badge" id="av-tab-badge-family">0</span>
+                    </button>
+                </div>
                 <div class="av-risk-controls">
                     <label class="av-risk-toggle">
                         <input type="checkbox" id="av-persons-show-all"> Показывать всех (включая однократные)
                     </label>
                 </div>
-                <div id="av-persons-transport" class="av-persons-cat"></div>
-                <div id="av-persons-personal" class="av-persons-cat"></div>
-                <div id="av-persons-family" class="av-persons-cat"></div>
+                <div id="av-persons-transport" class="av-persons-cat" data-cat="transport"></div>
+                <div id="av-persons-personal" class="av-persons-cat av-cat-hidden" data-cat="personal"></div>
+                <div id="av-persons-family" class="av-persons-cat av-cat-hidden" data-cat="family"></div>
             </div>
 
             <div class="an-section">
@@ -1140,7 +1151,7 @@
     <script src="js/analytics.js?v=14"></script>
     <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.mini.min.js"></script>
     <script src="js/data.js?v=3"></script>
-    <script src="js/app.js?v=24"></script>
+    <script src="js/app.js?v=25"></script>
     <!-- QR code generator (lightweight) -->
     <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
     <script>
