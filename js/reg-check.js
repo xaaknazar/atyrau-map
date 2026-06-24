@@ -352,28 +352,33 @@ function REG_setProgress(text) {
     if (el) el.textContent = text || "";
 }
 
-function REG_runAI() {
+function REG_runAI(force) {
     // Сначала дождёмся загрузки ранее проверенных вердиктов из общей базы,
     // чтобы НЕ перепроверять их заново и не тратить токены.
     if (!REG_dbLoaded) {
         REG_setProgress("Загружаю ранее проверенные записи…");
-        REG_loadAI(function () { REG_apply(); REG_runAI(); });
+        REG_loadAI(function () { REG_apply(); REG_runAI(force); });
         return;
     }
-    var pending = REG_currentItems.filter(function (it) { return !REG_aiResults[it.aiKey]; });
+    if (REG_aiRunning) return;
+    var pending = force
+        ? REG_currentItems.slice()
+        : REG_currentItems.filter(function (it) { return !REG_aiResults[it.aiKey]; });
     if (pending.length === 0) {
-        REG_setProgress("Все записи в текущем списке уже проверены AI.");
+        REG_setProgress(force ? "Нет записей для проверки в текущем выборе." : "Все записи в текущем списке уже проверены AI.");
         return;
     }
-    if (pending.length > 150 &&
-        !confirm("Будет проверено " + pending.length + " записей за текущий выбор (период + источник) через AI. Это займёт время и расходует API. Продолжить?")) {
+    var msg = force
+        ? ("Перепроверить заново " + pending.length + " записей за текущий выбор? Старые вердикты будут перезаписаны, расходуются токены.")
+        : ("Будет проверено " + pending.length + " записей за текущий выбор (период + источник) через AI. Это займёт время и расходует API. Продолжить?");
+    if ((force || pending.length > 150) && !confirm(msg)) {
         return;
     }
     var btn = document.getElementById("reg-ai-btn");
     if (btn) btn.disabled = true;
     REG_aiRunning = true;
 
-    var total = pending.length, done = 0, batchSize = 12;
+    var total = pending.length, done = 0, batchSize = 6;
 
     function nextBatch() {
         if (pending.length === 0) {
@@ -454,7 +459,9 @@ function REG_wire() {
         });
     });
     var ai = document.getElementById("reg-ai-btn");
-    if (ai) ai.addEventListener("click", REG_runAI);
+    if (ai) ai.addEventListener("click", function () { REG_runAI(false); });
+    var recheck = document.getElementById("reg-ai-recheck");
+    if (recheck) recheck.addEventListener("click", function () { REG_runAI(true); });
     var search = document.getElementById("reg-search");
     if (search) search.addEventListener("input", function () {
         REG_state.search = this.value || ""; REG_state.limit = 100; REG_apply();
