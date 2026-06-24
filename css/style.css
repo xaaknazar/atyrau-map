@@ -5137,140 +5137,191 @@ body {
 }
 
 /* ══════════════════════════════════════════════════════════════
-   ЛИЦА — потенциальные нарушители (риск перехода в уголовные)
+   ЛИЦА — потенциальные нарушители (минималистичный офиц. стиль)
    ══════════════════════════════════════════════════════════════ */
-.av-risk-section { }
-.av-risk-title { display: flex; align-items: center; color: #b3261e; }
-.av-risk-controls { margin: 6px 0 14px; }
-.av-risk-toggle {
-    display: inline-flex; align-items: center; gap: 7px;
-    font-size: 13px; color: #555; cursor: pointer; user-select: none;
+:root {
+    --av-ink: #1d2530;
+    --av-ink-2: #5b6573;
+    --av-ink-3: #8b94a3;
+    --av-line: #e9ebf0;
+    --av-line-2: #f0f2f6;
+    --av-bg-soft: #f7f8fa;
+    --av-red: #b3261e;
+    --av-amber: #b9791c;
+    --av-slate: #5a677f;
 }
-.av-risk-toggle input { width: 15px; height: 15px; cursor: pointer; }
 
-/* Вкладки категорий */
+.av-risk-section { margin-bottom: 8px; }
+.av-risk-title {
+    display: flex; align-items: center;
+    color: var(--av-ink); font-size: 15px; font-weight: 700;
+    letter-spacing: -0.01em;
+}
+.av-risk-title svg { color: var(--av-red); opacity: .9; }
+.av-risk-section .an-hint {
+    color: var(--av-ink-3); font-size: 12.5px; line-height: 1.5;
+    margin: 4px 0 0;
+}
+
+/* Сегментированный переключатель категорий */
 .av-risk-tabs {
-    display: flex; flex-wrap: wrap; gap: 8px;
-    margin: 12px 0 4px;
+    display: flex; flex-wrap: wrap; gap: 4px;
+    margin: 14px 0 0;
+    background: var(--av-bg-soft);
+    border: 1px solid var(--av-line);
+    border-radius: 12px; padding: 4px;
 }
 .av-risk-tab {
-    display: inline-flex; align-items: center; gap: 7px;
-    font-size: 13px; font-weight: 600; color: #51607a;
-    background: #f1f3f8; border: 1px solid #e6e9f0;
-    border-radius: 22px; padding: 8px 14px; cursor: pointer;
-    transition: background .12s ease, color .12s ease, border-color .12s ease;
+    flex: 1 1 auto;
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    font-size: 13px; font-weight: 600; color: var(--av-ink-2);
+    background: transparent; border: none;
+    border-radius: 9px; padding: 9px 12px; cursor: pointer;
+    white-space: nowrap;
+    transition: background .14s ease, color .14s ease, box-shadow .14s ease;
 }
-.av-risk-tab:hover { background: #e8ebf2; }
+.av-risk-tab:hover { color: var(--av-ink); }
 .av-risk-tab.active {
-    background: #b3261e; border-color: #b3261e; color: #fff;
+    background: #fff; color: var(--av-ink);
+    box-shadow: 0 1px 2px rgba(20,30,50,.08), 0 0 0 1px var(--av-line);
 }
 .av-risk-tab-badge {
     display: inline-flex; align-items: center; justify-content: center;
-    min-width: 20px; height: 20px; padding: 0 6px;
-    font-size: 12px; font-weight: 700;
-    background: #fff; color: #b3261e;
-    border-radius: 11px;
+    min-width: 19px; height: 19px; padding: 0 6px;
+    font-size: 11.5px; font-weight: 700;
+    background: #eceef3; color: var(--av-ink-2);
+    border-radius: 10px;
 }
-.av-risk-tab.active .av-risk-tab-badge { background: rgba(255,255,255,.25); color: #fff; }
-.av-risk-tab-badge.av-badge-zero { background: #e1e5ec; color: #9aa3b2; }
-.av-risk-tab.active .av-risk-tab-badge.av-badge-zero { background: rgba(255,255,255,.2); color: #fff; }
+.av-risk-tab.active .av-risk-tab-badge { background: var(--av-red); color: #fff; }
+.av-risk-tab-badge.av-badge-zero { background: #eceef3; color: var(--av-ink-3); }
+.av-risk-tab.active .av-risk-tab-badge.av-badge-zero { background: #d6dae2; color: #fff; }
+
+/* Тонкая строка-переключатель «показывать всех» */
+.av-risk-controls { margin: 12px 0 14px; }
+.av-risk-toggle {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-size: 12.5px; color: var(--av-ink-2); cursor: pointer; user-select: none;
+}
+.av-risk-toggle input { width: 15px; height: 15px; cursor: pointer; accent-color: var(--av-red); }
 
 .av-cat-hidden { display: none; }
 
-/* Скрытие «хвоста» длинного списка */
-.av-person-extra { display: none; }
-.av-pc-list.show-all .av-person-extra { display: block; }
-.av-pc-more {
-    margin-top: 10px;
-    width: 100%;
-    font-size: 13px; font-weight: 600;
-    color: #b3261e; background: #fbeceb;
-    border: 1px solid #f4d3d1; border-radius: 9px;
-    padding: 9px 12px; cursor: pointer;
-    transition: background .12s ease;
-}
-.av-pc-more:hover { background: #f7dddb; }
-
-.av-persons-cat { margin-bottom: 16px; }
+/* Карточка категории — чистая, без лишнего */
+.av-persons-cat { margin-bottom: 4px; }
 .av-pc-block {
-    border: 1px solid #e6e9f0;
-    border-left: 4px solid #888;
-    border-radius: 12px;
-    padding: 14px 16px;
+    border: 1px solid var(--av-line);
+    border-radius: 14px;
+    padding: 18px 18px 14px;
     background: #fff;
 }
-.av-pc-red    { border-left-color: #e5484d; }
-.av-pc-orange { border-left-color: #f0883e; }
-.av-pc-purple { border-left-color: #8e5cd9; }
-
-.av-pc-head { margin-bottom: 10px; }
-.av-pc-title { font-weight: 700; font-size: 14.5px; color: #1c2333; line-height: 1.35; }
-.av-pc-desc { font-size: 12.5px; color: #8a93a6; margin-top: 3px; }
-.av-pc-badges { margin-top: 9px; display: flex; flex-wrap: wrap; gap: 8px; }
+.av-pc-head {
+    margin-bottom: 14px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--av-line-2);
+}
+.av-pc-title {
+    display: flex; align-items: flex-start; gap: 9px;
+    font-weight: 650; font-size: 14.5px; color: var(--av-ink); line-height: 1.4;
+}
+.av-pc-title::before {
+    content: ""; flex: 0 0 auto;
+    width: 8px; height: 8px; margin-top: 6px;
+    border-radius: 50%; background: var(--av-ink-3);
+}
+.av-pc-red    .av-pc-title::before { background: var(--av-red); }
+.av-pc-orange .av-pc-title::before { background: var(--av-amber); }
+.av-pc-purple .av-pc-title::before { background: var(--av-slate); }
+.av-pc-desc { font-size: 12px; color: var(--av-ink-3); margin: 5px 0 0 17px; }
+.av-pc-badges { margin: 11px 0 0 17px; display: flex; flex-wrap: wrap; gap: 16px; }
 .av-pc-badge {
-    display: inline-block; font-size: 12px; font-weight: 600;
-    padding: 4px 10px; border-radius: 20px;
-    background: #eef1f6; color: #51607a;
+    font-size: 12px; font-weight: 600; color: var(--av-ink-2);
 }
-.av-pc-badge-danger { background: #fde8e8; color: #c0231f; }
+.av-pc-badge strong { color: var(--av-ink); font-weight: 700; }
+.av-pc-badge-danger { color: var(--av-red); }
+.av-pc-badge-danger strong { color: var(--av-red); }
 .av-pc-empty {
-    font-size: 13px; color: #97a0b0; font-style: italic;
-    padding: 10px 2px;
+    font-size: 13px; color: var(--av-ink-3);
+    padding: 8px 2px;
 }
 
-.av-pc-list { display: flex; flex-direction: column; gap: 8px; }
-.av-person {
-    border: 1px solid #eef0f5;
-    border-radius: 10px;
-    overflow: hidden;
-    background: #fafbfd;
-}
+/* Список лиц — как реестр, разделённый тонкими линиями */
+.av-pc-list { display: flex; flex-direction: column; }
+.av-person { border-top: 1px solid var(--av-line-2); }
+.av-person:first-child { border-top: none; }
 .av-person-main {
-    display: flex; align-items: center; gap: 11px;
-    padding: 10px 12px; cursor: pointer;
+    display: flex; align-items: center; gap: 12px;
+    padding: 11px 4px; cursor: pointer;
+    transition: background .12s ease;
 }
-.av-person-main:hover { background: #f3f5fa; }
+.av-person-main:hover { background: var(--av-bg-soft); }
 .av-person-count {
     flex: 0 0 auto;
-    min-width: 30px; height: 30px; padding: 0 6px;
+    min-width: 26px; height: 26px; padding: 0 7px;
     display: inline-flex; align-items: center; justify-content: center;
-    background: #c0231f; color: #fff;
-    border-radius: 8px; font-weight: 700; font-size: 14px;
+    background: #eef0f4; color: var(--av-ink);
+    border-radius: 7px; font-weight: 700; font-size: 13px;
+    font-variant-numeric: tabular-nums;
 }
+.av-person.risk-high-row .av-person-count { background: #fbe9e8; color: var(--av-red); }
 .av-person-info { flex: 1 1 auto; min-width: 0; }
 .av-person-fio {
-    font-weight: 600; font-size: 14px; color: #1c2333;
+    font-weight: 600; font-size: 13.5px; color: var(--av-ink);
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
-.av-person-sub { font-size: 12px; color: #8a93a6; margin-top: 2px; }
+.av-person-sub { font-size: 11.5px; color: var(--av-ink-3); margin-top: 2px; }
 .av-person-risk {
-    flex: 0 0 auto; font-size: 11.5px; font-weight: 600;
-    padding: 3px 9px; border-radius: 20px; white-space: nowrap;
+    flex: 0 0 auto; display: inline-flex; align-items: center; gap: 6px;
+    font-size: 11.5px; font-weight: 600; color: var(--av-ink-2);
+    white-space: nowrap;
 }
-.av-person-risk.risk-high { background: #fde2e1; color: #b3261e; }
-.av-person-risk.risk-mid  { background: #fdeede; color: #c2701a; }
-.av-person-risk.risk-low  { background: #eef1f6; color: #5a677f; }
+.av-person-risk::before {
+    content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--av-ink-3);
+}
+.av-person-risk.risk-high { color: var(--av-red); }
+.av-person-risk.risk-high::before { background: var(--av-red); }
+.av-person-risk.risk-mid { color: var(--av-amber); }
+.av-person-risk.risk-mid::before { background: var(--av-amber); }
+.av-person-risk.risk-low { color: var(--av-ink-3); }
 .av-person-arrow {
-    flex: 0 0 auto; color: #aab3c4; transition: transform .15s ease;
+    flex: 0 0 auto; color: #b8c0cd; transition: transform .15s ease;
 }
 .av-person.expanded .av-person-arrow { transform: rotate(90deg); }
 
-.av-person-details { display: none; padding: 4px 12px 12px 12px; }
+.av-person-details { display: none; padding: 2px 4px 12px 38px; }
 .av-person.expanded .av-person-details { display: block; }
-.av-viol {
-    border-top: 1px dashed #e6e9f0;
-    padding: 9px 0 4px;
-}
+.av-viol { padding: 9px 0; border-top: 1px dashed var(--av-line); }
+.av-viol:first-child { border-top: none; }
 .av-viol-row { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
-.av-viol-article { font-weight: 600; font-size: 13px; color: #b3261e; }
-.av-viol-date { font-size: 12px; color: #8a93a6; white-space: nowrap; }
-.av-viol-place { font-size: 12.5px; color: #51607a; margin-top: 3px; }
-.av-viol-fabula { font-size: 12.5px; color: #6b7488; margin-top: 4px; line-height: 1.45; }
+.av-viol-article { font-weight: 600; font-size: 12.5px; color: var(--av-ink); }
+.av-viol-date { font-size: 11.5px; color: var(--av-ink-3); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.av-viol-place { font-size: 12px; color: var(--av-ink-2); margin-top: 4px; }
+.av-viol-fabula { font-size: 12px; color: var(--av-ink-2); margin-top: 5px; line-height: 1.5; }
 .av-person-map-btn {
-    margin-top: 7px;
+    margin-top: 9px;
+    display: inline-flex; align-items: center; gap: 6px;
     font-size: 12px; font-weight: 600;
-    color: #1565c0; background: #eaf2fd;
-    border: none; border-radius: 7px;
-    padding: 5px 11px; cursor: pointer;
+    color: var(--av-ink-2); background: transparent;
+    border: 1px solid var(--av-line); border-radius: 8px;
+    padding: 6px 11px; cursor: pointer;
+    transition: border-color .12s ease, color .12s ease, background .12s ease;
 }
-.av-person-map-btn:hover { background: #d8e8fb; }
+.av-person-map-btn:hover { color: var(--av-ink); border-color: #cfd5df; background: var(--av-bg-soft); }
+.av-person-map-btn::before {
+    content: ""; width: 13px; height: 13px;
+    background: currentColor;
+    -webkit-mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z'/><circle cx='12' cy='10' r='3'/></svg>") center/contain no-repeat;
+            mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z'/><circle cx='12' cy='10' r='3'/></svg>") center/contain no-repeat;
+}
+
+/* Кнопка «показать ещё» — текстовая, ненавязчивая */
+.av-person-extra { display: none; }
+.av-pc-list.show-all .av-person-extra { display: block; }
+.av-pc-more {
+    margin-top: 12px; width: 100%;
+    font-size: 12.5px; font-weight: 600;
+    color: var(--av-ink-2); background: var(--av-bg-soft);
+    border: 1px solid var(--av-line); border-radius: 9px;
+    padding: 9px 12px; cursor: pointer;
+    transition: background .12s ease, color .12s ease;
+}
+.av-pc-more:hover { background: #eef0f4; color: var(--av-ink); }

@@ -2426,7 +2426,8 @@
         if (p.age) sub.push(_avEsc(p.age) + " лет");
         if (p.raion) sub.push(_avEsc(p.raion));
 
-        var html = '<div class="av-person' + (isExtra ? ' av-person-extra' : '') + '">';
+        var rowClass = (p.count >= 5 ? ' risk-high-row' : '') + (isExtra ? ' av-person-extra' : '');
+        var html = '<div class="av-person' + rowClass + '">';
         html += '<div class="av-person-main">';
         html += '<span class="av-person-count" title="Кол-во правонарушений">' + p.count + '</span>';
         html += '<div class="av-person-info">';
@@ -2487,8 +2488,8 @@
             html += '<div class="av-pc-title">' + _avEsc(cat.title) + '</div>';
             html += '<div class="av-pc-desc">' + _avEsc(cat.desc) + '</div>';
             html += '<div class="av-pc-badges">';
-            html += '<span class="av-pc-badge av-pc-badge-danger">Повторных лиц: ' + cat.repeatCount + '</span>';
-            html += '<span class="av-pc-badge">Всего лиц: ' + cat.totalPersons + '</span>';
+            html += '<span class="av-pc-badge av-pc-badge-danger">Повторных: <strong>' + cat.repeatCount + '</strong></span>';
+            html += '<span class="av-pc-badge">Всего лиц: <strong>' + cat.totalPersons + '</strong></span>';
             html += '</div></div>';
 
             if (list.length === 0) {
@@ -2535,22 +2536,33 @@
                     var lat = parseFloat(this.getAttribute("data-lat"));
                     var lng = parseFloat(this.getAttribute("data-lng"));
                     if (isNaN(lat) || isNaN(lng)) return;
+                    var fio = this.getAttribute("data-fio") || "";
+                    var art = this.getAttribute("data-art") || "";
                     hideAVAnalyticsPanel();
                     if (typeof reportSelector !== "undefined" && reportSelector) {
                         reportSelector.classList.add("hidden");
                     }
-                    map.setView([lat, lng], 17);
-                    if (window._avLocMarker) {
-                        try { map.removeLayer(window._avLocMarker); } catch (err) {}
-                    }
-                    try {
-                        window._avLocMarker = L.marker([lat, lng]).addTo(map);
-                        var fio = this.getAttribute("data-fio") || "";
-                        var art = this.getAttribute("data-art") || "";
-                        window._avLocMarker.bindPopup(
-                            '<strong>' + fio + '</strong>' + (art ? '<br>' + art : '')
-                        ).openPopup();
-                    } catch (err) {}
+                    // Даём карте перерисоваться (иначе Leaflet рисует пустой холст)
+                    setTimeout(function () {
+                        try {
+                            map.invalidateSize();
+                            map.setView([lat, lng], 17);
+                            if (window._avLocMarker) { map.removeLayer(window._avLocMarker); }
+                            window._avLocMarker = L.circleMarker([lat, lng], {
+                                radius: 11, color: "#fff", weight: 3,
+                                fillColor: "#b3261e", fillOpacity: 0.95
+                            }).addTo(map);
+                            window._avLocMarker.bindPopup(
+                                '<strong>' + fio + '</strong>' + (art ? '<br>' + art : '')
+                            ).openPopup();
+                            setTimeout(function () {
+                                if (window._avLocMarker) {
+                                    map.removeLayer(window._avLocMarker);
+                                    window._avLocMarker = null;
+                                }
+                            }, 60000);
+                        } catch (err) {}
+                    }, 80);
                 });
             });
         });
