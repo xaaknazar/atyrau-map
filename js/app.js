@@ -463,7 +463,7 @@
             if (c.placeType) places[c.placeType] = true;
         });
 
-        _fillSelect("crime-filter-article", articles, "Все статьи");
+        _fillSelect("crime-filter-article", articles, (typeof t === "function" ? t("all_articles") : "Все статьи"));
         _fillSelect("crime-filter-organ", organs, "Все органы");
         _fillSelect("crime-filter-place", places, "Все");
     }
@@ -2183,7 +2183,7 @@
             if (v.podrazdelenie) units[v.podrazdelenie] = true;
             if (v.authorFio) authors[v.authorFio] = true;
         });
-        _fillSelect("av-filter-article", articles, "Все статьи");
+        _fillSelect("av-filter-article", articles, (typeof t === "function" ? t("all_articles") : "Все статьи"));
         _fillSelect("av-filter-unit", units, "Все");
         _fillSelect("av-filter-author", authors, "Все");
     }
@@ -3085,6 +3085,15 @@
             // Перерисовать аналитику и брифинг на новом языке
             if (typeof renderAnalytics === "function" && crimeIncidents && crimeIncidents.length > 0) {
                 try { renderAnalytics(); } catch (e) {}
+            }
+            // Пересобрать динамические списки статей (теряют data-i18n при перестроении)
+            if (typeof _buildArticleOptions === "function") {
+                try {
+                    var _sc = document.getElementById("sidebar-crime-article");
+                    var _sa = document.getElementById("sidebar-av-article");
+                    if (_sc && typeof crimeIncidents !== "undefined") _buildArticleOptions(crimeIncidents, _sc);
+                    if (_sa && typeof adminViolations !== "undefined") _buildArticleOptions(adminViolations, _sa);
+                } catch (e) {}
             }
         });
     });

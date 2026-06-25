@@ -47,6 +47,14 @@ var I18N = {
         cat_av: "Адм. правонарушения",
         stat_av: "Адм. правонарушения:",
         all_articles: "Все статьи",
+        sb_period: "Период",
+        sb_period_day: "День",
+        sb_period_week: "Неделя",
+        sb_period_month: "Месяц",
+        sb_period_quarter: "Квартал",
+        sb_period_year: "Год",
+        sb_period_all: "Весь период",
+        report_btn: "Отчет",
         stat_total: "Всего точек:",
 
         // Footer
@@ -422,6 +430,14 @@ var I18N = {
         cat_av: "Әкімшілік құқық бұзушылық",
         stat_av: "Әкімшілік құқық бұзушылық:",
         all_articles: "Барлық баптар",
+        sb_period: "Кезең",
+        sb_period_day: "Күн",
+        sb_period_week: "Апта",
+        sb_period_month: "Ай",
+        sb_period_quarter: "Тоқсан",
+        sb_period_year: "Жыл",
+        sb_period_all: "Барлық кезең",
+        report_btn: "Есеп",
         stat_total: "Барлық нүктелер:",
 
         // Footer

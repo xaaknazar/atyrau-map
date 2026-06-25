@@ -107,14 +107,14 @@
 
         <!-- Период для карты -->
         <div class="sidebar-period-section staff-only">
-            <h3>Период</h3>
+            <h3 data-i18n="sb_period">Период</h3>
             <div class="sidebar-period-buttons">
-                <button class="sidebar-period-btn" data-period="day">День</button>
-                <button class="sidebar-period-btn" data-period="week">Неделя</button>
-                <button class="sidebar-period-btn" data-period="month">Месяц</button>
-                <button class="sidebar-period-btn" data-period="quarter">Квартал</button>
-                <button class="sidebar-period-btn" data-period="year">Год</button>
-                <button class="sidebar-period-btn active" data-period="all">Весь период</button>
+                <button class="sidebar-period-btn" data-period="day" data-i18n="sb_period_day">День</button>
+                <button class="sidebar-period-btn" data-period="week" data-i18n="sb_period_week">Неделя</button>
+                <button class="sidebar-period-btn" data-period="month" data-i18n="sb_period_month">Месяц</button>
+                <button class="sidebar-period-btn" data-period="quarter" data-i18n="sb_period_quarter">Квартал</button>
+                <button class="sidebar-period-btn" data-period="year" data-i18n="sb_period_year">Год</button>
+                <button class="sidebar-period-btn active" data-period="all" data-i18n="sb_period_all">Весь период</button>
             </div>
             <span id="sidebar-period-hint" class="period-hint"></span>
         </div>
@@ -125,7 +125,7 @@
             <div id="crime-loading-status" class="crime-loading-status">
                 <span data-i18n="crime_loading">Загрузка данных...</span>
             </div>
-            <button id="open-crime-panel-btn" class="open-crime-panel-btn">Отчет</button>
+            <button id="open-crime-panel-btn" class="open-crime-panel-btn" data-i18n="report_btn">Отчет</button>
         </div>
 
         <div class="stats">
@@ -1217,7 +1217,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
     <script src="js/firebase-config.js?v=2"></script>
-    <script src="js/i18n.js?v=8"></script>
+    <script src="js/i18n.js?v=9"></script>
     <script src="js/photos.js?v=2"></script>
     <script src="js/crimes.js?v=5"></script>
     <script src="js/cameras.js?v=2"></script>
@@ -1230,7 +1230,7 @@
     <script src="js/analytics.js?v=14"></script>
     <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.mini.min.js"></script>
     <script src="js/data.js?v=3"></script>
-    <script src="js/app.js?v=32"></script>
+    <script src="js/app.js?v=33"></script>
     <!-- QR code generator (lightweight) -->
     <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
     <script>
