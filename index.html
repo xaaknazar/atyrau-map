@@ -81,7 +81,7 @@
             <label class="legend-item staff-only">
                 <input type="checkbox" checked data-filter="cameras" />
                 <span class="legend-dot" style="background: #2ecc71;"></span>
-                <span>Камеры</span>
+                <span data-i18n="cat_cameras">Камеры</span>
             </label>
             <label class="legend-item">
                 <input type="checkbox" data-filter="venues" />
@@ -91,7 +91,7 @@
             <label class="legend-item">
                 <input type="checkbox" checked data-filter="alkomarkets" />
                 <span class="legend-dot" style="background: #6d4c41;"></span>
-                <span>Алкомаркеты</span>
+                <span data-i18n="cat_alkomarkets">Алкомаркеты</span>
             </label>
             <label class="legend-item">
                 <input type="checkbox" checked data-filter="police" />
@@ -147,7 +147,7 @@
                 <span class="stat-value" id="count-unlit">0</span>
             </div>
             <div class="stat-row staff-only">
-                <span class="stat-label">Камеры:</span>
+                <span class="stat-label" data-i18n="stat_cameras">Камеры:</span>
                 <span class="stat-value" id="count-cameras">0</span>
             </div>
             <div class="stat-row staff-only">
@@ -242,7 +242,7 @@
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <polyline points="15 18 9 12 15 6"/>
                 </svg>
-                <span>Назад к карте</span>
+                <span data-i18n="back_to_map">Назад к карте</span>
             </button>
         </div>
         <div class="report-selector-body">
@@ -250,21 +250,21 @@
                 <img src="images/placeholders/logos.jpeg" alt="" class="report-logo" />
                 <div>
                     <div class="report-org">Атырау қаласы прокуратурасы</div>
-                    <div class="report-org-sub">Прокуратура города Атырау</div>
+                    <div class="report-org-sub" data-i18n="report_org_sub">Прокуратура города Атырау</div>
                 </div>
             </div>
-            <h2 class="report-main-title">Отчёты и аналитика</h2>
+            <h2 class="report-main-title" data-i18n="rs_title">Отчёты и аналитика</h2>
 
             <div class="report-section">
-                <div class="report-section-label">Уголовные правонарушения (ЕРДР)</div>
+                <div class="report-section-label" data-i18n="rs_sec_erdr">Уголовные правонарушения (ЕРДР)</div>
                 <div class="report-cards-row">
                     <div class="report-card" id="report-card-erdr">
                         <div class="rc-icon rc-red">
                             <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm-1 7V3.5L18.5 9H13zM6 20V4h5v7h7v9H6z"/></svg>
                         </div>
                         <div class="rc-body">
-                            <div class="rc-title">Реестр правонарушений</div>
-                            <div class="rc-desc">Зарегистрированные уголовные правонарушения</div>
+                            <div class="rc-title" data-i18n="rc_reg_erdr_t">Реестр правонарушений</div>
+                            <div class="rc-desc" data-i18n="rc_reg_erdr_d">Зарегистрированные уголовные правонарушения</div>
                             <div class="rc-count" id="report-count-erdr">0 записей</div>
                         </div>
                         <div class="rc-arrow">›</div>
@@ -274,8 +274,8 @@
                             <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/></svg>
                         </div>
                         <div class="rc-body">
-                            <div class="rc-title">Аналитика преступлений</div>
-                            <div class="rc-desc">Статистический анализ и ИИ-помощник прокурора</div>
+                            <div class="rc-title" data-i18n="rc_an_erdr_t">Аналитика преступлений</div>
+                            <div class="rc-desc" data-i18n="rc_an_erdr_d">Статистический анализ и ИИ-помощник прокурора</div>
                         </div>
                         <div class="rc-arrow">›</div>
                     </div>
@@ -283,15 +283,15 @@
             </div>
 
             <div class="report-section">
-                <div class="report-section-label">Административные правонарушения</div>
+                <div class="report-section-label" data-i18n="rs_sec_av">Административные правонарушения</div>
                 <div class="report-cards-row">
                     <div class="report-card" id="report-card-av">
                         <div class="rc-icon rc-blue">
                             <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm-1 7V3.5L18.5 9H13zM6 20V4h5v7h7v9H6z"/></svg>
                         </div>
                         <div class="rc-body">
-                            <div class="rc-title">Реестр правонарушений</div>
-                            <div class="rc-desc">Список административных правонарушений</div>
+                            <div class="rc-title" data-i18n="rc_reg_av_t">Реестр правонарушений</div>
+                            <div class="rc-desc" data-i18n="rc_reg_av_d">Список административных правонарушений</div>
                             <div class="rc-count" id="report-count-av">0 записей</div>
                         </div>
                         <div class="rc-arrow">›</div>
@@ -301,8 +301,8 @@
                             <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/></svg>
                         </div>
                         <div class="rc-body">
-                            <div class="rc-title">Аналитика правонарушений</div>
-                            <div class="rc-desc">Статистический анализ административных правонарушений</div>
+                            <div class="rc-title" data-i18n="rc_an_av_t">Аналитика правонарушений</div>
+                            <div class="rc-desc" data-i18n="rc_an_av_d">Статистический анализ административных правонарушений</div>
                         </div>
                         <div class="rc-arrow">›</div>
                     </div>
@@ -310,15 +310,15 @@
             </div>
 
             <div class="report-section">
-                <div class="report-section-label">Прокурорский надзор</div>
+                <div class="report-section-label" data-i18n="rs_sec_nadzor">Прокурорский надзор</div>
                 <div class="report-cards-row">
                     <div class="report-card" id="report-card-reg-check">
                         <div class="rc-icon rc-red">
                             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
                         </div>
                         <div class="rc-body">
-                            <div class="rc-title">Контроль регистраций</div>
-                            <div class="rc-desc">Проверка качества: соответствие фабулы статье (AI), полнота, даты, дубликаты, язык</div>
+                            <div class="rc-title" data-i18n="rc_reg_check_t">Контроль регистраций</div>
+                            <div class="rc-desc" data-i18n="rc_reg_check_d">Проверка качества: соответствие фабулы статье (AI), полнота, даты, дубликаты, язык</div>
                         </div>
                         <div class="rc-arrow">›</div>
                     </div>
@@ -344,19 +344,19 @@
             <div class="crime-stats-cards">
                 <div class="crime-stat-card">
                     <div class="crime-stat-value" id="cs-total">0</div>
-                    <div class="crime-stat-label">Всего</div>
+                    <div class="crime-stat-label" data-i18n="cp_stat_total">Всего</div>
                 </div>
                 <div class="crime-stat-card crime-stat-public">
                     <div class="crime-stat-value" id="cs-public">0</div>
-                    <div class="crime-stat-label">Общественные места</div>
+                    <div class="crime-stat-label" data-i18n="cp_stat_public">Общественные места</div>
                 </div>
                 <div class="crime-stat-card crime-stat-with-coords">
                     <div class="crime-stat-value" id="cs-coords">0</div>
-                    <div class="crime-stat-label">С координатами</div>
+                    <div class="crime-stat-label" data-i18n="cp_stat_coords">С координатами</div>
                 </div>
                 <div class="crime-stat-card crime-stat-articles">
                     <div class="crime-stat-value" id="cs-articles">0</div>
-                    <div class="crime-stat-label">Уник. статей</div>
+                    <div class="crime-stat-label" data-i18n="cp_stat_uniq">Уник. статей</div>
                 </div>
             </div>
 
@@ -365,7 +365,7 @@
                 <div class="crime-filter-row">
                     <!-- Период -->
                     <div class="crime-filter-group-inline">
-                        <label>Период:</label>
+                        <label data-i18n="an_period">Период:</label>
                         <div class="crime-filter-buttons">
                             <button class="crime-period-btn active" data-period="all" data-i18n="crime_period_all">Все</button>
                             <button class="crime-period-btn" data-period="month" data-i18n="crime_period_month">Месяц</button>
@@ -376,43 +376,43 @@
                     </div>
                     <!-- Сортировка -->
                     <div class="crime-filter-group-inline">
-                        <label>Сортировка:</label>
+                        <label data-i18n="lbl_sort">Сортировка:</label>
                         <select id="crime-sort" class="crime-select">
-                            <option value="date-desc">Сначала новые</option>
-                            <option value="date-asc">Сначала старые</option>
-                            <option value="article">По статье</option>
+                            <option value="date-desc" data-i18n="sort_new">Сначала новые</option>
+                            <option value="date-asc" data-i18n="sort_old">Сначала старые</option>
+                            <option value="article" data-i18n="sort_article">По статье</option>
                         </select>
                     </div>
                 </div>
                 <div class="crime-filter-row">
                     <!-- Статья -->
                     <div class="crime-filter-group-inline">
-                        <label>Статья:</label>
+                        <label data-i18n="lbl_article">Статья:</label>
                         <select id="crime-filter-article" class="crime-select">
                             <option value="" data-i18n="all_articles">Все статьи</option>
                         </select>
                     </div>
                     <!-- Орган -->
                     <div class="crime-filter-group-inline">
-                        <label>Орган:</label>
+                        <label data-i18n="lbl_organ">Орган:</label>
                         <select id="crime-filter-organ" class="crime-select">
-                            <option value="">Все органы</option>
+                            <option value="" data-i18n="opt_all_organs">Все органы</option>
                         </select>
                     </div>
                     <!-- Место -->
                     <div class="crime-filter-group-inline">
-                        <label>Место:</label>
+                        <label data-i18n="lbl_place">Место:</label>
                         <select id="crime-filter-place" class="crime-select">
-                            <option value="">Все</option>
+                            <option value="" data-i18n="crime_period_all">Все</option>
                         </select>
                     </div>
                     <!-- Общественное место -->
                     <div class="crime-filter-group-inline">
-                        <label>Общ. место:</label>
+                        <label data-i18n="lbl_public">Общ. место:</label>
                         <select id="crime-filter-public" class="crime-select">
-                            <option value="">Все</option>
-                            <option value="yes">Да</option>
-                            <option value="no">Нет</option>
+                            <option value="" data-i18n="crime_period_all">Все</option>
+                            <option value="yes" data-i18n="opt_yes">Да</option>
+                            <option value="no" data-i18n="opt_no">Нет</option>
                         </select>
                     </div>
                 </div>
@@ -427,9 +427,9 @@
 
             <!-- Показано записей -->
             <div class="crime-panel-results-bar">
-                <span>Показано: <strong id="crime-panel-count-value">0</strong></span>
-                <button id="crime-export-xlsx" class="export-xlsx-btn">Выгрузить</button>
-                <button id="crime-reset-filters" class="crime-reset-btn">Сбросить фильтры</button>
+                <span><span data-i18n="shown_label">Показано:</span> <strong id="crime-panel-count-value">0</strong></span>
+                <button id="crime-export-xlsx" class="export-xlsx-btn" data-i18n="btn_export">Выгрузить</button>
+                <button id="crime-reset-filters" class="crime-reset-btn" data-i18n="btn_reset">Сбросить фильтры</button>
             </div>
         </div>
         <div id="crime-list" class="crime-list"></div>
@@ -443,28 +443,28 @@
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <polyline points="15 18 9 12 15 6"/>
                     </svg>
-                    <span>Назад</span>
+                    <span data-i18n="back_label">Назад</span>
                 </button>
-                <h2>Административные правонарушения</h2>
+                <h2 data-i18n="av_panel_title">Административные правонарушения</h2>
             </div>
 
             <!-- Статистика -->
             <div class="crime-stats-cards">
                 <div class="crime-stat-card">
                     <div class="crime-stat-value" id="av-total">0</div>
-                    <div class="crime-stat-label">Всего</div>
+                    <div class="crime-stat-label" data-i18n="cp_stat_total">Всего</div>
                 </div>
                 <div class="crime-stat-card" style="border-top-color:#3498db">
                     <div class="crime-stat-value" id="av-coords">0</div>
-                    <div class="crime-stat-label">С координатами</div>
+                    <div class="crime-stat-label" data-i18n="cp_stat_coords">С координатами</div>
                 </div>
                 <div class="crime-stat-card" style="border-top-color:#9b59b6">
                     <div class="crime-stat-value" id="av-articles">0</div>
-                    <div class="crime-stat-label">Уник. статей</div>
+                    <div class="crime-stat-label" data-i18n="cp_stat_uniq">Уник. статей</div>
                 </div>
                 <div class="crime-stat-card" style="border-top-color:#2ecc71">
                     <div class="crime-stat-value" id="av-authors">0</div>
-                    <div class="crime-stat-label">Инспекторов</div>
+                    <div class="crime-stat-label" data-i18n="cp_stat_inspectors">Инспекторов</div>
                 </div>
             </div>
 
@@ -472,36 +472,36 @@
             <div class="crime-panel-filters">
                 <div class="crime-filter-row">
                     <div class="crime-filter-group-inline">
-                        <label>Период:</label>
+                        <label data-i18n="an_period">Период:</label>
                         <div class="crime-filter-buttons">
-                            <button class="av-period-btn active" data-period="all">Все</button>
-                            <button class="av-period-btn" data-period="month">Месяц</button>
-                            <button class="av-period-btn" data-period="week">Неделя</button>
-                            <button class="av-period-btn" data-period="day">День</button>
+                            <button class="av-period-btn active" data-period="all" data-i18n="crime_period_all">Все</button>
+                            <button class="av-period-btn" data-period="month" data-i18n="crime_period_month">Месяц</button>
+                            <button class="av-period-btn" data-period="week" data-i18n="crime_period_week">Неделя</button>
+                            <button class="av-period-btn" data-period="day" data-i18n="crime_period_day">День</button>
                         </div>
                         <span id="av-period-hint" class="period-hint"></span>
                     </div>
                     <div class="crime-filter-group-inline">
-                        <label>Сортировка:</label>
+                        <label data-i18n="lbl_sort">Сортировка:</label>
                         <select id="av-sort" class="crime-select">
-                            <option value="date-desc">Сначала новые</option>
-                            <option value="date-asc">Сначала старые</option>
-                            <option value="article">По статье</option>
+                            <option value="date-desc" data-i18n="sort_new">Сначала новые</option>
+                            <option value="date-asc" data-i18n="sort_old">Сначала старые</option>
+                            <option value="article" data-i18n="sort_article">По статье</option>
                         </select>
                     </div>
                 </div>
                 <div class="crime-filter-row">
                     <div class="crime-filter-group-inline">
-                        <label>Статья:</label>
+                        <label data-i18n="lbl_article">Статья:</label>
                         <select id="av-filter-article" class="crime-select"><option value="" data-i18n="all_articles">Все статьи</option></select>
                     </div>
                     <div class="crime-filter-group-inline">
-                        <label>Подразделение:</label>
-                        <select id="av-filter-unit" class="crime-select"><option value="">Все</option></select>
+                        <label data-i18n="av_unit_label">Подразделение:</label>
+                        <select id="av-filter-unit" class="crime-select"><option value="" data-i18n="crime_period_all">Все</option></select>
                     </div>
                     <div class="crime-filter-group-inline">
-                        <label>Инспектор:</label>
-                        <select id="av-filter-author" class="crime-select"><option value="">Все</option></select>
+                        <label data-i18n="av_inspector_label">Инспектор:</label>
+                        <select id="av-filter-author" class="crime-select"><option value="" data-i18n="crime_period_all">Все</option></select>
                     </div>
                 </div>
                 <div class="crime-search-wrapper">
@@ -513,9 +513,9 @@
             </div>
 
             <div class="crime-panel-results-bar">
-                <span>Показано: <strong id="av-count-value">0</strong></span>
-                <button id="av-export-xlsx" class="export-xlsx-btn">Выгрузить</button>
-                <button id="av-reset-filters" class="crime-reset-btn">Сбросить фильтры</button>
+                <span><span data-i18n="shown_label">Показано:</span> <strong id="av-count-value">0</strong></span>
+                <button id="av-export-xlsx" class="export-xlsx-btn" data-i18n="btn_export">Выгрузить</button>
+                <button id="av-reset-filters" class="crime-reset-btn" data-i18n="btn_reset">Сбросить фильтры</button>
             </div>
         </div>
 
@@ -530,48 +530,48 @@
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <polyline points="15 18 9 12 15 6"/>
                     </svg>
-                    <span>Назад</span>
+                    <span data-i18n="back_label">Назад</span>
                 </button>
-                <h2>Контроль регистраций</h2>
+                <h2 data-i18n="rc_reg_check_t">Контроль регистраций</h2>
                 <span style="width:64px;"></span>
             </div>
             <div class="analytics-period-row">
-                <span class="analytics-period-label">Период:</span>
+                <span class="analytics-period-label" data-i18n="an_period">Период:</span>
                 <div class="crime-period-buttons">
-                    <button class="reg-period-btn active" data-period="all">Все</button>
-                    <button class="reg-period-btn" data-period="month">Месяц</button>
-                    <button class="reg-period-btn" data-period="week">Неделя</button>
-                    <button class="reg-period-btn" data-period="day">День</button>
+                    <button class="reg-period-btn active" data-period="all" data-i18n="crime_period_all">Все</button>
+                    <button class="reg-period-btn" data-period="month" data-i18n="crime_period_month">Месяц</button>
+                    <button class="reg-period-btn" data-period="week" data-i18n="crime_period_week">Неделя</button>
+                    <button class="reg-period-btn" data-period="day" data-i18n="crime_period_day">День</button>
                 </div>
             </div>
         </div>
         <div class="analytics-body">
-            <p class="an-hint">Надзор за качеством регистрации: соответствие описания указанной статье (на русском и казахском), полнота полей, корректность дат, дубликаты и язык описания.</p>
+            <p class="an-hint" data-i18n="rc_hint">Надзор за качеством регистрации: соответствие описания указанной статье (на русском и казахском), полнота полей, корректность дат, дубликаты и язык описания.</p>
 
             <div class="reg-stats-grid" id="reg-stats"></div>
 
             <div class="reg-ai-row">
                 <button id="reg-ai-btn" class="reg-ai-btn">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a4 4 0 0 1 4 4v1h1a3 3 0 0 1 3 3v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-8a3 3 0 0 1 3-3h1V6a4 4 0 0 1 4-4z"/><circle cx="9" cy="13" r="1"/><circle cx="15" cy="13" r="1"/></svg>
-                    Проверить соответствие статье (AI)
+                    <span data-i18n="rc_ai_btn">Проверить соответствие статье (AI)</span>
                 </button>
-                <button id="reg-ai-recheck" class="reg-ai-recheck">Перепроверить заново</button>
+                <button id="reg-ai-recheck" class="reg-ai-recheck" data-i18n="rc_ai_recheck">Перепроверить заново</button>
                 <span id="reg-ai-progress" class="reg-ai-progress"></span>
             </div>
 
             <div class="reg-search-row">
                 <svg class="reg-search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-                <input type="text" id="reg-search" class="reg-search-input" placeholder="Поиск по статье (например: 188 или ст.190 ч.4)" />
+                <input type="text" id="reg-search" class="reg-search-input" placeholder="Поиск по статье (например: 188 или ст.190 ч.4)" data-i18n-placeholder="rc_search_ph" />
             </div>
 
             <div class="reg-filters">
-                <button class="reg-filter-chip active" data-filter="issues">С замечаниями</button>
-                <button class="reg-filter-chip" data-filter="all">Все</button>
-                <button class="reg-filter-chip" data-filter="complete">Полнота</button>
-                <button class="reg-filter-chip" data-filter="date">Даты</button>
-                <button class="reg-filter-chip" data-filter="dup">Дубликаты</button>
-                <button class="reg-filter-chip" data-filter="lang">Язык</button>
-                <button class="reg-filter-chip" data-filter="ai-mismatch">AI: несоответствия</button>
+                <button class="reg-filter-chip active" data-filter="issues" data-i18n="rc_f_issues">С замечаниями</button>
+                <button class="reg-filter-chip" data-filter="all" data-i18n="rc_f_all">Все</button>
+                <button class="reg-filter-chip" data-filter="complete" data-i18n="rc_f_complete">Полнота</button>
+                <button class="reg-filter-chip" data-filter="date" data-i18n="rc_f_date">Даты</button>
+                <button class="reg-filter-chip" data-filter="dup" data-i18n="rc_f_dup">Дубликаты</button>
+                <button class="reg-filter-chip" data-filter="lang" data-i18n="rc_f_lang">Язык</button>
+                <button class="reg-filter-chip" data-filter="ai-mismatch" data-i18n="rc_f_ai">AI: несоответствия</button>
             </div>
 
             <div id="reg-list" class="reg-list"></div>
@@ -586,18 +586,18 @@
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <polyline points="15 18 9 12 15 6"/>
                     </svg>
-                    <span>Назад</span>
+                    <span data-i18n="back_label">Назад</span>
                 </button>
-                <h2>Аналитика административных правонарушений</h2>
-                <button id="av-analytics-export-xlsx" class="export-xlsx-btn">Выгрузить</button>
+                <h2 data-i18n="av_an_title">Аналитика административных правонарушений</h2>
+                <button id="av-analytics-export-xlsx" class="export-xlsx-btn" data-i18n="btn_export">Выгрузить</button>
             </div>
             <div class="analytics-period-row">
-                <span class="analytics-period-label">Период:</span>
+                <span class="analytics-period-label" data-i18n="an_period">Период:</span>
                 <div class="crime-period-buttons">
-                    <button class="av-an-period-btn active" data-period="all">Все</button>
-                    <button class="av-an-period-btn" data-period="month">Месяц</button>
-                    <button class="av-an-period-btn" data-period="week">Неделя</button>
-                    <button class="av-an-period-btn" data-period="day">День</button>
+                    <button class="av-an-period-btn active" data-period="all" data-i18n="crime_period_all">Все</button>
+                    <button class="av-an-period-btn" data-period="month" data-i18n="crime_period_month">Месяц</button>
+                    <button class="av-an-period-btn" data-period="week" data-i18n="crime_period_week">Неделя</button>
+                    <button class="av-an-period-btn" data-period="day" data-i18n="crime_period_day">День</button>
                 </div>
                 <span id="av-analytics-period-hint" class="period-hint"></span>
             </div>
@@ -612,23 +612,23 @@
                         <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
                         <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
                     </svg>
-                    Лица — потенциальные нарушители
+                    <span data-i18n="av_persons_title">Лица — потенциальные нарушители</span>
                 </h3>
-                <p class="an-hint">Лица, неоднократно совершившие административные правонарушения по статьям, сопряжённым с риском перехода в уголовную ответственность. Прокуроры могут видеть потенциальных нарушителей.</p>
+                <p class="an-hint" data-i18n="av_persons_hint">Лица, неоднократно совершившие административные правонарушения по статьям, сопряжённым с риском перехода в уголовную ответственность. Прокуроры могут видеть потенциальных нарушителей.</p>
                 <div class="av-risk-tabs" id="av-risk-tabs">
                     <button class="av-risk-tab active" data-cat="transport">
-                        Транспортные <span class="av-risk-tab-badge" id="av-tab-badge-transport">0</span>
+                        <span data-i18n="av_tab_transport">Транспортные</span> <span class="av-risk-tab-badge" id="av-tab-badge-transport">0</span>
                     </button>
                     <button class="av-risk-tab" data-cat="personal">
-                        Против личности <span class="av-risk-tab-badge" id="av-tab-badge-personal">0</span>
+                        <span data-i18n="av_tab_personal">Против личности</span> <span class="av-risk-tab-badge" id="av-tab-badge-personal">0</span>
                     </button>
                     <button class="av-risk-tab" data-cat="family">
-                        Семейно-бытовые <span class="av-risk-tab-badge" id="av-tab-badge-family">0</span>
+                        <span data-i18n="av_tab_family">Семейно-бытовые</span> <span class="av-risk-tab-badge" id="av-tab-badge-family">0</span>
                     </button>
                 </div>
                 <div class="av-risk-controls">
                     <label class="av-risk-toggle">
-                        <input type="checkbox" id="av-persons-show-all"> Показывать всех (включая однократные)
+                        <input type="checkbox" id="av-persons-show-all"> <span data-i18n="av_show_all">Показывать всех (включая однократные)</span>
                     </label>
                 </div>
                 <div id="av-persons-transport" class="av-persons-cat" data-cat="transport"></div>
@@ -637,31 +637,31 @@
             </div>
 
             <div class="an-section">
-                <h3 class="an-section-title">Топ инспекторов по количеству протоколов</h3>
+                <h3 class="an-section-title" data-i18n="av_h_authors">Топ инспекторов по количеству протоколов</h3>
                 <div id="av-chart-authors" class="an-bar-container"></div>
             </div>
             <div class="an-section">
-                <h3 class="an-section-title">По подразделениям</h3>
+                <h3 class="an-section-title" data-i18n="av_h_units">По подразделениям</h3>
                 <div id="av-chart-units" class="an-bar-container"></div>
             </div>
             <div class="an-section">
-                <h3 class="an-section-title">Топ статей</h3>
+                <h3 class="an-section-title" data-i18n="av_h_articles">Топ статей</h3>
                 <div id="av-chart-articles" class="an-bar-container"></div>
             </div>
             <div class="an-section">
-                <h3 class="an-section-title">По районам</h3>
+                <h3 class="an-section-title" data-i18n="av_h_raions">По районам</h3>
                 <div id="av-chart-raions" class="an-bar-container"></div>
             </div>
             <div class="an-section">
-                <h3 class="an-section-title">Состояние нарушителя</h3>
+                <h3 class="an-section-title" data-i18n="av_h_state">Состояние нарушителя</h3>
                 <div id="av-chart-state" class="an-bar-container"></div>
             </div>
             <div class="an-section">
-                <h3 class="an-section-title">По возрасту</h3>
+                <h3 class="an-section-title" data-i18n="av_h_age">По возрасту</h3>
                 <div id="av-chart-age" class="an-bar-container"></div>
             </div>
             <div class="an-section">
-                <h3 class="an-section-title">По месяцам</h3>
+                <h3 class="an-section-title" data-i18n="av_h_months">По месяцам</h3>
                 <div id="av-chart-months" class="an-bar-container"></div>
             </div>
         </div>
@@ -675,7 +675,7 @@
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <polyline points="15 18 9 12 15 6"/>
                     </svg>
-                    <span>Назад к карте</span>
+                    <span data-i18n="back_to_map">Назад к карте</span>
                 </button>
                 <h2 data-i18n="an_title">Аналитика преступлений</h2>
                 <button id="crime-analytics-export-xlsx" class="export-xlsx-btn">Выгрузить</button>
@@ -921,7 +921,7 @@
     <!-- Problem zones legend (shown when zones active) -->
     <div id="zones-legend" class="hidden">
         <div class="zones-legend-header">
-            <span class="zones-legend-title">Очаги преступности</span>
+            <span class="zones-legend-title" data-i18n="zones_legend_title">Очаги преступности</span>
             <button id="zones-legend-close" aria-label="Закрыть">&times;</button>
         </div>
         <div class="zones-legend-scale">
@@ -1217,7 +1217,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-database-compat.js"></script>
     <script src="js/firebase-config.js?v=2"></script>
-    <script src="js/i18n.js?v=9"></script>
+    <script src="js/i18n.js?v=10"></script>
     <script src="js/photos.js?v=2"></script>
     <script src="js/crimes.js?v=5"></script>
     <script src="js/cameras.js?v=2"></script>
