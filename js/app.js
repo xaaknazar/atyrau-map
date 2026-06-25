@@ -2802,7 +2802,7 @@
             marker.bindTooltip(a.name, { direction: "top", offset: [0, -14], className: "marker-tooltip" });
             marker.bindPopup(
                 '<div style="min-width:160px;">' +
-                '<div style="font-weight:700;font-size:14px;color:#c77b00;margin-bottom:4px;">🍺 ' + a.name + '</div>' +
+                '<div style="font-weight:700;font-size:14px;color:#6d4c41;margin-bottom:4px;">🍺 ' + a.name + '</div>' +
                 '<div style="font-size:12px;color:#888;">' + (a.addr || "") + '</div>' +
                 '</div>', { maxWidth: 240 }
             );
