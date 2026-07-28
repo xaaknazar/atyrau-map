@@ -398,3 +398,80 @@ function analyzeAVPersons(items, minCount) {
         };
     });
 }
+
+// ══════════════════════════════════════════════════════════════
+//  МОЛОДЁЖЬ 18–27, часто нарушающие админ. правонарушения
+// ══════════════════════════════════════════════════════════════
+
+// Возраст лица: поле "возраст" либо расчёт из даты рождения.
+function _avAgeOf(v) {
+    var a = parseInt((v.age || "").toString().replace(/[^0-9]/g, ""), 10);
+    if (!isNaN(a) && a > 0 && a < 120) return a;
+    var bd = (v.birthDate || "").trim();
+    var y = null, mo = null, d = null;
+    var m = bd.match(/(\d{1,2})[.\-\/](\d{1,2})[.\-\/](\d{4})/); // DD.MM.YYYY
+    if (m) { d = +m[1]; mo = +m[2]; y = +m[3]; }
+    else {
+        var m2 = bd.match(/(\d{4})[.\-\/](\d{1,2})[.\-\/](\d{1,2})/); // YYYY-MM-DD
+        if (m2) { y = +m2[1]; mo = +m2[2]; d = +m2[3]; }
+    }
+    if (y) {
+        var now = new Date();
+        var age = now.getFullYear() - y;
+        var mm = (now.getMonth() + 1) - mo;
+        if (mm < 0 || (mm === 0 && now.getDate() < d)) age--;
+        if (age > 0 && age < 120) return age;
+    }
+    return null;
+}
+
+/**
+ * Сгруппировать лиц 18–27 лет по количеству админ. правонарушений.
+ * Возвращает всех и «повторных» (>= 2), отсортированных по убыванию.
+ */
+function analyzeAVYouth(items, minAge, maxAge) {
+    minAge = minAge || 18;
+    maxAge = maxAge || 27;
+    var byPerson = {};
+    items.forEach(function (v) {
+        var fio = [v.lastName, v.firstName, v.patronymic]
+            .map(function (s) { return (s || "").trim(); }).filter(Boolean).join(" ");
+        if (!fio) return;
+        var age = _avAgeOf(v);
+        if (age === null || age < minAge || age > maxAge) return;
+        var key = _avPersonKey(v);
+        if (!byPerson[key]) {
+            byPerson[key] = {
+                fio: fio,
+                birthDate: v.birthDate || "",
+                age: age,
+                workplace: v.workplace || "",
+                workPosition: v.workPosition || "",
+                state: v.state || "",
+                phone: v.phone || "",
+                raion: v.raion || "",
+                count: 0,
+                violations: []
+            };
+        }
+        var p = byPerson[key];
+        p.count++;
+        p.violations.push(v);
+        if (!p.workplace && v.workplace) p.workplace = v.workplace;
+        if (!p.workPosition && v.workPosition) p.workPosition = v.workPosition;
+        if (!p.phone && v.phone) p.phone = v.phone;
+        if (!p.raion && v.raion) p.raion = v.raion;
+        if (!p.state && v.state) p.state = v.state;
+    });
+    var persons = Object.keys(byPerson).map(function (k) { return byPerson[k]; })
+        .sort(function (a, b) { return b.count - a.count; });
+    var repeat = persons.filter(function (p) { return p.count >= 2; });
+    return {
+        minAge: minAge,
+        maxAge: maxAge,
+        persons: persons,
+        repeat: repeat,
+        totalPersons: persons.length,
+        repeatCount: repeat.length
+    };
+}

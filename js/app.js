@@ -2417,6 +2417,8 @@
 
         // Лица — потенциальные нарушители (риск перехода в уголовные)
         renderAVPersons(filtered);
+        // Молодёжь 18–27, часто нарушающие
+        renderAVYouth(filtered);
 
         renderGroupedAuthorsChart("av-chart-authors", a.byAuthorGrouped);
         renderExpandableChart("av-chart-units", a.byUnit, 10, "teal");
@@ -2434,6 +2436,106 @@
         _avShowAllCb.addEventListener("change", function () {
             avPersonsShowAll = this.checked;
             renderAVAnalytics();
+        });
+    }
+
+    // ── Молодёжь 18–27, часто нарушающие ─────────────────────
+    var avYouthShowAll = false;
+    var _avYouthCb = document.getElementById("av-youth-show-all");
+    if (_avYouthCb) {
+        _avYouthCb.addEventListener("change", function () {
+            avYouthShowAll = this.checked;
+            renderAVAnalytics();
+        });
+    }
+
+    function _avKV(k, v) {
+        return '<div class="av-kv"><span class="av-kv-k">' + _avEsc(k) + ':</span> <span class="av-kv-v">' + _avEsc(v) + '</span></div>';
+    }
+
+    function _avYouthCardHTML(p, isExtra) {
+        var sub = [];
+        if (p.age) sub.push(p.age + " лет");
+        if (p.birthDate) sub.push("др. " + _avEsc(p.birthDate));
+        if (p.raion) sub.push(_avEsc(p.raion));
+        var riskCls = p.count >= 5 ? " risk-high-row" : "";
+        var html = '<div class="av-person' + riskCls + (isExtra ? ' av-person-extra' : '') + '">';
+        html += '<div class="av-person-main">';
+        html += '<span class="av-person-count" title="Кол-во правонарушений">' + p.count + '</span>';
+        html += '<div class="av-person-info">';
+        html += '<div class="av-person-fio">' + _avEsc(p.fio) + '</div>';
+        if (sub.length) html += '<div class="av-person-sub">' + sub.join(' · ') + '</div>';
+        html += '</div>';
+        html += '<svg class="av-person-arrow" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>';
+        html += '</div>';
+
+        html += '<div class="av-person-details">';
+        html += '<div class="av-youth-personal">';
+        html += _avKV("Возраст", p.age ? (p.age + " лет") : "—");
+        html += _avKV("Дата рождения", p.birthDate || "—");
+        if (p.raion) html += _avKV("Район", p.raion);
+        if (p.workplace) html += _avKV("Место работы/учёбы", p.workplace);
+        if (p.workPosition) html += _avKV("Должность", p.workPosition);
+        if (p.state) html += _avKV("Состояние", p.state);
+        if (p.phone) html += _avKV("Телефон", p.phone);
+        html += '</div>';
+
+        html += '<div class="av-youth-viols-h">Правонарушения (' + p.count + '):</div>';
+        var vs = p.violations.slice().sort(function (a, b) {
+            return String(b.regDate || "").localeCompare(String(a.regDate || ""));
+        });
+        vs.forEach(function (v) {
+            html += '<div class="av-viol">';
+            html += '<div class="av-viol-row"><span class="av-viol-article">' + _avEsc(v.article || '—') + '</span>';
+            var d = v.crimeDate || v.regDate;
+            if (d) html += '<span class="av-viol-date">' + _avEsc(d) + '</span>';
+            html += '</div>';
+            var loc = [v.raion, v.place].filter(Boolean).join(', ');
+            if (loc) html += '<div class="av-viol-place">' + _avEsc(loc) + '</div>';
+            if (v.fabula) html += '<div class="av-viol-fabula">' + _avEsc(v.fabula) + '</div>';
+            html += '</div>';
+        });
+        html += '</div>'; // details
+        html += '</div>'; // person
+        return html;
+    }
+
+    function renderAVYouth(items) {
+        var el = document.getElementById("av-youth-list");
+        if (!el || typeof analyzeAVYouth !== "function") return;
+        var res = analyzeAVYouth(items, 18, 27);
+        var list = avYouthShowAll ? res.persons : res.repeat;
+        var LIMIT = 8;
+
+        var html = '<div class="av-pc-block av-pc-red">';
+        html += '<div class="av-pc-head"><div class="av-pc-badges">';
+        html += '<span class="av-pc-badge av-pc-badge-danger">Повторных: <strong>' + res.repeatCount + '</strong></span>';
+        html += '<span class="av-pc-badge">Всего 18–27: <strong>' + res.totalPersons + '</strong></span>';
+        html += '</div></div>';
+        if (list.length === 0) {
+            html += '<div class="av-pc-empty">' +
+                (avYouthShowAll ? "Нет лиц 18–27 лет за выбранный период." : "Нет повторных нарушителей 18–27 лет за выбранный период.") +
+                '</div>';
+        } else {
+            html += '<div class="av-pc-list">';
+            list.forEach(function (p, i) { html += _avYouthCardHTML(p, i >= LIMIT); });
+            html += '</div>';
+            if (list.length > LIMIT) {
+                html += '<button class="av-pc-more">Показать ещё ' + (list.length - LIMIT) + '</button>';
+            }
+        }
+        html += '</div>';
+        el.innerHTML = html;
+
+        el.querySelectorAll(".av-person").forEach(function (card) {
+            var main = card.querySelector(".av-person-main");
+            if (main) main.addEventListener("click", function () { card.classList.toggle("expanded"); });
+        });
+        var more = el.querySelector(".av-pc-more");
+        if (more) more.addEventListener("click", function () {
+            var lst = el.querySelector(".av-pc-list");
+            if (lst) lst.classList.add("show-all");
+            this.remove();
         });
     }
 

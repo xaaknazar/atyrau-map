@@ -5217,6 +5217,19 @@ body {
 
 .av-cat-hidden { display: none; }
 
+/* Молодёжь 18–27 — блок личных данных внутри карточки */
+.av-youth-list { margin-bottom: 4px; }
+.av-youth-personal {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 4px 18px;
+    padding: 4px 0 10px; margin-bottom: 6px;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.av-kv { font-size: 12.5px; line-height: 1.5; }
+.av-kv-k { color: #717a99; }
+.av-kv-v { color: #e8ebf3; font-weight: 600; }
+.av-youth-viols-h { font-size: 12px; font-weight: 700; color: #aab2c8; margin: 4px 0 2px; }
+
 /* Карточка категории — чистая, без лишнего */
 .av-persons-cat { margin-bottom: 4px; }
 .av-pc-block {
