@@ -3179,6 +3179,51 @@
         _exportXlsx(headers, rows, "AV_analytics_" + new Date().toISOString().slice(0, 10) + ".xlsx");
     });
 
+    // ── Выгрузка отдельного блока АП-аналитики в Excel ───────
+    function exportAVBlock(block) {
+        var filtered = filterAVByPeriod(avAnalyticsPeriod);
+        if (!filtered.length) { alert("Нет данных за выбранный период."); return; }
+        var a = analyzeAdminViolations(filtered);
+        var d = new Date().toISOString().slice(0, 10);
+        function simple(list, label, name) {
+            _exportXlsx([label, "Кол-во"], (list || []).map(function (x) { return [x.label, x.count]; }), name + "_" + d + ".xlsx");
+        }
+        if (block === "persons") {
+            if (typeof analyzeAVPersons !== "function") return;
+            var cats = analyzeAVPersons(filtered, 2);
+            var rows = [];
+            cats.forEach(function (cat) {
+                cat.persons.forEach(function (p) {
+                    var arts = p.violations.map(function (v) { return v.article; }).filter(Boolean).join("; ");
+                    rows.push([cat.title, p.fio, p.birthDate, p.age, p.raion, p.count, arts]);
+                });
+            });
+            _exportXlsx(["Категория", "ФИО", "Дата рождения", "Возраст", "Район", "Кол-во нарушений", "Статьи"], rows, "AV_lica_" + d + ".xlsx");
+        } else if (block === "youth") {
+            if (typeof analyzeAVYouth !== "function") return;
+            var res = analyzeAVYouth(filtered, 18, 27);
+            var yrows = res.persons.map(function (p) {
+                var arts = p.violations.map(function (v) { return v.article; }).filter(Boolean).join("; ");
+                return [p.fio, p.birthDate, p.age, p.raion, p.workplace, p.workPosition, p.state, p.phone, p.count, arts];
+            });
+            _exportXlsx(["ФИО", "Дата рождения", "Возраст", "Район", "Место работы/учёбы", "Должность", "Состояние", "Телефон", "Кол-во нарушений", "Статьи"], yrows, "AV_molodezh_18_27_" + d + ".xlsx");
+        } else if (block === "authors") {
+            _exportXlsx(["Инспектор", "Подразделение", "Кол-во протоколов"],
+                (a.byAuthor || []).map(function (x) { return [x.label, x.unit || "", x.count]; }), "AV_inspektory_" + d + ".xlsx");
+        } else if (block === "units") { simple(a.byUnit, "Подразделение", "AV_podrazdeleniya");
+        } else if (block === "articles") { simple(a.byArticle, "Статья", "AV_stati");
+        } else if (block === "raions") { simple(a.byRaion, "Район", "AV_raiony");
+        } else if (block === "state") { simple(a.byState, "Состояние", "AV_sostoyanie");
+        } else if (block === "age") { simple(a.byAge, "Возраст", "AV_vozrast");
+        } else if (block === "months") { simple(a.byMonth, "Месяц", "AV_mesyacy"); }
+    }
+    document.querySelectorAll(".av-block-export").forEach(function (btn) {
+        btn.addEventListener("click", function (e) {
+            e.stopPropagation();
+            exportAVBlock(this.getAttribute("data-block"));
+        });
+    });
+
     // ── Language switch ─────────────────────────────────────
     document.querySelectorAll(".lang-btn").forEach(function (btn) {
         btn.addEventListener("click", function () {

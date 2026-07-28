@@ -15,7 +15,7 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
-    <link rel="stylesheet" href="css/style.css?v=29" />
+    <link rel="stylesheet" href="css/style.css?v=30" />
 </head>
 <body>
 
@@ -614,6 +614,7 @@
                     </svg>
                     <span data-i18n="av_persons_title">Лица — потенциальные нарушители</span>
                 </h3>
+                <button class="av-block-export" data-block="persons">Excel</button>
                 <p class="an-hint" data-i18n="av_persons_hint">Лица, неоднократно совершившие административные правонарушения по статьям, сопряжённым с риском перехода в уголовную ответственность. Прокуроры могут видеть потенциальных нарушителей.</p>
                 <div class="av-risk-tabs" id="av-risk-tabs">
                     <button class="av-risk-tab active" data-cat="transport">
@@ -644,6 +645,7 @@
                     </svg>
                     <span data-i18n="av_youth_title">Молодёжь 18–27, часто нарушающие</span>
                 </h3>
+                <button class="av-block-export" data-block="youth">Excel</button>
                 <p class="an-hint" data-i18n="av_youth_hint">Лица в возрасте 18–27 лет, неоднократно совершившие административные правонарушения. По каждому: сколько раз, какие статьи и доступные личные данные.</p>
                 <div class="av-risk-controls">
                     <label class="av-risk-toggle">
@@ -655,30 +657,37 @@
 
             <div class="an-section">
                 <h3 class="an-section-title" data-i18n="av_h_authors">Топ инспекторов по количеству протоколов</h3>
+                <button class="av-block-export" data-block="authors">Excel</button>
                 <div id="av-chart-authors" class="an-bar-container"></div>
             </div>
             <div class="an-section">
                 <h3 class="an-section-title" data-i18n="av_h_units">По подразделениям</h3>
+                <button class="av-block-export" data-block="units">Excel</button>
                 <div id="av-chart-units" class="an-bar-container"></div>
             </div>
             <div class="an-section">
                 <h3 class="an-section-title" data-i18n="av_h_articles">Топ статей</h3>
+                <button class="av-block-export" data-block="articles">Excel</button>
                 <div id="av-chart-articles" class="an-bar-container"></div>
             </div>
             <div class="an-section">
                 <h3 class="an-section-title" data-i18n="av_h_raions">По районам</h3>
+                <button class="av-block-export" data-block="raions">Excel</button>
                 <div id="av-chart-raions" class="an-bar-container"></div>
             </div>
             <div class="an-section">
                 <h3 class="an-section-title" data-i18n="av_h_state">Состояние нарушителя</h3>
+                <button class="av-block-export" data-block="state">Excel</button>
                 <div id="av-chart-state" class="an-bar-container"></div>
             </div>
             <div class="an-section">
                 <h3 class="an-section-title" data-i18n="av_h_age">По возрасту</h3>
+                <button class="av-block-export" data-block="age">Excel</button>
                 <div id="av-chart-age" class="an-bar-container"></div>
             </div>
             <div class="an-section">
                 <h3 class="an-section-title" data-i18n="av_h_months">По месяцам</h3>
+                <button class="av-block-export" data-block="months">Excel</button>
                 <div id="av-chart-months" class="an-bar-container"></div>
             </div>
         </div>
@@ -1247,7 +1256,7 @@
     <script src="js/analytics.js?v=14"></script>
     <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.mini.min.js"></script>
     <script src="js/data.js?v=3"></script>
-    <script src="js/app.js?v=34"></script>
+    <script src="js/app.js?v=35"></script>
     <!-- QR code generator (lightweight) -->
     <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
     <script>
