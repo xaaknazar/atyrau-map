@@ -5,11 +5,14 @@
 //   { items: [ { id, article, description }, ... ] }   // до ~20 записей за раз
 // Ответ:
 //   { results: [ { id, verdict: "match"|"partial"|"mismatch"|"unknown", comment }, ... ] }
+var auth = require("./_auth");
+
 module.exports = async function handler(req, res) {
     if (req.method !== "POST") {
         res.status(405).json({ error: "Method not allowed" });
         return;
     }
+    if (!auth.requireAuth(req, res)) return; // защита от постороннего использования (при AUTH_ENFORCE=1)
 
     var apiKey = process.env.OPENAI_API_KEY;
     if (!apiKey) {

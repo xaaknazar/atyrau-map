@@ -1,11 +1,14 @@
 // Vercel serverless function — прокси к OpenAI.
 // Ключ хранится в переменной окружения OPENAI_API_KEY (Vercel → Settings → Environment Variables)
 // и НИКОГДА не попадает в клиентский код.
+var auth = require("./_auth");
+
 module.exports = async function handler(req, res) {
     if (req.method !== "POST") {
         res.status(405).json({ error: "Method not allowed" });
         return;
     }
+    if (!auth.requireAuth(req, res)) return; // защита от постороннего использования (при AUTH_ENFORCE=1)
 
     var apiKey = process.env.OPENAI_API_KEY;
     if (!apiKey) {
