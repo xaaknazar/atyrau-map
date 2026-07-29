@@ -2122,6 +2122,14 @@
         if (crimeLoadingEl) crimeLoadingEl.classList.add("hidden");
         buildCrimeMarkers();
         updateStats();
+        // Надёжно пересобрать список статей «Преступность» с актуальными данными
+        // (иначе при гонке загрузки список может остаться с «(0)»)
+        if (typeof _buildArticleOptions === "function") {
+            var _cs = document.getElementById("sidebar-crime-article");
+            if (_cs && typeof crimeIncidents !== "undefined" && crimeIncidents.length) {
+                _buildArticleOptions(crimeIncidents, _cs);
+            }
+        }
         // Обновить список лиц если аналитика открыта
         if (typeof _initPeopleFilters === "function") _initPeopleFilters();
     }
