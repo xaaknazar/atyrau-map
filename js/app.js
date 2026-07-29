@@ -3633,6 +3633,10 @@
             if (typeof policeLayer !== "undefined" && map.hasLayer(policeLayer)) map.removeLayer(policeLayer);
             if (typeof schoolLayer !== "undefined" && map.hasLayer(schoolLayer)) map.removeLayer(schoolLayer);
             if (typeof venueLayer !== "undefined" && map.hasLayer(venueLayer)) map.removeLayer(venueLayer);
+            // «Преступность» оставляем включённой по умолчанию (основной слой)
+            var _crimeDefaultCb = document.querySelector('[data-filter="crime"]');
+            if (_crimeDefaultCb) _crimeDefaultCb.checked = true;
+            if (typeof crimeErdrLayer !== "undefined") map.addLayer(crimeErdrLayer);
         } else if (!isStaff) {
             var crimeCb = document.querySelector('[data-filter="crime"]');
             if (!crimeCb || crimeCb.checked) map.addLayer(crimeErdrLayer);
