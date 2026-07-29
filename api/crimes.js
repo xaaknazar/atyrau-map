@@ -6,9 +6,17 @@ module.exports = async function handler(req, res) {
     var url = process.env.CRIMES_API_URL ||
         "https://script.google.com/macros/s/AKfycbyIL49bcgNgfDcmurDPA6A_T0Ntzt0ACKb41LArY2_Lu9-XtXbUlUTpwNjZ5shaxZNW/exec";
     try {
-        var r = await fetch(url, { redirect: "follow" });
+        var r = await fetch(url, {
+            redirect: "follow",
+            headers: {
+                "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36",
+                "Accept": "application/json,text/plain,*/*"
+            }
+        });
         if (!r.ok) {
-            res.status(502).json({ error: "Источник ЕРДР недоступен (" + r.status + ")." });
+            var body = "";
+            try { body = (await r.text()).slice(0, 200); } catch (e) {}
+            res.status(502).json({ error: "Источник ЕРДР недоступен (" + r.status + "). " + body });
             return;
         }
         var text = await r.text();
