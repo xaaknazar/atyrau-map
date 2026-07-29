@@ -4,7 +4,7 @@
 // URL берётся из env CRIMES_API_URL, иначе — запасной (тот же, что был в клиенте).
 module.exports = async function handler(req, res) {
     var url = process.env.CRIMES_API_URL ||
-        "https://script.google.com/macros/s/AKfycbyIL49bcgNgfDcmurDPA6A_T0Ntzt0ACKb41LArY2_Lu9-XtXbUlUTpwNjZ5shaxZNW/exec";
+        "https://script.google.com/macros/s/AKfycbxUXN9_fzNGhlgygTgT432q05-_go_Tj_8pgP3KrpnTi2Ee9OIvCop8caNpRfqxzmPf/exec";
     try {
         var r = await fetch(url, {
             redirect: "follow",
