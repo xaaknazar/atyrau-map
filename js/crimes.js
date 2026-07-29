@@ -32,9 +32,17 @@
 //  Конфигурация
 // ══════════════════════════════════════════════════════════════
 
-// ЕРДР грузим через собственный серверный прокси (same-origin) —
-// иначе Safari блокирует прямой запрос к script.google.com (CORS на редиректе).
-var CRIMES_API_URL = "/api/crimes";
+// Google Apps Script web app — возвращает JSON с обоими листами
+var CRIMES_API_URL =
+    "https://script.google.com/macros/s/" +
+    "AKfycbyIL49bcgNgfDcmurDPA6A_T0Ntzt0ACKb41LArY2_Lu9-XtXbUlUTpwNjZ5shaxZNW" +
+    "/exec";
+
+// Резервный источник для Safari (Apps Script требует Google-вход): CSV главной
+// таблицы, лист ЕРДР (gid=0). Экспорт CSV работает без Google-сессии.
+var CRIMES_MAIN_CSV_URL =
+    "https://docs.google.com/spreadsheets/d/1W7J6c7rM3Skd5cJbv_95J3d5fM_6X5mBNQBvhxhLkBU" +
+    "/export?format=csv&gid=0";
 
 // Резервная ссылка — CSV из таблицы (без координат, без людей)
 var CRIMES_SHEET_CSV_URL =
