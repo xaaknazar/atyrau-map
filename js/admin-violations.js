@@ -6,10 +6,8 @@ var adminViolations = [];
 var _avCallbacks = [];
 var _avDataReady = false;
 
-var AV_SHEET_ID = "1W7J6c7rM3Skd5cJbv_95J3d5fM_6X5mBNQBvhxhLkBU";
-var AV_GID = "121213149";
-var AV_CSV_URL = "https://docs.google.com/spreadsheets/d/" + AV_SHEET_ID +
-    "/export?format=csv&gid=" + AV_GID;
+// Данные через авторизованный серверный прокси (same-origin).
+var AV_CSV_URL = "/api/data?source=admin";
 var AV_CACHE_KEY = "atyrau-av-cache-v1";
 
 function onAdminViolationsReady(fn) {

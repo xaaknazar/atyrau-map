@@ -6,10 +6,9 @@ var cameraPoints = [];
 var _cameraCallbacks = [];
 var _cameraDataReady = false;
 
-var CAMERAS_SHEET_ID = "1W7J6c7rM3Skd5cJbv_95J3d5fM_6X5mBNQBvhxhLkBU";
-var CAMERAS_GID = "2044322486";
-var CAMERAS_CSV_URL = "https://docs.google.com/spreadsheets/d/" + CAMERAS_SHEET_ID +
-    "/export?format=csv&gid=" + CAMERAS_GID;
+// Данные идут через авторизованный серверный прокси (same-origin, cookie сессии
+// уходит автоматически). Прямые ссылки на Google в браузере не хранятся.
+var CAMERAS_CSV_URL = "/api/data?source=cameras";
 var CAMERAS_CACHE_KEY = "atyrau-cameras-cache-v2";
 
 function onCamerasReady(fn) {

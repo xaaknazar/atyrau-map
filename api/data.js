@@ -12,6 +12,13 @@
 // ══════════════════════════════════════════════════════════════
 var auth = require("./_auth");
 
+// Значения по умолчанию (server-side): не секреты, в браузер не попадают.
+// Позволяют сайту работать до настройки env; env их переопределяет.
+var DEFAULT_SHEET_ID = "1W7J6c7rM3Skd5cJbv_95J3d5fM_6X5mBNQBvhxhLkBU";
+var DEFAULT_CRIMES_URL =
+    "https://script.google.com/macros/s/" +
+    "AKfycbxUXN9_fzNGhlgygTgT432q05-_go_Tj_8pgP3KrpnTi2Ee9OIvCop8caNpRfqxzmPf/exec";
+
 // gid листов внутри таблицы (сами по себе, без id таблицы, бесполезны)
 var GIDS = {
     admin: "121213149",
@@ -32,11 +39,9 @@ module.exports = async function handler(req, res) {
     try {
         var url;
         if (source === "crimes") {
-            url = process.env.CRIMES_API_URL;
-            if (!url) { res.status(500).json({ error: "Не настроен CRIMES_API_URL." }); return; }
+            url = process.env.CRIMES_API_URL || DEFAULT_CRIMES_URL;
         } else if (GIDS[source]) {
-            var sheetId = process.env.DATA_SHEET_ID;
-            if (!sheetId) { res.status(500).json({ error: "Не настроен DATA_SHEET_ID." }); return; }
+            var sheetId = process.env.DATA_SHEET_ID || DEFAULT_SHEET_ID;
             url = "https://docs.google.com/spreadsheets/d/" + sheetId +
                 "/export?format=csv&gid=" + GIDS[source] + "&_=" + Date.now();
         } else {
@@ -44,7 +49,13 @@ module.exports = async function handler(req, res) {
             return;
         }
 
-        var r = await fetch(url, { redirect: "follow" });
+        var r = await fetch(url, {
+            redirect: "follow",
+            headers: {
+                "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36",
+                "Accept": "application/json,text/csv,text/plain,*/*"
+            }
+        });
         if (!r.ok) {
             res.status(502).json({ error: "Источник недоступен (" + r.status + ")." });
             return;

@@ -17,11 +17,9 @@ function _notifyAlkoReady() {
     _alkoCallbacks = [];
 }
 
-var ALKO_SHEET_ID = "1W7J6c7rM3Skd5cJbv_95J3d5fM_6X5mBNQBvhxhLkBU";
-var ALKO_GID = "1627911552";
+// Данные через авторизованный серверный прокси (same-origin).
 function _alkoCsvUrl() {
-    return "https://docs.google.com/spreadsheets/d/" + ALKO_SHEET_ID +
-        "/export?format=csv&gid=" + ALKO_GID + "&_=" + Date.now();
+    return "/api/data?source=alkomarkets&_=" + Date.now();
 }
 var ALKO_CACHE_KEY = "atyrau-alkomarkets-cache-v1";
 

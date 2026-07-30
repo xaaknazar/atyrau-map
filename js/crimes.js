@@ -32,21 +32,11 @@
 //  Конфигурация
 // ══════════════════════════════════════════════════════════════
 
-// ЕРДР грузим через собственный серверный прокси (same-origin), чтобы Safari не
-// упирался в CORS на редиректе script.google.com. Сервер ходит на публичный
-// Apps Script (Execute as: Me, Access: Anyone) и возвращает JSON same-origin.
-var CRIMES_API_URL = "/api/crimes";
-
-// Резервная ссылка — CSV из таблицы (без координат, без людей)
-var CRIMES_SHEET_CSV_URL =
-    "https://docs.google.com/spreadsheets/d/e/" +
-    "2PACX-1vRdNcnBVsk8JV3lsjicAt9erR4jAmaq8Pj4AsC5eIcqGqR_q3OLkU2Eujn9eG99WEdzMUzA1OEHf7wE" +
-    "/pub?gid=0&single=true&output=csv";
-
-var PEOPLE_SHEET_ID = "1W7J6c7rM3Skd5cJbv_95J3d5fM_6X5mBNQBvhxhLkBU";
-var PEOPLE_GID = "187886123";
-var PEOPLE_CSV_URL = "https://docs.google.com/spreadsheets/d/" + PEOPLE_SHEET_ID +
-    "/export?format=csv&gid=" + PEOPLE_GID;
+// Данные ЕРДР и лиц идут через авторизованный серверный прокси (same-origin).
+// Сервер сам ходит в Apps Script / Google Sheets; прямые ссылки и id таблиц в
+// браузер не попадают, а при AUTH_ENFORCE=1 доступ только после входа.
+var CRIMES_API_URL = "/api/data?source=crimes";
+var PEOPLE_CSV_URL = "/api/data?source=people";
 
 var CRIMES_DATA_CACHE_KEY = "atyrau-crimes-data-cache-v4";
 var PEOPLE_DATA_CACHE_KEY = "atyrau-people-data-cache-v4";

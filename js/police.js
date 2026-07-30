@@ -6,10 +6,8 @@ var policePoints = [];
 var _policeCallbacks = [];
 var _policeDataReady = false;
 
-var POLICE_SHEET_ID = "1W7J6c7rM3Skd5cJbv_95J3d5fM_6X5mBNQBvhxhLkBU";
-var POLICE_GID = "538301573";
-var POLICE_CSV_URL = "https://docs.google.com/spreadsheets/d/" + POLICE_SHEET_ID +
-    "/export?format=csv&gid=" + POLICE_GID;
+// Данные через авторизованный серверный прокси (same-origin).
+var POLICE_CSV_URL = "/api/data?source=police";
 var POLICE_CACHE_KEY = "atyrau-police-cache-v1";
 
 function onPoliceReady(fn) {

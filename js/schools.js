@@ -6,10 +6,8 @@ var schoolPoints = [];
 var _schoolCallbacks = [];
 var _schoolDataReady = false;
 
-var SCHOOLS_SHEET_ID = "1W7J6c7rM3Skd5cJbv_95J3d5fM_6X5mBNQBvhxhLkBU";
-var SCHOOLS_GID = "531851649";
-var SCHOOLS_CSV_URL = "https://docs.google.com/spreadsheets/d/" + SCHOOLS_SHEET_ID +
-    "/export?format=csv&gid=" + SCHOOLS_GID;
+// Данные через авторизованный серверный прокси (same-origin).
+var SCHOOLS_CSV_URL = "/api/data?source=schools";
 var SCHOOLS_CACHE_KEY = "atyrau-schools-cache-v1";
 
 function onSchoolsReady(fn) {

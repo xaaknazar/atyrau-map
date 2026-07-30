@@ -12,10 +12,8 @@ function _notifyVenuesReady() {
     _venueCallbacks.forEach(function (fn) { fn(); });
 }
 
-var VENUES_SHEET_ID = "1W7J6c7rM3Skd5cJbv_95J3d5fM_6X5mBNQBvhxhLkBU";
-var VENUES_GID = "1361292445";
-var VENUES_CSV_URL = "https://docs.google.com/spreadsheets/d/" + VENUES_SHEET_ID +
-    "/export?format=csv&gid=" + VENUES_GID;
+// Данные через авторизованный серверный прокси (same-origin).
+var VENUES_CSV_URL = "/api/data?source=venues";
 var VENUES_CACHE_KEY = "atyrau-venues-cache-v1";
 
 function _parseVenuesCSV(text) {

@@ -1213,31 +1213,62 @@
     <script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
     <!-- Firebase SDK (Realtime Database) -->
     <script>
-    (function() {
-        var AUTH_HASH = "1345";
-        if (sessionStorage.getItem("atyrau-auth") === "ok") {
-            document.getElementById("auth-screen").classList.add("hidden");
-            return;
-        }
+    // Реальный вход через сервер (/api/login + /api/me). Пароль в браузере не
+    // хранится и не проверяется. Пока AUTH_ENFORCE!=1 — экран не показывается
+    // (мягкий режим, сайт работает как раньше). После AUTH_ENFORCE=1 — без входа
+    // и данные (/api/data) не отдаются, и появляется экран входа.
+    (function () {
         var screen = document.getElementById("auth-screen");
-        var input = document.getElementById("auth-password");
-        var btn = document.getElementById("auth-submit");
-        var err = document.getElementById("auth-error");
+        if (!screen) return;
 
-        function tryLogin() {
-            if (input.value === AUTH_HASH) {
-                sessionStorage.setItem("atyrau-auth", "ok");
-                screen.classList.add("hidden");
-            } else {
-                err.classList.remove("hidden");
-                input.value = "";
-                input.focus();
-            }
+        function overlayStyle() {
+            screen.setAttribute("style",
+                "position:fixed;inset:0;z-index:100000;background:#0f172a;color:#e2e8f0;" +
+                "display:flex;align-items:center;justify-content:center;font-family:system-ui,Segoe UI,Roboto,sans-serif;");
+            screen.classList.remove("hidden");
         }
-        if (btn) btn.addEventListener("click", tryLogin);
-        if (input) input.addEventListener("keydown", function(e) {
-            if (e.key === "Enter") tryLogin();
-        });
+
+        function showLogin() {
+            overlayStyle();
+            screen.innerHTML =
+                '<div style="width:320px;max-width:90vw;background:#1e293b;padding:28px 24px;border-radius:14px;box-shadow:0 10px 40px rgba(0,0,0,.4);">' +
+                '<h2 style="margin:0 0 6px;font-size:20px;">Вход</h2>' +
+                '<p style="margin:0 0 16px;color:#94a3b8;font-size:14px;">Доступ только для сотрудников</p>' +
+                '<input type="password" id="auth-password" autocomplete="current-password" placeholder="Пароль" ' +
+                'style="width:100%;box-sizing:border-box;padding:11px 12px;border:1px solid #334155;border-radius:8px;background:#0f172a;color:#e2e8f0;font-size:15px;" />' +
+                '<button id="auth-submit" style="width:100%;margin-top:12px;padding:11px;border:0;border-radius:8px;background:#2563eb;color:#fff;font-size:15px;cursor:pointer;">Войти</button>' +
+                '<p id="auth-error" style="display:none;margin:12px 0 0;color:#f87171;font-size:13px;"></p>' +
+                '</div>';
+            var input = document.getElementById("auth-password");
+            var btn = document.getElementById("auth-submit");
+            var err = document.getElementById("auth-error");
+            function fail(msg) { err.style.display = ""; err.textContent = msg; input.value = ""; input.focus(); btn.disabled = false; }
+            function submit() {
+                if (!input.value) { return; }
+                btn.disabled = true; err.style.display = "none";
+                fetch("/api/login", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ password: input.value })
+                }).then(function (r) { return r.json().then(function (j) { return { ok: r.ok, j: j }; }); })
+                  .then(function (res) {
+                      if (res.ok && res.j && res.j.ok) { location.reload(); }
+                      else { fail((res.j && res.j.error) || "Неверный пароль"); }
+                  }).catch(function () { fail("Ошибка сети, попробуйте ещё раз"); });
+            }
+            btn.addEventListener("click", submit);
+            input.addEventListener("keydown", function (e) { if (e.key === "Enter") submit(); });
+            input.focus();
+        }
+
+        fetch("/api/me", { cache: "no-store" })
+            .then(function (r) { return r.json(); })
+            .then(function (me) {
+                if (!me || !me.enforce) return;      // мягкий режим — не блокируем
+                if (me.authenticated) return;         // уже вошёл
+                showLogin();                          // требуется вход
+            })
+            .catch(function () { /* /api/me недоступно — не блокируем сайт */ });
     })();
     </script>
     <script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
@@ -1245,14 +1276,14 @@
     <script src="js/firebase-config.js?v=2"></script>
     <script src="js/i18n.js?v=11"></script>
     <script src="js/photos.js?v=2"></script>
-    <script src="js/crimes.js?v=8"></script>
-    <script src="js/cameras.js?v=2"></script>
-    <script src="js/police.js?v=2"></script>
-    <script src="js/admin-violations.js?v=4"></script>
+    <script src="js/crimes.js?v=9"></script>
+    <script src="js/cameras.js?v=3"></script>
+    <script src="js/police.js?v=3"></script>
+    <script src="js/admin-violations.js?v=5"></script>
     <script src="js/reg-check.js?v=10"></script>
-    <script src="js/schools.js?v=1"></script>
-    <script src="js/venues.js?v=2"></script>
-    <script src="js/alkomarkets.js?v=1"></script>
+    <script src="js/schools.js?v=2"></script>
+    <script src="js/venues.js?v=3"></script>
+    <script src="js/alkomarkets.js?v=2"></script>
     <script src="js/analytics.js?v=14"></script>
     <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.mini.min.js"></script>
     <script src="js/data.js?v=3"></script>
