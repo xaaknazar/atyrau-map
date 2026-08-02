@@ -1,4 +1,4 @@
-var CACHE_NAME = "atyrau-map-v1";
+var CACHE_NAME = "atyrau-map-v2";
 var PRECACHE = ["/", "/index.html", "/css/style.css", "/images/icon-192x192.png", "/images/icon-512x512.png"];
 
 self.addEventListener("install", function (e) {
