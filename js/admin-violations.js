@@ -464,12 +464,16 @@ function analyzeAVYouth(items, minAge, maxAge) {
     var persons = Object.keys(byPerson).map(function (k) { return byPerson[k]; })
         .sort(function (a, b) { return b.count - a.count; });
     var repeat = persons.filter(function (p) { return p.count >= 2; });
+    // «Часто нарушающие» — от 5 правонарушений (красные)
+    var frequent = persons.filter(function (p) { return p.count >= 5; });
     return {
         minAge: minAge,
         maxAge: maxAge,
         persons: persons,
         repeat: repeat,
+        frequent: frequent,
         totalPersons: persons.length,
-        repeatCount: repeat.length
+        repeatCount: repeat.length,
+        frequentCount: frequent.length
     };
 }

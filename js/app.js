@@ -2512,17 +2512,18 @@
         var el = document.getElementById("av-youth-list");
         if (!el || typeof analyzeAVYouth !== "function") return;
         var res = analyzeAVYouth(items, 18, 27);
-        var list = avYouthShowAll ? res.persons : res.repeat;
+        // По умолчанию — только «красные»: часто нарушающие, от 5 правонарушений.
+        var list = avYouthShowAll ? res.persons : (res.frequent || []);
         var LIMIT = 8;
 
         var html = '<div class="av-pc-block av-pc-red">';
         html += '<div class="av-pc-head"><div class="av-pc-badges">';
-        html += '<span class="av-pc-badge av-pc-badge-danger">Повторных: <strong>' + res.repeatCount + '</strong></span>';
+        html += '<span class="av-pc-badge av-pc-badge-danger">От 5 нарушений: <strong>' + (res.frequentCount || 0) + '</strong></span>';
         html += '<span class="av-pc-badge">Всего 18–27: <strong>' + res.totalPersons + '</strong></span>';
         html += '</div></div>';
         if (list.length === 0) {
             html += '<div class="av-pc-empty">' +
-                (avYouthShowAll ? "Нет лиц 18–27 лет за выбранный период." : "Нет повторных нарушителей 18–27 лет за выбранный период.") +
+                (avYouthShowAll ? "Нет лиц 18–27 лет за выбранный период." : "Нет нарушителей 18–27 лет с 5+ правонарушениями за выбранный период.") +
                 '</div>';
         } else {
             html += '<div class="av-pc-list">';
