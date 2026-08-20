@@ -3666,7 +3666,11 @@
     //  AUTH: read role from localStorage (set on /login page)
     // ═══════════════════════════════════════════════════════
     var authRole = localStorage.getItem("atyrau-auth-role");
+    // Полиция получает тот же вид, что и сотрудник прокуратуры (аналитика, карта),
+    // без гостевого блока «Сообщить о проблеме». Блок ҰСЫНУ для роли police скрыт
+    // отдельно в analytics.js (по localStorage-роли).
     if (authRole === "staff") isStaff = true;
+    else if (authRole === "police") isStaff = true;
     else if (authRole === "akimat") isAkimat = true;
 
     // Apply mode on load
