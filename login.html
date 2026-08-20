@@ -211,6 +211,7 @@
 
                 <div class="role-tabs">
                     <button type="button" class="role-tab active" data-role="staff" data-i18n="staff_role_tab">Прокуратура</button>
+                    <button type="button" class="role-tab" data-role="police" data-i18n="police_role_tab">Полиция</button>
                     <button type="button" class="role-tab" data-role="akimat" data-i18n="akimat_role_tab">Акимат</button>
                 </div>
 
@@ -222,6 +223,16 @@
                     </div>
                     <button class="login-submit" id="staff-submit" data-i18n="login_submit">Войти</button>
                     <div class="login-error" id="staff-err"></div>
+                </div>
+
+                <!-- Police -->
+                <div class="role-form hidden" id="form-police">
+                    <div class="login-field">
+                        <label data-i18n="login_password_label">Пароль</label>
+                        <input type="password" id="police-pwd" autocomplete="off" />
+                    </div>
+                    <button class="login-submit" id="police-submit" data-i18n="login_submit">Войти</button>
+                    <div class="login-error" id="police-err"></div>
                 </div>
 
                 <!-- Akimat -->
@@ -239,12 +250,13 @@
         </div>
     </div>
 
-    <script src="js/i18n.js?v=3"></script>
+    <script src="js/i18n.js?v=12"></script>
     <script>
         // Если уже залогинен — сразу редирект
         (function () {
             var role = localStorage.getItem("atyrau-auth-role");
             if (role === "staff") { window.location.href = "/"; return; }
+            if (role === "police") { window.location.href = "/"; return; }
             if (role === "akimat") { window.location.href = "/akimat"; return; }
         })();
 
@@ -265,6 +277,7 @@
                 document.querySelectorAll(".role-tab").forEach(function (t) { t.classList.remove("active"); });
                 this.classList.add("active");
                 document.getElementById("form-staff").classList.toggle("hidden", role !== "staff");
+                document.getElementById("form-police").classList.toggle("hidden", role !== "police");
                 document.getElementById("form-akimat").classList.toggle("hidden", role !== "akimat");
                 var input = document.getElementById(role + "-pwd");
                 if (input) input.focus();
@@ -273,6 +286,9 @@
 
         var STAFF_PASSWORD = "Qalaprok2025";
         var AKIMAT_PASSWORD = "1234";
+        // TODO: замените на свой пароль для Полиции (эта проверка клиентская,
+        // как у остальных ролей — временно, до перевода входа на сервер).
+        var POLICE_PASSWORD = "Polisiya2025";
 
         function tryStaff() {
             var pwd = document.getElementById("staff-pwd").value;
@@ -281,6 +297,15 @@
                 window.location.href = "/";
             } else {
                 document.getElementById("staff-err").textContent = I18N[currentLang].staff_login_error || "Неверный пароль";
+            }
+        }
+        function tryPolice() {
+            var pwd = document.getElementById("police-pwd").value;
+            if (pwd === POLICE_PASSWORD) {
+                localStorage.setItem("atyrau-auth-role", "police");
+                window.location.href = "/";
+            } else {
+                document.getElementById("police-err").textContent = (I18N[currentLang].police_login_error) || "Неверный пароль";
             }
         }
         function tryAkimat() {
@@ -294,9 +319,13 @@
         }
 
         document.getElementById("staff-submit").addEventListener("click", tryStaff);
+        document.getElementById("police-submit").addEventListener("click", tryPolice);
         document.getElementById("akimat-submit").addEventListener("click", tryAkimat);
         document.getElementById("staff-pwd").addEventListener("keydown", function (e) {
             if (e.key === "Enter") tryStaff();
+        });
+        document.getElementById("police-pwd").addEventListener("keydown", function (e) {
+            if (e.key === "Enter") tryPolice();
         });
         document.getElementById("akimat-pwd").addEventListener("keydown", function (e) {
             if (e.key === "Enter") tryAkimat();

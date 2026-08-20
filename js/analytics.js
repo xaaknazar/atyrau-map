@@ -1104,8 +1104,10 @@ function buildProsecutorBriefing(analysis, allCrimes, lang) {
     }
 
     // ── Smart findings + ҰСЫНУ ──────────────────────────────
+    // Для роли «Полиция» блок ҰСЫНУ (акт прокурорского надзора) скрыт.
+    var _role = (typeof localStorage !== "undefined") ? localStorage.getItem("atyrau-auth-role") : null;
     var smartFindings = buildSmartFindings(analysis, allCrimes);
-    if (smartFindings.length > 0) {
+    if (smartFindings.length > 0 && _role !== "police") {
         html += '<div class="assistant-section">';
         html += '<div class="assistant-section-title">Анықталған мәселелер бойынша ҰСЫНУ</div>';
         html += '<div class="assistant-hint">Жүйе деректерді талдап, маңызды мәселелерді анықтады. Әр мәселе бойынша жеке акт надзора жүктей аласыз.</div>';

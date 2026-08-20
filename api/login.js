@@ -31,6 +31,7 @@ module.exports = async function handler(req, res) {
     var role = null;
     if (process.env.APP_PASSWORD_ADMIN && eq(pwd, process.env.APP_PASSWORD_ADMIN)) role = "admin";
     else if (process.env.APP_PASSWORD_STAFF && eq(pwd, process.env.APP_PASSWORD_STAFF)) role = "staff";
+    else if (process.env.APP_PASSWORD_POLICE && eq(pwd, process.env.APP_PASSWORD_POLICE)) role = "police";
     else if (process.env.APP_PASSWORD_AKIMAT && eq(pwd, process.env.APP_PASSWORD_AKIMAT)) role = "akimat";
 
     if (!role) {
