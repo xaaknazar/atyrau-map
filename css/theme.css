@@ -1,0 +1,742 @@
+/* ══════════════════════════════════════════════════════════════════
+   ОФИЦИАЛЬНАЯ ТЕМА — отчёты, реестры, аналитика, контроль регистраций
+   Светлая / тёмная (html[data-theme="light" | "dark"]).
+   Слой поверх style.css: все цвета через токены, контраст ≥ WCAG AA.
+   ИСХОДНИК: css/theme.src.css («html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel)» = контейнеры панелей) → css/theme.css
+   ══════════════════════════════════════════════════════════════════ */
+
+/* ── Токены ─────────────────────────────────────────────────────── */
+html[data-theme="light"] {
+    --t-bg: #f3f5f8;
+    --t-surface: #ffffff;
+    --t-surface-2: #f6f8fb;
+    --t-surface-3: #eaeef4;
+    --t-border: #dde3ec;
+    --t-border-strong: #c5cedb;
+    --t-ink: #14223b;
+    --t-ink-2: #3b4a63;
+    --t-ink-3: #5a6782;
+    --t-brand: #0d3363;
+    --t-gold: #b98a2e;
+    --t-accent: #1f5fa6;
+    --t-accent-hover: #184d88;
+    --t-accent-soft: #e8f0fa;
+    --t-accent-ink: #1a4f8c;
+    --t-btn: #1f5fa6;
+    --t-btn-hover: #184d88;
+    --t-on-btn: #ffffff;
+    --t-danger: #b3261e;
+    --t-danger-soft: #fdecea;
+    --t-warning: #8a5300;
+    --t-warning-soft: #fdf1dc;
+    --t-success: #1d6f42;
+    --t-success-soft: #e5f4ea;
+    --t-purple: #5b3f99;
+    --t-teal: #1b6f6f;
+    --t-track: #e6ebf2;
+    --t-focus: 0 0 0 3px rgba(31,95,166,0.25);
+    --t-shadow: 0 1px 2px rgba(16,24,40,0.05), 0 1px 3px rgba(16,24,40,0.07);
+    --t-shadow-hover: 0 4px 12px rgba(16,24,40,0.10);
+    color-scheme: light;
+}
+html[data-theme="dark"] {
+    --t-bg: #0e1729;
+    --t-surface: #152139;
+    --t-surface-2: #1a2843;
+    --t-surface-3: #20304f;
+    --t-border: #26375a;
+    --t-border-strong: #33476f;
+    --t-ink: #eef2f8;
+    --t-ink-2: #c4cee0;
+    --t-ink-3: #9aa8c2;
+    --t-brand: #e6edf8;
+    --t-gold: #c9a24a;
+    --t-accent: #7aaef2;
+    --t-accent-hover: #9cc3f6;
+    --t-accent-soft: #1e3355;
+    --t-accent-ink: #9cc3f6;
+    --t-btn: #2f6fc4;
+    --t-btn-hover: #3a7fd6;
+    --t-on-btn: #ffffff;
+    --t-danger: #ff8a80;
+    --t-danger-soft: #3a2230;
+    --t-warning: #f2b45a;
+    --t-warning-soft: #3a2f22;
+    --t-success: #5fcf8e;
+    --t-success-soft: #1c3a33;
+    --t-purple: #b39ce8;
+    --t-teal: #5cc4c4;
+    --t-track: #22314f;
+    --t-focus: 0 0 0 3px rgba(122,174,242,0.35);
+    --t-shadow: 0 1px 2px rgba(0,0,0,0.25);
+    --t-shadow-hover: 0 6px 16px rgba(0,0,0,0.35);
+    color-scheme: dark;
+}
+html[data-theme] {
+    --t-font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    --t-r-sm: 6px;
+    --t-r-md: 8px;
+    --t-r-lg: 10px;
+}
+
+/* ── Оболочка панели ───────────────────────────────────────────── */
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) {
+    background: var(--t-bg) !important;
+    color: var(--t-ink) !important;
+    font-family: var(--t-font) !important;
+    -webkit-font-smoothing: antialiased;
+}
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .analytics-body,
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .report-selector-body {
+    background: var(--t-bg) !important;
+    color: var(--t-ink) !important;
+}
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .crime-list { background: transparent !important; }
+
+/* ── Шапка: спокойная поверхность, тонкая нижняя граница ─────── */
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .report-selector-header,
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .crime-panel-header,
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .analytics-header {
+    background: var(--t-surface) !important;
+    border-top: none !important;
+    border-bottom: 1px solid var(--t-border) !important;
+    box-shadow: none !important;
+}
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .report-selector-header h2,
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .crime-panel-header h2,
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .analytics-header h2 {
+    color: var(--t-ink) !important;
+    font-size: 19px !important;
+    font-weight: 700 !important;
+    letter-spacing: -0.01em !important;
+}
+
+/* ── Кнопки ─────────────────────────────────────────────────────── */
+/* Вторичная (назад, выгрузка) */
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .close-crime-panel-btn,
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .close-analytics-btn,
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .close-av-panel-btn,
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .close-av-analytics-btn,
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .close-report-selector-btn,
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .export-xlsx-btn,
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .brief-export-btn,
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .av-block-export,
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .usynu-download-btn,
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .reg-ai-recheck,
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .an-zone-map-btn,
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .an-venue-map-btn,
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .av-person-map-btn,
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .an-action-btn {
+    background: var(--t-surface) !important;
+    color: var(--t-ink-2) !important;
+    border: 1px solid var(--t-border-strong) !important;
+    border-radius: var(--t-r-sm) !important;
+    font-weight: 600 !important;
+    box-shadow: none !important;
+    transition: background .12s ease, border-color .12s ease, color .12s ease !important;
+}
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .close-crime-panel-btn:hover,
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .close-analytics-btn:hover,
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .close-av-panel-btn:hover,
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .close-av-analytics-btn:hover,
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .close-report-selector-btn:hover,
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .export-xlsx-btn:hover,
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .brief-export-btn:hover,
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .av-block-export:hover,
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .usynu-download-btn:hover,
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .reg-ai-recheck:hover,
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .an-zone-map-btn:hover,
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .an-venue-map-btn:hover,
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .av-person-map-btn:hover,
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .an-action-btn:hover {
+    background: var(--t-surface-2) !important;
+    color: var(--t-ink) !important;
+    border-color: var(--t-accent) !important;
+}
+/* Выгрузка — акцентный текст */
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .export-xlsx-btn,
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .brief-export-btn,
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .av-block-export,
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .usynu-download-btn { color: var(--t-accent-ink) !important; }
+
+/* Основная (запуск AI, проверка) */
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .reg-ai-btn,
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .an-ai-run-btn {
+    background: var(--t-btn) !important;
+    color: var(--t-on-btn) !important;
+    border: 1px solid var(--t-btn) !important;
+    border-radius: var(--t-r-sm) !important;
+    font-weight: 600 !important;
+    box-shadow: none !important;
+}
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .reg-ai-btn:hover,
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .an-ai-run-btn:hover { background: var(--t-btn-hover) !important; border-color: var(--t-btn-hover) !important; }
+
+/* Текстовые кнопки */
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .crime-reset-btn,
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .av-pc-more,
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .reg-more,
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .an-expand-btn {
+    color: var(--t-accent) !important;
+    background: transparent !important;
+    border-color: var(--t-border) !important;
+    font-weight: 600 !important;
+}
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .crime-reset-btn:hover,
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .av-pc-more:hover,
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .reg-more:hover,
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .an-expand-btn:hover { color: var(--t-accent-hover) !important; background: var(--t-surface-2) !important; }
+
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) button:focus-visible,
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) input:focus-visible,
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) select:focus-visible { outline: none !important; box-shadow: var(--t-focus) !important; }
+
+/* ── Переключатели периода / вкладки ────────────────────────────── */
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .crime-filter-buttons,
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .crime-period-buttons,
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .av-risk-tabs,
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .reg-src-tabs {
+    background: var(--t-surface-2) !important;
+    border: 1px solid var(--t-border) !important;
+    border-radius: var(--t-r-md) !important;
+}
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .crime-period-btn,
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .an-period-btn,
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .av-an-period-btn,
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .av-period-btn,
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .reg-period-btn,
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .av-risk-tab,
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .reg-src-tab {
+    background: transparent !important;
+    color: var(--t-ink-2) !important;
+    font-weight: 600 !important;
+    box-shadow: none !important;
+}
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .crime-period-btn:hover:not(.active),
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .an-period-btn:hover:not(.active),
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .av-an-period-btn:hover:not(.active),
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .av-period-btn:hover:not(.active),
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .reg-period-btn:hover:not(.active),
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .av-risk-tab:hover:not(.active),
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .reg-src-tab:hover:not(.active) {
+    background: var(--t-surface-3) !important;
+    color: var(--t-ink) !important;
+}
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .crime-period-btn.active,
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .an-period-btn.active,
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .av-an-period-btn.active,
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .av-period-btn.active,
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .reg-period-btn.active,
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .av-risk-tab.active,
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .reg-src-tab.active {
+    background: var(--t-btn) !important;
+    color: var(--t-on-btn) !important;
+    box-shadow: none !important;
+}
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .av-risk-tab-badge {
+    background: var(--t-surface-3) !important;
+    color: var(--t-ink-2) !important;
+}
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .av-risk-tab.active .av-risk-tab-badge {
+    background: rgba(255,255,255,0.22) !important;
+    color: #ffffff !important;
+}
+
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .analytics-tabs { border-bottom: 1px solid var(--t-border) !important; background: transparent !important; }
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .analytics-tab {
+    color: var(--t-ink-2) !important;
+    font-weight: 600 !important;
+    border-bottom: 2px solid transparent !important;
+    background: transparent !important;
+}
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .analytics-tab:hover:not(.active) { color: var(--t-ink) !important; }
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .analytics-tab.active { color: var(--t-accent-ink) !important; border-bottom-color: var(--t-accent) !important; }
+
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .analytics-period-label,
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .crime-filter-label,
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .crime-filter-group-inline label {
+    color: var(--t-ink-2) !important;
+    font-weight: 600 !important;
+}
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .period-hint { color: var(--t-ink-3) !important; font-size: 12.5px !important; }
+
+/* ── Поля ввода ─────────────────────────────────────────────────── */
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .crime-select,
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .crime-search-wrapper input,
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .brief-search-input,
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .reg-search-input,
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .an-ai-input {
+    background: var(--t-surface) !important;
+    color: var(--t-ink) !important;
+    border: 1px solid var(--t-border-strong) !important;
+    border-radius: var(--t-r-sm) !important;
+    font-size: 14px !important;
+}
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .crime-select:focus,
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .crime-search-wrapper input:focus,
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .brief-search-input:focus,
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .reg-search-input:focus,
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .an-ai-input:focus {
+    border-color: var(--t-accent) !important;
+    box-shadow: var(--t-focus) !important;
+    background: var(--t-surface) !important;
+}
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .crime-select option { background: var(--t-surface) !important; color: var(--t-ink) !important; }
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .crime-search-wrapper input::placeholder,
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .brief-search-input::placeholder,
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .reg-search-input::placeholder { color: var(--t-ink-3) !important; }
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .crime-search-icon,
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .reg-search-icon { color: var(--t-ink-3) !important; }
+
+/* ── Ключевые показатели (KPI) ─ единый цвет, без «радуги» ─────── */
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .crime-stat-card,
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .an-stat-card,
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .assistant-stat,
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .reg-stat {
+    background: var(--t-surface) !important;
+    border: 1px solid var(--t-border) !important;
+    border-radius: var(--t-r-md) !important;
+    box-shadow: var(--t-shadow) !important;
+}
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .crime-stat-value,
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .an-stat-card .an-stat-val,
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .assistant-stat-value,
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .reg-stat-num {
+    color: var(--t-ink) !important;
+    font-weight: 700 !important;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.01em;
+}
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .crime-stat-label,
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .an-stat-card .an-stat-lbl,
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .assistant-stat-label,
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .reg-stat-label {
+    color: var(--t-ink-3) !important;
+    font-size: 11.5px !important;
+    font-weight: 600 !important;
+    letter-spacing: 0.04em !important;
+    text-transform: uppercase;
+}
+/* Семантика оставлена только там, где она несёт смысл */
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .reg-stat-high .reg-stat-num { color: var(--t-danger) !important; }
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .an-stat-clickable { cursor: pointer; }
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .an-stat-clickable:hover { border-color: var(--t-accent) !important; box-shadow: var(--t-shadow-hover) !important; }
+
+/* ── Разделы, заголовки, подсказки ──────────────────────────────── */
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .an-section h3,
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .an-section-title,
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .av-risk-title {
+    color: var(--t-ink) !important;
+    font-size: 16px !important;
+    font-weight: 700 !important;
+    letter-spacing: -0.01em !important;
+}
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .av-risk-title svg { color: var(--t-danger) !important; opacity: 1 !important; }
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .an-hint,
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .assistant-hint,
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .av-risk-section .an-hint,
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) #reg-check-panel .an-hint {
+    color: var(--t-ink-3) !important;
+    font-size: 13px !important;
+    line-height: 1.55 !important;
+    font-style: normal !important;
+}
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .an-empty,
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .assistant-empty,
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .reg-empty,
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .av-pc-empty,
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .crime-list-empty { color: var(--t-ink-3) !important; }
+
+/* Кнопка «Excel» у блока: не перекрывает содержимое */
+#av-analytics-panel .an-section > h3 { padding-right: 96px; min-height: 28px; }
+html[data-theme] #av-analytics-panel .av-block-export {
+    top: -2px !important;
+    right: 0 !important;
+    font-size: 12px !important;
+    padding: 5px 11px !important;
+}
+
+/* ── Карточки и блоки ───────────────────────────────────────────── */
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .assistant-card,
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .av-pc-block,
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .an-insight-card,
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .an-zone-card,
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .an-people-card,
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .usynu-finding,
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .reg-row,
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .an-ai-section,
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .analytics-body .stat-card,
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .analytics-body .chart-card {
+    background: var(--t-surface) !important;
+    border: 1px solid var(--t-border) !important;
+    border-radius: var(--t-r-lg) !important;
+    box-shadow: var(--t-shadow) !important;
+    color: var(--t-ink) !important;
+}
+
+/* ── Таблицы ────────────────────────────────────────────────────── */
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .an-table,
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .assistant-table {
+    background: var(--t-surface) !important;
+    border: 1px solid var(--t-border) !important;
+    border-radius: var(--t-r-md) !important;
+    border-collapse: separate !important;
+    border-spacing: 0 !important;
+    overflow: hidden;
+    color: var(--t-ink) !important;
+    font-size: 13.5px !important;
+}
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .an-table thead,
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .assistant-table thead { background: var(--t-surface-2) !important; }
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .an-table th,
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .assistant-table th {
+    background: var(--t-surface-2) !important;
+    color: var(--t-ink-2) !important;
+    font-size: 11.5px !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.04em !important;
+    text-transform: uppercase;
+    border-bottom: 1px solid var(--t-border) !important;
+}
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .an-table td,
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .assistant-table td {
+    color: var(--t-ink) !important;
+    border-bottom: 1px solid var(--t-border) !important;
+}
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .an-table tbody tr:last-child td,
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .assistant-table tr:last-child td { border-bottom: none !important; }
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .an-table tbody tr:nth-child(even) td,
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .assistant-table tbody tr:nth-child(even) td { background: var(--t-surface-2) !important; }
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .an-table tbody tr:hover td,
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .assistant-table tbody tr:hover td { background: var(--t-accent-soft) !important; }
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .an-table .an-th-num,
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .an-table .an-th-share,
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .assistant-table .muted { color: var(--t-ink-3) !important; }
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .an-table td,
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .assistant-table td { font-variant-numeric: tabular-nums; }
+
+/* ── Полосы (диаграммы) ─ плоские, без градиентов ──────────────── */
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .an-bar-track,
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .an-mini-bar { background: var(--t-track) !important; }
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .an-bar-fill,
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .an-mini-bar-fill,
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .an-bar-fill.blue { background: var(--t-accent) !important; }
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .an-bar-fill.red { background: var(--t-danger) !important; }
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .an-bar-fill.orange { background: var(--t-warning) !important; }
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .an-bar-fill.green { background: var(--t-success) !important; }
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .an-bar-fill.purple { background: var(--t-purple) !important; }
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .an-bar-fill.teal { background: var(--t-teal) !important; }
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .an-bar-label { color: var(--t-ink) !important; }
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .an-bar-value { color: var(--t-ink-2) !important; font-variant-numeric: tabular-nums; font-weight: 600 !important; }
+
+/* ── Метки и бейджи ─────────────────────────────────────────────── */
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .crime-list-article,
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .av-viol-article,
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .crime-article-badge {
+    background: var(--t-accent-soft) !important;
+    color: var(--t-accent-ink) !important;
+    border: 1px solid transparent !important;
+    font-weight: 700 !important;
+}
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .crime-list-place-badge {
+    background: var(--t-surface-2) !important;
+    color: var(--t-ink-2) !important;
+    border: 1px solid var(--t-border) !important;
+}
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .crime-list-place-badge.public,
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .crime-public-badge {
+    background: var(--t-warning-soft) !important;
+    color: var(--t-warning) !important;
+    border-color: transparent !important;
+}
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .an-danger-high { background: var(--t-danger-soft) !important; color: var(--t-danger) !important; }
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .an-danger-med  { background: var(--t-warning-soft) !important; color: var(--t-warning) !important; }
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .an-danger-low  { background: var(--t-success-soft) !important; color: var(--t-success) !important; }
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .an-zone-rank { color: #ffffff !important; }
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .an-zone-rank.d5 { background: #9d1c15 !important; }
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .an-zone-rank.d4 { background: #b3261e !important; }
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .an-zone-rank.d3 { background: #b2560b !important; }
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .an-zone-rank.d2 { background: #8a5300 !important; }
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .an-zone-rank.d1 { background: #1d6f42 !important; }
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .an-zone-name { color: var(--t-ink) !important; }
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .an-zone-tag {
+    background: var(--t-surface-2) !important;
+    color: var(--t-ink-2) !important;
+    border: 1px solid var(--t-border) !important;
+}
+
+/* ── Отчёты: главное меню ───────────────────────────────────────── */
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .report-official-header { border-bottom: 1px solid var(--t-border) !important; }
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .report-org { color: var(--t-ink) !important; font-weight: 700 !important; }
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .report-org-sub { color: var(--t-ink-3) !important; }
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .report-main-title {
+    color: var(--t-ink) !important;
+    font-size: 24px !important;
+    font-weight: 700 !important;
+    letter-spacing: -0.015em !important;
+}
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .report-section-label {
+    color: var(--t-ink-3) !important;
+    font-size: 12px !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.07em !important;
+}
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .report-card {
+    background: var(--t-surface) !important;
+    border: 1px solid var(--t-border) !important;
+    border-radius: var(--t-r-md) !important;
+    box-shadow: var(--t-shadow) !important;
+}
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .report-card:hover {
+    border-color: var(--t-border-strong) !important;
+    box-shadow: var(--t-shadow-hover) !important;
+    background: var(--t-surface) !important;
+}
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .rc-title,
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .report-card-body h3 { color: var(--t-ink) !important; font-size: 15.5px !important; font-weight: 700 !important; }
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .rc-desc,
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .report-card-body p { color: var(--t-ink-2) !important; font-size: 13.5px !important; }
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .rc-count,
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .report-card-count { color: var(--t-accent-ink) !important; font-weight: 700 !important; }
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .rc-arrow { color: var(--t-ink-3) !important; }
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .rc-icon,
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .report-card-icon { border: none !important; border-radius: var(--t-r-md) !important; }
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .rc-red { background: var(--t-danger-soft) !important; color: var(--t-danger) !important; }
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .rc-blue { background: var(--t-accent-soft) !important; color: var(--t-accent) !important; }
+
+/* ── Реестр (список записей) ────────────────────────────────────── */
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .crime-panel-filters { background: transparent !important; }
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .crime-panel-results-bar {
+    color: var(--t-ink-2) !important;
+    border-top: 1px solid var(--t-border) !important;
+}
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .crime-panel-results-bar strong { color: var(--t-ink) !important; }
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .crime-list-item {
+    background: var(--t-surface) !important;
+    border: 1px solid var(--t-border) !important;
+    border-radius: var(--t-r-md) !important;
+    box-shadow: var(--t-shadow) !important;
+}
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .crime-list-item:hover {
+    background: var(--t-surface) !important;
+    border-color: var(--t-border-strong) !important;
+    box-shadow: var(--t-shadow-hover) !important;
+}
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .crime-list-address { color: var(--t-ink) !important; font-weight: 700 !important; }
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .crime-list-organ { color: var(--t-ink-2) !important; }
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .crime-list-description { color: var(--t-ink-2) !important; line-height: 1.55 !important; }
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .crime-list-date,
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .crime-list-erdr { color: var(--t-ink-3) !important; }
+
+/* ── ИИ-помощник (бриф прокурора) ───────────────────────────────── */
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .assistant-header { border-bottom: 1px solid var(--t-border) !important; }
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .assistant-header h3 { color: var(--t-ink) !important; }
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .assistant-header p { color: var(--t-ink-3) !important; }
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .assistant-avatar { background: var(--t-brand) !important; color: var(--t-surface) !important; }
+html[data-theme="dark"] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .assistant-avatar { background: var(--t-btn) !important; color: #ffffff !important; }
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .assistant-section-title {
+    color: var(--t-ink) !important;
+    font-size: 15px !important;
+    font-weight: 700 !important;
+    border-bottom: 1px solid var(--t-border) !important;
+}
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .assistant-rec-list,
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .assistant-rec-list li { color: var(--t-ink) !important; line-height: 1.6 !important; }
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .assistant-recommendations {
+    background: var(--t-surface-2) !important;
+    border: 1px solid var(--t-border) !important;
+    border-radius: var(--t-r-md) !important;
+    padding: 14px 16px !important;
+}
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .trend-up { color: var(--t-danger) !important; }
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .trend-down { color: var(--t-success) !important; }
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .assistant-trend-detail { color: var(--t-ink-2) !important; }
+
+/* ҰСЫНУ */
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .usynu-finding-title { color: var(--t-ink) !important; }
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .usynu-finding-sub,
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .usynu-finding-facts li { color: var(--t-ink-2) !important; }
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .usynu-finding-sev { background: var(--t-track) !important; }
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .usynu-finding.sev-high .sev-bar { background: var(--t-danger) !important; }
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .usynu-finding.sev-med .sev-bar  { background: var(--t-warning) !important; }
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .usynu-finding.sev-low .sev-bar  { background: var(--t-success) !important; }
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .usynu-finding-score { color: var(--t-ink) !important; }
+
+/* Лица (вкладка «Лица» аналитики ЕРДР) */
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .an-people-card-fio { color: var(--t-ink) !important; }
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .an-people-card-meta,
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .an-people-count { color: var(--t-ink-3) !important; }
+
+/* AI-анализ */
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .an-ai-status { color: var(--t-ink-2) !important; }
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .an-ai-result { color: var(--t-ink) !important; }
+
+/* ── Адм. аналитика: лица, молодёжь, инспекторы ─────────────────── */
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) {
+    --av-ink: var(--t-ink);
+    --av-ink-2: var(--t-ink-2);
+    --av-ink-3: var(--t-ink-3);
+    --av-line: var(--t-border);
+    --av-line-2: var(--t-border);
+    --av-bg-soft: var(--t-surface-2);
+    --av-red: var(--t-danger);
+    --av-amber: var(--t-warning);
+    --av-slate: var(--t-accent);
+}
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .av-risk-toggle,
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .av-risk-toggle span { color: var(--t-ink-2) !important; }
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .av-pc-title { color: var(--t-ink) !important; font-size: 15px !important; }
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .av-pc-desc { color: var(--t-ink-3) !important; font-size: 12.5px !important; }
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .av-pc-badge { color: var(--t-ink-2) !important; }
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .av-pc-badge strong { color: var(--t-ink) !important; }
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .av-pc-badge-danger,
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .av-pc-badge-danger strong { color: var(--t-danger) !important; }
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .av-person { border-top-color: var(--t-border) !important; }
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .av-person-main:hover { background: var(--t-surface-2) !important; }
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .av-person-fio { color: var(--t-ink) !important; font-size: 14px !important; }
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .av-person-sub { color: var(--t-ink-3) !important; font-size: 12px !important; }
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .av-person-count {
+    background: var(--t-surface-3) !important;
+    color: var(--t-ink) !important;
+}
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .av-person.risk-high-row .av-person-count { background: var(--t-danger-soft) !important; color: var(--t-danger) !important; }
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .av-person-risk { color: var(--t-ink-2) !important; }
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .av-person-risk.risk-high { color: var(--t-danger) !important; }
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .av-person-risk.risk-high::before { background: var(--t-danger) !important; }
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .av-person-risk.risk-mid { color: var(--t-warning) !important; }
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .av-person-risk.risk-mid::before { background: var(--t-warning) !important; }
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .av-person-risk.risk-low { color: var(--t-ink-3) !important; }
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .av-person-arrow,
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .reg-row-arrow,
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .av-group-arrow { color: var(--t-ink-3) !important; }
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .av-viol { border-top-color: var(--t-border) !important; }
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .av-viol-date,
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .av-viol-place { color: var(--t-ink-3) !important; }
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .av-viol-fabula { color: var(--t-ink-2) !important; line-height: 1.55 !important; }
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .av-kv-k { color: var(--t-ink-3) !important; }
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .av-kv-v { color: var(--t-ink) !important; }
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .av-youth-viols-h { color: var(--t-ink-2) !important; }
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .av-youth-personal { background: var(--t-surface-2) !important; border-color: var(--t-border) !important; }
+
+/* Меры по семейно-бытовым */
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .av-measure { color: var(--t-ink-2) !important; }
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .av-measure.on { color: var(--t-ink) !important; }
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .av-measure-box { border-color: var(--t-border-strong) !important; background: var(--t-surface) !important; }
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .av-measure:hover .av-measure-box { border-color: var(--t-accent) !important; }
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .av-measure.on .av-measure-box { background: var(--t-success) !important; border-color: var(--t-success) !important; }
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .av-measure.on .av-measure-box::after { border-color: #ffffff !important; }
+
+/* Группы инспекторов */
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .av-author-group {
+    background: var(--t-surface) !important;
+    border: 1px solid var(--t-border) !important;
+    border-radius: var(--t-r-md) !important;
+}
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .av-author-group-header { background: var(--t-surface) !important; color: var(--t-ink) !important; }
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .av-author-group-header:hover { background: var(--t-surface-2) !important; }
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .av-author-group-name { color: var(--t-accent-ink) !important; font-weight: 700 !important; }
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .av-author-group-total { color: var(--t-ink) !important; font-variant-numeric: tabular-nums; font-weight: 700 !important; }
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .av-author-group-body { background: var(--t-surface-2) !important; border-top: 1px solid var(--t-border) !important; }
+
+/* ── Контроль регистраций ───────────────────────────────────────── */
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .reg-row-main:hover { background: var(--t-surface-2) !important; }
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .reg-row-article { color: var(--t-ink) !important; }
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .reg-row-num { color: var(--t-ink-3) !important; }
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .reg-row-desc { color: var(--t-ink-2) !important; font-size: 13px !important; }
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .reg-row-details { border-top-color: var(--t-border) !important; }
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .reg-kv-k { color: var(--t-ink-3) !important; }
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .reg-kv-v { color: var(--t-ink) !important; }
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .reg-ai-progress { color: var(--t-ink-2) !important; }
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .reg-src-crime { background: var(--t-danger-soft) !important; color: var(--t-danger) !important; }
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .reg-src-admin { background: var(--t-accent-soft) !important; color: var(--t-accent-ink) !important; }
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .reg-filter-chip {
+    background: var(--t-surface) !important;
+    color: var(--t-ink-2) !important;
+    border: 1px solid var(--t-border-strong) !important;
+}
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .reg-filter-chip:hover { color: var(--t-ink) !important; border-color: var(--t-accent) !important; }
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .reg-filter-chip.active { background: var(--t-btn) !important; color: var(--t-on-btn) !important; border-color: var(--t-btn) !important; }
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .reg-flag,
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .reg-flag.sev-low,
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .reg-flag.reg-ai.ai-unknown { background: var(--t-surface-3) !important; color: var(--t-ink-2) !important; }
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .reg-flag.sev-high,
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .reg-flag.reg-ai.ai-mismatch { background: var(--t-danger-soft) !important; color: var(--t-danger) !important; }
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .reg-flag.sev-med,
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .reg-flag.reg-ai.ai-partial { background: var(--t-warning-soft) !important; color: var(--t-warning) !important; }
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .reg-flag.reg-ai.ai-match { background: var(--t-success-soft) !important; color: var(--t-success) !important; }
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .reg-ai-box.ai-match    { background: var(--t-success-soft) !important; color: var(--t-success) !important; }
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .reg-ai-box.ai-partial  { background: var(--t-warning-soft) !important; color: var(--t-warning) !important; }
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .reg-ai-box.ai-mismatch { background: var(--t-danger-soft) !important; color: var(--t-danger) !important; }
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .reg-ai-box.ai-unknown  { background: var(--t-surface-2) !important; color: var(--t-ink-2) !important; }
+
+/* ── Переключатель темы ─────────────────────────────────────────── */
+.theme-toggle {
+    display: inline-flex; align-items: center; gap: 7px;
+    height: 32px; padding: 0 12px; margin-left: auto;
+    font: 600 13px/1 var(--t-font, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif);
+    background: var(--t-surface, #152139);
+    color: var(--t-ink-2, #c4cee0);
+    border: 1px solid var(--t-border-strong, #33476f);
+    border-radius: 6px; cursor: pointer; white-space: nowrap;
+    transition: background .12s ease, border-color .12s ease, color .12s ease;
+}
+.theme-toggle:hover { color: var(--t-ink, #fff); border-color: var(--t-accent, #7aaef2); }
+.theme-toggle:focus-visible { outline: none; box-shadow: var(--t-focus); }
+.theme-toggle svg { flex: 0 0 auto; }
+.theme-toggle .tt-sun { display: none; }
+html[data-theme="dark"] .theme-toggle .tt-sun { display: inline; }
+html[data-theme="dark"] .theme-toggle .tt-moon { display: none; }
+@media (max-width: 600px) { .theme-toggle .tt-label { display: none; } .theme-toggle { padding: 0 9px; } }
+
+/* ── Печать: всегда светлая, без кнопок ─────────────────────────── */
+@media print {
+    html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) { background: #fff !important; color: #000 !important; }
+    .theme-toggle,
+    html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .close-crime-panel-btn, html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .close-analytics-btn, html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .close-av-panel-btn,
+    html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .close-av-analytics-btn, html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .close-report-selector-btn,
+    html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .export-xlsx-btn, html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .av-block-export, html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .brief-export-btn { display: none !important; }
+}
+
+/* Шапка меню отчётов — в строку, чтобы кнопка темы встала справа */
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .report-selector-header { display: flex !important; align-items: center; gap: 12px; }
+
+/* ── Доп. исправления контраста (найдено автосканом) ───────────── */
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .assistant-extra {
+    background: var(--t-surface-2) !important;
+    border: 1px solid var(--t-border) !important;
+    border-radius: var(--t-r-md) !important;
+    padding: 14px 16px !important;
+}
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .assistant-trend { border-radius: var(--t-r-sm) !important; }
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .assistant-trend.trend-down { background: var(--t-success-soft) !important; color: var(--t-success) !important; }
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .assistant-trend.trend-up   { background: var(--t-danger-soft) !important;  color: var(--t-danger) !important; }
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .assistant-trend-detail strong { color: var(--t-ink) !important; }
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .an-insight-card h4 { color: var(--t-ink) !important; }
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .an-insight-card p { color: var(--t-ink-3) !important; }
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .an-people-count strong { color: var(--t-accent-ink) !important; }
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .an-people-card-meta strong { color: var(--t-ink) !important; }
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .an-zone-info h4 { color: var(--t-ink-2) !important; font-weight: 600 !important; }
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .an-zone-info p { color: var(--t-ink-3) !important; }
+
+/* ── Без цветных полос: у всех блоков одинаковая нейтральная рамка ── */
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .crime-list-item,
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .crime-stat-card,
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .an-stat-card,
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .reg-stat,
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .report-card,
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .usynu-finding,
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .an-people-card,
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .an-insight-card,
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .an-zone-card,
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .assistant-card,
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .assistant-stat,
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .assistant-recommendations,
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .av-pc-block,
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .reg-row,
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .av-author-group {
+    border-width: 1px !important;
+    border-style: solid !important;
+    border-color: var(--t-border) !important;
+}
+/* Строка «Инспектор» в реестре адм. правонарушений (цвет задан в разметке) */
+html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .crime-list-item div[style*="color"] { color: var(--t-ink-3) !important; }
