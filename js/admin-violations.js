@@ -366,6 +366,7 @@ function analyzeAVPersons(items, minCount) {
             var key = _avPersonKey(v);
             if (!byPerson[key]) {
                 byPerson[key] = {
+                    key: key,
                     fio: fio,
                     birthDate: v.birthDate || "",
                     age: v.age || "",
@@ -395,6 +396,91 @@ function analyzeAVPersons(items, minCount) {
             repeatCount: repeat.length
         };
     });
+}
+
+// ══════════════════════════════════════════════════════════════
+//  МЕРЫ ПО СЕМЕЙНО-БЫТОВЫМ (отметки сотрудников, общие для всех)
+//  Хранятся в Firebase Realtime DB. Ключ — хэш от «ФИО|дата рождения»,
+//  поэтому персональные данные в базу не попадают (только id + да/нет).
+// ══════════════════════════════════════════════════════════════
+var AV_FAMILY_MEASURES = [
+    { key: "warn",    ru: "Официальное предостережение", kz: "Ресми алдын ала ескерту" },
+    { key: "protect", ru: "Защитное предписание",        kz: "Қорғау нұсқамасы" },
+    { key: "special", ru: "Особые требования",           kz: "Ерекше талап" }
+];
+var AV_MEASURES_NODE = "avFamilyMeasures";
+var avFamilyMeasures = {};          // id -> { warn: true, protect: false, special: true }
+var _avMeasuresSubscribed = false;
+var _avMeasuresListeners = [];
+
+// Стабильный id лица без ФИО в открытом виде (два 32-битных хэша)
+function avMeasureId(personKey) {
+    var s = String(personKey || "");
+    var h1 = 0x811c9dc5, h2 = 5381;
+    for (var i = 0; i < s.length; i++) {
+        var c = s.charCodeAt(i);
+        h1 ^= c; h1 = Math.imul(h1, 16777619) >>> 0;
+        h2 = (((h2 << 5) + h2) + c) >>> 0;
+    }
+    return "p" + h1.toString(36) + h2.toString(36);
+}
+
+function _avMeasuresDB() {
+    try {
+        if (typeof firebase === "undefined" || !firebase.database) return null;
+        if (!firebase.apps || !firebase.apps.length) {
+            if (typeof FIREBASE_CONFIG !== "undefined") firebase.initializeApp(FIREBASE_CONFIG);
+            else return null;
+        }
+        return firebase.database();
+    } catch (e) { return null; }
+}
+
+// Можно ли ставить галочки: Прокуратура и Полиция
+function avCanEditMeasures() {
+    var role = null;
+    try { role = localStorage.getItem("atyrau-auth-role"); } catch (e) {}
+    return role === "staff" || role === "police";
+}
+
+// Подписка на изменения (живое обновление у всех сотрудников)
+function avSubscribeMeasures(onChange) {
+    if (onChange) _avMeasuresListeners.push(onChange);
+    if (_avMeasuresSubscribed) { if (onChange) onChange(); return; }
+    _avMeasuresSubscribed = true;
+    var db = _avMeasuresDB();
+    if (!db) return;
+    db.ref(AV_MEASURES_NODE).on("value", function (snap) {
+        avFamilyMeasures = snap.val() || {};
+        _avMeasuresListeners.forEach(function (fn) { try { fn(); } catch (e) {} });
+    }, function (err) {
+        console.warn("[av-measures] Нет доступа к отметкам:", err && err.message);
+    });
+}
+
+// Сохранить одну отметку. cb(ok)
+function avSetMeasure(id, mkey, value, cb) {
+    var db = _avMeasuresDB();
+    if (!db || !id || !mkey) { if (cb) cb(false); return; }
+    if (!avFamilyMeasures[id]) avFamilyMeasures[id] = {};
+    avFamilyMeasures[id][mkey] = !!value;
+    var role = null;
+    try { role = localStorage.getItem("atyrau-auth-role"); } catch (e) {}
+    var upd = {};
+    upd[mkey] = !!value;
+    upd.ts = Date.now();
+    upd.by = role || "";
+    db.ref(AV_MEASURES_NODE + "/" + id).update(upd)
+        .then(function () { if (cb) cb(true); })
+        .catch(function (e) {
+            console.warn("[av-measures] Не сохранено:", e && e.message);
+            avFamilyMeasures[id][mkey] = !value;
+            if (cb) cb(false);
+        });
+}
+
+function avGetMeasure(id, mkey) {
+    return !!(avFamilyMeasures[id] && avFamilyMeasures[id][mkey]);
 }
 
 // ══════════════════════════════════════════════════════════════

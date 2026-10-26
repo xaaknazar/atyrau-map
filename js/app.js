@@ -2587,7 +2587,59 @@
         });
     }
 
-    function _avPersonCardHTML(p, isExtra) {
+    // Строка мер (семейно-бытовые): официальное предостережение / защитное
+    // предписание / особые требования — галочка, если мера применена.
+    function _avMeasuresHTML(p) {
+        if (typeof AV_FAMILY_MEASURES === "undefined") return "";
+        var id = avMeasureId(p.key);
+        var canEdit = avCanEditMeasures();
+        var kz = (typeof currentLang !== "undefined" && currentLang === "kz");
+        var html = '<div class="av-measures' + (canEdit ? '' : ' av-measures-ro') + '" data-mid="' + id + '">';
+        AV_FAMILY_MEASURES.forEach(function (m) {
+            var on = avGetMeasure(id, m.key);
+            html += '<label class="av-measure' + (on ? ' on' : '') + '" title="' + _avEsc(kz ? m.ru : m.kz) + '">' +
+                '<input type="checkbox" data-mkey="' + m.key + '"' + (on ? ' checked' : '') + (canEdit ? '' : ' disabled') + '>' +
+                '<span class="av-measure-box"></span>' +
+                '<span class="av-measure-label">' + _avEsc(kz ? m.kz : m.ru) + '</span>' +
+                '</label>';
+        });
+        html += '</div>';
+        return html;
+    }
+
+    // Обновить состояние галочек в DOM (после загрузки/изменения в базе)
+    function _avApplyMeasuresToDOM() {
+        document.querySelectorAll(".av-measures").forEach(function (row) {
+            var id = row.getAttribute("data-mid");
+            row.querySelectorAll("input[data-mkey]").forEach(function (cb) {
+                var on = avGetMeasure(id, cb.getAttribute("data-mkey"));
+                cb.checked = on;
+                cb.closest(".av-measure").classList.toggle("on", on);
+            });
+        });
+    }
+
+    function _avBindMeasures(root) {
+        root.querySelectorAll(".av-measures input[data-mkey]").forEach(function (cb) {
+            cb.addEventListener("click", function (e) { e.stopPropagation(); });
+            cb.addEventListener("change", function () {
+                var row = this.closest(".av-measures");
+                var lab = this.closest(".av-measure");
+                var self = this;
+                var val = this.checked;
+                lab.classList.toggle("on", val);
+                avSetMeasure(row.getAttribute("data-mid"), this.getAttribute("data-mkey"), val, function (ok) {
+                    if (!ok) {
+                        self.checked = !val;
+                        lab.classList.toggle("on", !val);
+                        alert("Не удалось сохранить отметку. Проверьте интернет или права доступа к базе.");
+                    }
+                });
+            });
+        });
+    }
+
+    function _avPersonCardHTML(p, isExtra, catKey) {
         var riskLabel = p.count >= 5 ? "Высокий риск" : (p.count >= 3 ? "Повышенный риск" : "Средний риск");
         var riskClass = p.count >= 5 ? "risk-high" : (p.count >= 3 ? "risk-mid" : "risk-low");
         var sub = [];
@@ -2606,6 +2658,8 @@
         html += '<span class="av-person-risk ' + riskClass + '">' + riskLabel + '</span>';
         html += '<svg class="av-person-arrow" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>';
         html += '</div>';
+
+        if (catKey === "family") html += _avMeasuresHTML(p);
 
         html += '<div class="av-person-details">';
         var vs = p.violations.slice().sort(function (a, b) {
@@ -2632,6 +2686,7 @@
         return html;
     }
 
+    var _avMeasuresHooked = false;
     function renderAVPersons(items) {
         if (typeof analyzeAVPersons !== "function") return;
         var cats = analyzeAVPersons(items, 2);
@@ -2670,7 +2725,7 @@
             } else {
                 var LIMIT = 5;
                 html += '<div class="av-pc-list">';
-                list.forEach(function (p, i) { html += _avPersonCardHTML(p, i >= LIMIT); });
+                list.forEach(function (p, i) { html += _avPersonCardHTML(p, i >= LIMIT, cat.key); });
                 html += '</div>';
                 if (list.length > LIMIT) {
                     html += '<button class="av-pc-more">Показать ещё ' + (list.length - LIMIT) + '</button>';
@@ -2678,6 +2733,17 @@
             }
             html += '</div>';
             el.innerHTML = html;
+
+            // Меры по семейно-бытовым: галочки + живая синхронизация
+            if (cat.key === "family" && typeof avSubscribeMeasures === "function") {
+                _avBindMeasures(el);
+                if (!_avMeasuresHooked) {
+                    _avMeasuresHooked = true;
+                    avSubscribeMeasures(_avApplyMeasuresToDOM);
+                } else {
+                    _avApplyMeasuresToDOM();
+                }
+            }
 
             // Кнопка "Показать ещё / Свернуть"
             var moreBtn = el.querySelector(".av-pc-more");
@@ -3204,10 +3270,18 @@
             cats.forEach(function (cat) {
                 cat.persons.forEach(function (p) {
                     var arts = p.violations.map(function (v) { return v.article; }).filter(Boolean).join("; ");
-                    rows.push([cat.title, p.fio, p.birthDate, p.age, p.raion, p.count, arts]);
+                    var mWarn = "", mProt = "", mSpec = "";
+                    if (cat.key === "family" && typeof avMeasureId === "function") {
+                        var mid = avMeasureId(p.key);
+                        mWarn = avGetMeasure(mid, "warn") ? "✓" : "";
+                        mProt = avGetMeasure(mid, "protect") ? "✓" : "";
+                        mSpec = avGetMeasure(mid, "special") ? "✓" : "";
+                    }
+                    rows.push([cat.title, p.fio, p.birthDate, p.age, p.raion, p.count, arts, mWarn, mProt, mSpec]);
                 });
             });
-            _exportXlsx(["Категория", "ФИО", "Дата рождения", "Возраст", "Район", "Кол-во нарушений", "Статьи"], rows, "AV_lica_" + d + ".xlsx");
+            _exportXlsx(["Категория", "ФИО", "Дата рождения", "Возраст", "Район", "Кол-во нарушений", "Статьи",
+                "Официальное предостережение", "Защитное предписание", "Особые требования"], rows, "AV_lica_" + d + ".xlsx");
         } else if (block === "youth") {
             if (typeof analyzeAVYouth !== "function") return;
             var res = analyzeAVYouth(filtered, 18, 27);

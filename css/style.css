@@ -5328,6 +5328,37 @@ body {
 }
 .av-person.expanded .av-person-arrow { transform: rotate(90deg); }
 
+/* Меры по семейно-бытовым: 3 галочки под лицом */
+.av-measures {
+    display: flex; flex-wrap: wrap; gap: 6px 16px;
+    padding: 0 4px 10px 42px;
+}
+.av-measure {
+    display: inline-flex; align-items: center; gap: 7px;
+    font-size: 12px; color: var(--av-ink-3); cursor: pointer;
+    user-select: none; line-height: 1.2;
+}
+.av-measures-ro .av-measure { cursor: default; }
+.av-measure input { position: absolute; opacity: 0; width: 0; height: 0; pointer-events: none; }
+.av-measure-box {
+    flex: 0 0 auto; width: 16px; height: 16px; border-radius: 4px;
+    border: 1.5px solid rgba(255,255,255,0.28); background: transparent;
+    display: inline-flex; align-items: center; justify-content: center;
+    transition: background .12s ease, border-color .12s ease;
+}
+.av-measure:hover .av-measure-box { border-color: rgba(255,255,255,0.5); }
+.av-measures-ro .av-measure:hover .av-measure-box { border-color: rgba(255,255,255,0.28); }
+.av-measure.on { color: var(--av-ink); }
+.av-measure.on .av-measure-box { background: #2ecc71; border-color: #2ecc71; }
+.av-measure.on .av-measure-box::after {
+    content: ""; width: 4px; height: 8px; margin-top: -2px;
+    border: solid #0f1624; border-width: 0 2px 2px 0; transform: rotate(45deg);
+}
+.av-measure input:focus-visible + .av-measure-box { outline: 2px solid #5dade2; outline-offset: 2px; }
+@media (max-width: 600px) {
+    .av-measures { padding-left: 4px; flex-direction: column; gap: 8px; }
+}
+
 .av-person-details { display: none; padding: 2px 4px 12px 38px; }
 .av-person.expanded .av-person-details { display: block; }
 .av-viol { padding: 9px 0; border-top: 1px dashed var(--av-line); }
