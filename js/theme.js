@@ -53,6 +53,7 @@
 
     function mount() {
         var hosts = document.querySelectorAll(
+            "#sidebar .header-top-row," +
             "#report-selector .report-selector-header," +
             "#crime-panel .crime-panel-top-row," +
             "#av-panel .crime-panel-top-row," +

@@ -740,3 +740,264 @@ html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#a
 }
 /* Строка «Инспектор» в реестре адм. правонарушений (цвет задан в разметке) */
 html[data-theme] :is(#report-selector,#crime-panel,#av-panel,#analytics-panel,#av-analytics-panel,#reg-check-panel) .crime-list-item div[style*="color"] { color: var(--t-ink-3) !important; }
+
+/* ══════════════════════════════════════════════════════════════════
+   САЙДБАР — следует светлой/тёмной теме. Иерархия — шрифтом и
+   отступами; без цветных полос и градиентов; один акцент.
+   ══════════════════════════════════════════════════════════════════ */
+html[data-theme] #sidebar {
+    background: var(--t-surface) !important;
+    color: var(--t-ink) !important;
+    font-family: var(--t-font) !important;
+    border-right: 1px solid var(--t-border) !important;
+    box-shadow: none !important;
+    -webkit-font-smoothing: antialiased;
+    scrollbar-width: thin;
+    scrollbar-color: var(--t-border-strong) transparent;
+}
+html[data-theme] #sidebar::-webkit-scrollbar { width: 8px; }
+html[data-theme] #sidebar::-webkit-scrollbar-thumb { background: var(--t-border-strong); border-radius: 8px; border: 2px solid var(--t-surface); }
+
+/* Шапка */
+html[data-theme] #sidebar .sidebar-header {
+    background: var(--t-surface) !important;
+    border-bottom: 1px solid var(--t-border) !important;
+    padding: 18px 20px 18px !important;
+}
+html[data-theme] #sidebar .header-top-row { gap: 8px; margin-bottom: 14px !important; }
+html[data-theme] #sidebar .sidebar-logo {
+    width: 48px !important; height: 48px !important;
+    border-radius: var(--t-r-md) !important;
+    border: 1px solid var(--t-border) !important;
+    box-shadow: none !important;
+}
+html[data-theme] #sidebar .lang-switch {
+    margin-left: auto;
+    background: var(--t-surface-2) !important;
+    border: 1px solid var(--t-border) !important;
+    border-radius: var(--t-r-md) !important;
+    padding: 2px !important;
+}
+html[data-theme] #sidebar .lang-btn {
+    color: var(--t-ink-2) !important;
+    background: transparent !important;
+    font-weight: 600 !important;
+    padding: 5px 12px !important;
+}
+html[data-theme] #sidebar .lang-btn:hover:not(.active) { background: var(--t-surface-3) !important; color: var(--t-ink) !important; }
+html[data-theme] #sidebar .lang-btn.active { background: var(--t-btn) !important; color: var(--t-on-btn) !important; }
+html[data-theme] #sidebar .sidebar-header h1 {
+    color: var(--t-ink) !important;
+    font-size: 17px !important;
+    font-weight: 700 !important;
+    letter-spacing: -0.01em !important;
+    line-height: 1.3 !important;
+}
+html[data-theme] #sidebar .sidebar-header .subtitle {
+    color: var(--t-ink-3) !important;
+    font-size: 13px !important;
+}
+
+/* Компактная кнопка темы в шапке сайдбара (только значок) */
+html[data-theme] #sidebar .theme-toggle {
+    margin-left: 0;
+    width: 34px; height: 34px; padding: 0;
+    justify-content: center;
+    border-radius: var(--t-r-md);
+}
+html[data-theme] #sidebar .theme-toggle .tt-label { display: none; }
+
+/* Заголовки разделов */
+html[data-theme] #sidebar .legend h3,
+html[data-theme] #sidebar .sidebar-period-section h3,
+html[data-theme] #sidebar .stats h3,
+html[data-theme] #sidebar .crime-incidents-section h3 {
+    color: var(--t-ink-3) !important;
+    font-size: 11.5px !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.07em !important;
+    margin-bottom: 10px !important;
+}
+
+/* Разделы — ровные отступы, тонкие разделители */
+html[data-theme] #sidebar .legend,
+html[data-theme] #sidebar .sidebar-period-section,
+html[data-theme] #sidebar .crime-incidents-section,
+html[data-theme] #sidebar .stats,
+html[data-theme] #sidebar .suggest-section,
+html[data-theme] #sidebar .guest-bottom,
+html[data-theme] #sidebar .prok-monitor-section,
+html[data-theme] #sidebar .akimat-panel-section,
+html[data-theme] #sidebar .akimat-logout-section,
+html[data-theme] #sidebar .staff-logout-section,
+html[data-theme] #sidebar .admin-section {
+    background: transparent !important;
+    border-top: none !important;
+    border-bottom: 1px solid var(--t-border) !important;
+    padding-left: 20px !important;
+    padding-right: 20px !important;
+}
+html[data-theme] #sidebar .legend { padding-top: 16px !important; padding-bottom: 12px !important; }
+html[data-theme] #sidebar .staff-logout-section,
+html[data-theme] #sidebar .akimat-logout-section { border-bottom: none !important; padding-top: 12px !important; padding-bottom: 4px !important; }
+
+/* Категории */
+html[data-theme] #sidebar .legend-item {
+    color: var(--t-ink) !important;
+    font-size: 14px !important;
+    padding: 8px 10px !important;
+    margin-bottom: 2px !important;
+    border-radius: var(--t-r-sm) !important;
+}
+html[data-theme] #sidebar .legend-item:hover { background: var(--t-surface-2) !important; }
+html[data-theme] #sidebar .legend-item input[type="checkbox"] { accent-color: var(--t-btn) !important; width: 17px; height: 17px; }
+html[data-theme] #sidebar .legend-dot {
+    width: 10px !important; height: 10px !important;
+    box-shadow: 0 0 0 2px var(--t-surface), 0 0 0 3px var(--t-border) !important;
+}
+html[data-theme] #sidebar .legend-article-filter { padding: 0 0 8px 37px !important; }
+html[data-theme] #sidebar .legend-article-select {
+    background: var(--t-surface) !important;
+    color: var(--t-ink) !important;
+    border: 1px solid var(--t-border-strong) !important;
+    border-radius: var(--t-r-sm) !important;
+    font-size: 13px !important;
+    padding: 6px 8px !important;
+}
+html[data-theme] #sidebar .legend-article-select:focus { border-color: var(--t-accent) !important; box-shadow: var(--t-focus) !important; }
+html[data-theme] #sidebar .legend-article-select option { background: var(--t-surface) !important; color: var(--t-ink) !important; }
+
+/* Период */
+html[data-theme] #sidebar .sidebar-period-section { padding-top: 14px !important; padding-bottom: 14px !important; }
+html[data-theme] #sidebar .sidebar-period-buttons { gap: 6px !important; }
+html[data-theme] #sidebar .sidebar-period-btn {
+    background: var(--t-surface) !important;
+    color: var(--t-ink-2) !important;
+    border: 1px solid var(--t-border-strong) !important;
+    border-radius: var(--t-r-sm) !important;
+    font-size: 12.5px !important;
+    font-weight: 600 !important;
+    padding: 5px 10px !important;
+}
+html[data-theme] #sidebar .sidebar-period-btn:hover:not(.active) { background: var(--t-surface-2) !important; color: var(--t-ink) !important; }
+html[data-theme] #sidebar .sidebar-period-btn.active { background: var(--t-btn) !important; color: var(--t-on-btn) !important; border-color: var(--t-btn) !important; }
+html[data-theme] #sidebar .period-hint { color: var(--t-ink-3) !important; font-size: 12.5px !important; }
+
+/* Отчёты — главная кнопка (основной цвет, не «тревожный» красный) */
+html[data-theme] #sidebar .crime-incidents-section { padding-top: 14px !important; padding-bottom: 16px !important; }
+html[data-theme] #sidebar .crime-loading-status { color: var(--t-ink-3) !important; font-style: normal !important; padding: 0 0 8px !important; }
+html[data-theme] #sidebar .open-crime-panel-btn {
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    margin-top: 0 !important;
+    padding: 11px 16px !important;
+    background: var(--t-btn) !important;
+    color: var(--t-on-btn) !important;
+    border: 1px solid var(--t-btn) !important;
+    border-radius: var(--t-r-md) !important;
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    box-shadow: none !important;
+}
+html[data-theme] #sidebar .open-crime-panel-btn::before {
+    content: ""; width: 16px; height: 16px; flex: 0 0 auto; background: currentColor;
+    -webkit-mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><line x1='18' y1='20' x2='18' y2='10'/><line x1='12' y1='20' x2='12' y2='4'/><line x1='6' y1='20' x2='6' y2='14'/></svg>") center/contain no-repeat;
+            mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><line x1='18' y1='20' x2='18' y2='10'/><line x1='12' y1='20' x2='12' y2='4'/><line x1='6' y1='20' x2='6' y2='14'/></svg>") center/contain no-repeat;
+}
+html[data-theme] #sidebar .open-crime-panel-btn:hover { background: var(--t-btn-hover) !important; border-color: var(--t-btn-hover) !important; }
+
+/* Статистика — список «название … число» */
+html[data-theme] #sidebar .stats { padding-top: 14px !important; padding-bottom: 12px !important; }
+html[data-theme] #sidebar .stat-row {
+    padding: 7px 0 !important;
+    font-size: 13.5px !important;
+    border-bottom: 1px solid var(--t-border) !important;
+    color: var(--t-ink-2) !important;
+}
+html[data-theme] #sidebar .stat-row:last-child { border-bottom: none !important; }
+html[data-theme] #sidebar .stat-label { color: var(--t-ink-2) !important; }
+html[data-theme] #sidebar .stat-value { color: var(--t-ink) !important; font-weight: 700 !important; font-variant-numeric: tabular-nums; }
+html[data-theme] #sidebar .stat-row.total {
+    margin-top: 2px !important;
+    padding-top: 9px !important;
+    border-top: none !important;
+    font-size: 14px !important;
+}
+html[data-theme] #sidebar .stat-row.total .stat-label { color: var(--t-ink) !important; font-weight: 700 !important; }
+html[data-theme] #sidebar .stat-row.pending-row .stat-value {
+    background: var(--t-surface-3) !important;
+    color: var(--t-ink) !important;
+}
+
+/* Кнопки внизу: вторичные, единый вид */
+html[data-theme] #sidebar #prok-monitor-btn,
+html[data-theme] #sidebar #akimat-panel-btn,
+html[data-theme] #sidebar .pwa-install-btn,
+html[data-theme] #sidebar #admin-toggle-btn {
+    background: var(--t-surface) !important;
+    color: var(--t-accent-ink) !important;
+    border: 1px solid var(--t-border-strong) !important;
+    border-radius: var(--t-r-md) !important;
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    box-shadow: none !important;
+    transform: none !important;
+    padding: 10px 14px !important;
+}
+html[data-theme] #sidebar #prok-monitor-btn:hover,
+html[data-theme] #sidebar #akimat-panel-btn:hover,
+html[data-theme] #sidebar .pwa-install-btn:hover,
+html[data-theme] #sidebar #admin-toggle-btn:hover {
+    background: var(--t-surface-2) !important;
+    border-color: var(--t-accent) !important;
+    box-shadow: none !important;
+}
+html[data-theme] #sidebar #akimat-panel-btn { display: block; text-align: center; text-decoration: none; }
+/* Выход — тихая кнопка, красный только текст */
+html[data-theme] #sidebar #staff-logout-btn,
+html[data-theme] #sidebar #akimat-logout-btn {
+    background: transparent !important;
+    color: var(--t-danger) !important;
+    border: 1px solid var(--t-border-strong) !important;
+    border-radius: var(--t-r-md) !important;
+    font-size: 13.5px !important;
+    font-weight: 600 !important;
+    padding: 9px 14px !important;
+}
+html[data-theme] #sidebar #staff-logout-btn:hover,
+html[data-theme] #sidebar #akimat-logout-btn:hover {
+    background: var(--t-danger-soft) !important;
+    border-color: var(--t-danger) !important;
+}
+
+/* Подвал */
+html[data-theme] #sidebar .sidebar-footer { border-top: none !important; padding: 14px 20px 18px !important; }
+html[data-theme] #sidebar .sidebar-footer p { color: var(--t-ink-3) !important; font-size: 12.5px !important; }
+
+/* Гостевой блок «Сообщить о проблеме» */
+html[data-theme] #sidebar .suggest-section { padding-top: 18px !important; padding-bottom: 16px !important; }
+html[data-theme] #sidebar .guest-hero { text-align: left !important; margin-bottom: 14px !important; }
+html[data-theme] #sidebar .guest-hero-title { color: var(--t-ink) !important; font-size: 16px !important; }
+html[data-theme] #sidebar .guest-hero-sub { color: var(--t-ink-3) !important; font-size: 13px !important; }
+html[data-theme] #sidebar .guest-suggest-btn {
+    background: var(--t-btn) !important;
+    color: var(--t-on-btn) !important;
+    border: 1px solid var(--t-btn) !important;
+    border-radius: var(--t-r-md) !important;
+    box-shadow: none !important;
+    font-size: 15px !important;
+    padding: 12px 16px !important;
+}
+html[data-theme] #sidebar .guest-suggest-btn:hover { background: var(--t-btn-hover) !important; border-color: var(--t-btn-hover) !important; }
+html[data-theme] #sidebar .guest-cat { color: var(--t-ink-2) !important; font-size: 13px !important; }
+html[data-theme] #sidebar .guest-bottom { margin-top: 0 !important; }
+html[data-theme] #sidebar .guest-qr-title { color: var(--t-ink-3) !important; font-size: 12.5px !important; }
+html[data-theme] #sidebar .guest-qr-hint { color: var(--t-ink-3) !important; font-size: 12px !important; }
+html[data-theme] #sidebar #guest-qr-canvas { border: 1px solid var(--t-border) !important; }
+
+/* Кнопка меню на мобильном (над картой) */
+html[data-theme] #mobile-menu-btn {
+    background: var(--t-surface) !important;
+    border: 1px solid var(--t-border) !important;
+    box-shadow: var(--t-shadow) !important;
+}
+html[data-theme] #mobile-menu-btn span { background: var(--t-ink) !important; }
